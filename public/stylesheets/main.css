@@ -1,0 +1,16 @@
+.logo {
+	height: 30px;
+	width: 30px;
+	margin-top: -4px;
+	margin-right: -5px;
+}
+
+#side-panel {
+	z-index: 2000;
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+	width: 450px;
+     max-height: 600px;
+     overflow: scroll;
+}
