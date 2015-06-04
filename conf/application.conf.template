@@ -3,6 +3,8 @@
 
 application.data.osmDirectory=data/osm/
 
+application.vex="http://osm.conveyal.com"
+
 # Secret key
 # ~~~~~
 # The secret key is used to secure cryptographics functions.
