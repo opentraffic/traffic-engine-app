@@ -48,6 +48,11 @@ public class Engine {
 	
 	private HashMap<Long,EngineWorker> workerMap = new HashMap<Long,EngineWorker>();
 	
+	public static ConcurrentHashMap<Long,Point> locationMap = new ConcurrentHashMap<Long,Point>();
+	
+    public static ConcurrentHashMap<String,Double> speedMap = new ConcurrentHashMap<String,Double>();
+    public static ConcurrentHashMap<String,Integer> countMap = new ConcurrentHashMap<String,Integer>();
+	
 	private ArrayList<Long> workerIdList = new ArrayList<Long>();
 	private int nextWorkerIndex = 0;
 	
@@ -68,7 +73,7 @@ public class Engine {
     	executor = Executors.newFixedThreadPool(5);
     	
     	for (int i = 0; i < 5; i++) {
-    		EngineWorker worker = new EngineWorker(this);
+    		EngineWorker worker = new EngineWorker(te);
     		
     		workerMap.put(worker.getId(), worker);
     		
@@ -91,7 +96,6 @@ public class Engine {
     }
     
     public void locationUpdate(GPSPoint gpsPoint) {
-    	
     	if(!vehicleWorkerMap.containsKey(gpsPoint.vehicleId))
     		vehicleWorkerMap.put(gpsPoint.vehicleId, getNextWorkerId());
     	

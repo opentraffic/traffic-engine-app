@@ -1,9 +1,6 @@
 package controllers;
 
 import java.io.ByteArrayOutputStream;
-
-import traffic.ExchangeFormat;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.MessageDigest;
@@ -15,6 +12,7 @@ import java.nio.ByteBuffer;
 
 import org.geotools.geojson.geom.GeometryJSON;
 
+import com.conveyal.traffic.data.ExchangeFormat;
 import com.conveyal.traffic.geom.GPSPoint;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.vividsolutions.jts.geom.Coordinate;

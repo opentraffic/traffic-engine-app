@@ -14,11 +14,11 @@ public class EngineWorker implements Runnable {
 	
 	private final Long id;
 	
-	private final Engine engine;
+	private final TrafficEngine te;
 	
-	public EngineWorker(Engine te) {
+	public EngineWorker(TrafficEngine te) {
 		
-		this.engine = engine;
+		this.te = te;
 		
 		this.id = UUID.randomUUID().getLeastSignificantBits();
 	
