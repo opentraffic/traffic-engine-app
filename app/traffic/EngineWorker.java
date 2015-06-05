@@ -1,12 +1,9 @@
 package traffic;
 
-import java.util.List;
+import com.conveyal.traffic.geom.GPSPoint;
+
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import com.conveyal.traffic.TrafficEngine;
-import com.conveyal.traffic.geom.GPSPoint;
-import com.conveyal.traffic.stats.SpeedSample;
 
 public class EngineWorker implements Runnable {
 
@@ -41,7 +38,11 @@ public class EngineWorker implements Runnable {
 			GPSPoint gpsPoint = locationQueue.poll();
 			
 			if(gpsPoint != null) {
-				int sampleCount = engine.getTrafficEngine().update(gpsPoint);
+				try {
+					int sampleCount = engine.getTrafficEngine().update(gpsPoint);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				
 			} else {
 				// if queue is empty pause
