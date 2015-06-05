@@ -1,29 +1,7 @@
 package tiles;
 
-import java.awt.Color;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.operation.TransformException;
-import org.opentripplanner.analyst.PointSet;
-import org.opentripplanner.analyst.ResultSetDelta;
-import org.opentripplanner.analyst.ResultSetWithTimes;
-import org.opentripplanner.analyst.SampleSet;
-import org.opentripplanner.analyst.TimeSurface;
-
-import traffic.Engine;
-import controllers.Application;
-
 import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.geom.StreetSegment;
-import com.conveyal.traffic.osm.OSMDataStore;
 import com.conveyal.traffic.stats.BaselineStatistics;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
@@ -32,7 +10,14 @@ import com.google.common.hash.Hashing;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import controllers.Application;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.operation.TransformException;
+
+import java.awt.*;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
 
 public abstract class SimulatorTileRequest {
 		
