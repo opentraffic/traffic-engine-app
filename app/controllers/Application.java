@@ -89,6 +89,11 @@ public class Application extends Controller {
         return ok(geoJsonStr);
     }
 
+    public static Result collectStatistics() throws IOException {
+        Application.engine.collectStatistics();
+        return ok();
+    }
+    
     public static Result triplines() {
         Envelope env = new Envelope();
 //        env.expandToInclude(x1, y1);

@@ -24,6 +24,7 @@ import controllers.Application;
 import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.geom.StreetSegment;
 import com.conveyal.traffic.osm.OSMDataStore;
+import com.conveyal.traffic.stats.BaselineStatistics;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
@@ -121,11 +122,11 @@ public abstract class SimulatorTileRequest {
     				
     				int colorNum = 11;
     				
-    				if(Engine.countMap.containsKey(((StreetSegment)sdi).id)) {
-    					count = Engine.countMap.get(((StreetSegment)sdi).id);
-        				double speedSum = Engine.speedMap.get(((StreetSegment)sdi).id);
-        				averageSpeed = speedSum / count;
-        				colorNum = (int) (10 / (25.0 / averageSpeed));
+    				BaselineStatistics baselineStats = Application.engine.getTrafficEngine().getSegementStatistics(((StreetSegment)sdi).id);
+    				
+    				if(baselineStats.getAverageSpeedKMH() > 0) {
+        				averageSpeed = baselineStats.getAverageSpeedKMH();
+        				colorNum = (int) (10 / (100.0 / averageSpeed));
         				if(colorNum > 10)
         					colorNum = 10;
     				}
@@ -222,8 +223,14 @@ public abstract class SimulatorTileRequest {
     				
     				int colorNum = 11;
     				
-    				Color color = colors[colorNum];
     				
+    				
+    				BaselineStatistics baselineStats = Application.engine.getTrafficEngine().getSegementStatistics(((StreetSegment)sdi).id);
+    				if(baselineStats.getAverageSpeedKMH() > 0) {
+    					colorNum = 5;
+    				}
+    				
+    				Color color = colors[colorNum];
     				tile.renderLineString(sdi.geometry, color, 2);
     			
 					

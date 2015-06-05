@@ -7,6 +7,8 @@ GET     /                       controllers.Application.index()
 
 GET     /stats                  controllers.Application.stats()
 
+GET     /collectStatistics      controllers.Application.collectStatistics()
+
 POST    /locationUpdate         controllers.Api.locationUpdate()
 
 GET     /envelopes              controllers.Application.osmEnvelopes()

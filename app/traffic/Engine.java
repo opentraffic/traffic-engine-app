@@ -30,6 +30,8 @@ import com.conveyal.osmlib.OSM;
 import com.conveyal.traffic.TrafficEngine;
 import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.geom.GPSPoint;
+import com.conveyal.traffic.stats.SpeedSample;
+import com.conveyal.traffic.stats.StatisticsCollector;
 import com.google.common.io.ByteStreams;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -49,10 +51,7 @@ public class Engine {
 	private HashMap<Long,EngineWorker> workerMap = new HashMap<Long,EngineWorker>();
 	
 	public static ConcurrentHashMap<Long,Point> locationMap = new ConcurrentHashMap<Long,Point>();
-	
-    public static ConcurrentHashMap<String,Double> speedMap = new ConcurrentHashMap<String,Double>();
-    public static ConcurrentHashMap<String,Integer> countMap = new ConcurrentHashMap<String,Integer>();
-	
+
 	private ArrayList<Long> workerIdList = new ArrayList<Long>();
 	private int nextWorkerIndex = 0;
 	
@@ -73,7 +72,7 @@ public class Engine {
     	executor = Executors.newFixedThreadPool(5);
     	
     	for (int i = 0; i < 5; i++) {
-    		EngineWorker worker = new EngineWorker(te);
+    		EngineWorker worker = new EngineWorker(this);
     		
     		workerMap.put(worker.getId(), worker);
     		
@@ -82,6 +81,10 @@ public class Engine {
     		executor.execute(worker);
     	}
 
+    }
+    
+    public TrafficEngine getTrafficEngine() { 
+    	return te;
     }
     
     private Long getNextWorkerId() {
@@ -93,6 +96,10 @@ public class Engine {
     		nextWorkerIndex = 0;
     	
     	return workerId;
+    }
+    
+    public void collectStatistics() {
+    	te.writeStatistics(new File("/tmp/traffic_stats.traffic.pbf"));
     }
     
     public void locationUpdate(GPSPoint gpsPoint) {

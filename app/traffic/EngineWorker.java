@@ -14,11 +14,11 @@ public class EngineWorker implements Runnable {
 	
 	private final Long id;
 	
-	private final TrafficEngine te;
+	private final Engine engine;
 	
-	public EngineWorker(TrafficEngine te) {
+	public EngineWorker( Engine engine) {
 		
-		this.te = te;
+		this.engine = engine;
 		
 		this.id = UUID.randomUUID().getLeastSignificantBits();
 	
@@ -41,21 +41,8 @@ public class EngineWorker implements Runnable {
 			GPSPoint gpsPoint = locationQueue.poll();
 			
 			if(gpsPoint != null) {
-				List<SpeedSample> speeds = te.update(gpsPoint);
-				if(speeds != null) {
-					for(SpeedSample speed : speeds) {
-						if(!Engine.countMap.containsKey(speed.getSegmentId())) {
-							Engine.countMap.put(speed.getSegmentId(), 0);
-						}
-						
-						if(!Engine.speedMap.containsKey(speed.getSegmentId())) {
-							Engine.speedMap.put(speed.getSegmentId(), 0.0);
-						}
-						
-						Engine.countMap.put(speed.getSegmentId(), Engine.countMap.get(speed.getSegmentId()) + 1);
-						Engine.speedMap.put(speed.getSegmentId(), Engine.speedMap.get(speed.getSegmentId()) + speed.getSpeed());
-					}
-				}
+				int sampleCount = engine.getTrafficEngine().update(gpsPoint);
+				
 			} else {
 				// if queue is empty pause
 				try {
