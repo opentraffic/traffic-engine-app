@@ -1,2 +1,2 @@
-# traffic-engine-simulator
-A GPS simulator and visualization environment for traffic-engine
+# Traffic Engine Application
+A GPS processing and visualization environment for producing traffic speed data sets.
