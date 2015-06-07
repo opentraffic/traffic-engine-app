@@ -126,7 +126,7 @@ public abstract class SimulatorTileRequest {
     				
     				if(baselineStats.getAverageSpeedKMH() > 0) {
         				averageSpeed = baselineStats.getAverageSpeedKMH();
-        				colorNum = (int) (10 / (100.0 / averageSpeed));
+        				colorNum = (int) (10 / (50.0 / averageSpeed));
         				if(colorNum > 10)
         					colorNum = 10;
     				}
