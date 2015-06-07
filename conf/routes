@@ -3,21 +3,23 @@
 # ~~~~
 
 # Home page
-GET     /                       controllers.Application.index()
+GET         /                         controllers.Application.index()
 
-GET     /stats                  controllers.Application.stats()
+GET         /stats                    controllers.Application.stats()
 
-GET     /collectStatistics      controllers.Application.collectStatistics()
+GET         /collectStatistics        controllers.Application.collectStatistics()
 
-POST    /locationUpdate         controllers.Api.locationUpdate()
+POST        /locationUpdate           controllers.Api.locationUpdate()
 
-GET     /envelopes              controllers.Application.osmEnvelopes()
+GET         /envelopes                controllers.Application.osmEnvelopes()
 
-GET     /vehicles               controllers.Application.vehiclePoints()
+GET         /vehicles                 controllers.Application.vehiclePoints()
 
-GET     /tile/segment			controllers.Tiles.segment(x:Integer, y:Integer, z:Integer)
-GET     /tile/data			controllers.Tiles.data(x:Integer, y:Integer, z:Integer)
+GET         /tile/segment             controllers.Tiles.segment(x:Integer, y:Integer, z:Integer)
+GET         /tile/data                controllers.Tiles.data(x:Integer, y:Integer, z:Integer)
+
+GET         /plan                     controllers.RoutingController.plan(fromLat:Double, fromLon:Double, toLat:Double, toLon:Double, day:Integer, time:Integer, useTraffic:Boolean ?= true)
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET         /assets/*file             controllers.Assets.at(path="/public", file)

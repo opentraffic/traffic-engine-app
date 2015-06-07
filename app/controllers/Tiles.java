@@ -1,33 +1,16 @@
 package controllers;
 
-import java.awt.Color;
-import java.io.ByteArrayInputStream;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.opentripplanner.analyst.ResultSetDelta;
-import org.opentripplanner.analyst.ResultSetWithTimes;
-import org.opentripplanner.analyst.TimeSurface;
-import org.opentripplanner.api.model.TimeSurfaceShort;
-import org.opentripplanner.common.model.GenericLocation;
-
-import com.vividsolutions.jts.index.strtree.STRtree;
-
-import play.libs.Akka;
-import play.libs.Json;
 import play.libs.F.Function;
 import play.libs.F.Function0;
 import play.libs.F.Promise;
-import play.mvc.*;
-import scala.concurrent.ExecutionContext;
+import play.mvc.Controller;
+import play.mvc.Result;
 import tiles.SimulatorTileRequest;
-import tiles.SimulatorTileRequest.SegmentTile;
 import tiles.SimulatorTileRequest.DataTile;
-import tiles.Tile;
-
+import tiles.SimulatorTileRequest.SegmentTile;
 import tiles.TileCache;
+
+import java.io.ByteArrayInputStream;
 
 public class Tiles extends Controller {
 
