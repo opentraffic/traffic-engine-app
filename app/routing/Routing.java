@@ -19,9 +19,9 @@ import org.opentripplanner.routing.impl.DefaultStreetVertexIndexFactory;
 import org.opentripplanner.routing.impl.GraphPathFinder;
 import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.standalone.Router;
-import org.opentripplanner.traffic.Segment;
-import org.opentripplanner.traffic.SegmentSpeedSample;
-import org.opentripplanner.traffic.StreetSpeedSource;
+//import org.opentripplanner.traffic.Segment;
+//import org.opentripplanner.traffic.SegmentSpeedSample;
+//import org.opentripplanner.traffic.StreetSpeedSource;
 import play.Logger;
 import play.Play;
 import play.libs.Akka;
@@ -31,7 +31,7 @@ import java.awt.*;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+//import java.util.stream.Collectors;
 
 /**
  * Routing with OpenTraffic data in a single area of the world.
@@ -66,7 +66,7 @@ public class Routing {
 
     /** Update the traffic data in the graph */
     private void update() {
-        Map<Segment, SegmentSpeedSample> samples = Maps.newHashMap();
+       /* Map<Segment, SegmentSpeedSample> samples = Maps.newHashMap();
 
         // not using an updater here as that requires dumping/loading PBFs.
         for (Envelope env : Application.engine.getOsmEnvelopes()) {
@@ -105,7 +105,7 @@ public class Routing {
 
             // clear existing samples
             graph.graph.streetSpeedSource = null;
-        }
+        } */
     }
 
     public void buildIfUnbuilt () {
@@ -175,7 +175,7 @@ public class Routing {
             // phew. having figured out what tiles we need now build an OTP graph.
             // note we do not configure an updater: we don't need one, as we do the updates
             // ourselves.
-            GraphBuilder gb = new GraphBuilder();
+           /* GraphBuilder gb = new GraphBuilder();
             OpenStreetMapModule osm = new OpenStreetMapModule();
             osm.setProviders(infiles.stream()
                             .map(osmFile -> new AnyFileBasedOpenStreetMapProviderImpl(osmFile))
@@ -194,7 +194,7 @@ public class Routing {
                 routing.gpf = gpf;
             }
 
-            Logger.info("graph built");
-        }
+            Logger.info("graph built");*/
+        } 
     }
 }

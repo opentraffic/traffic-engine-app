@@ -10,10 +10,10 @@ import play.mvc.Result;
 import routing.Routing;
 
 import java.awt.*;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoField;
+//import java.time.LocalDateTime;
+//import java.time.OffsetDateTime;
+//import java.time.ZoneOffset;
+//import java.time.temporal.ChronoField;
 
 /**
  * Controller to do routing.
@@ -29,15 +29,15 @@ public class RoutingController extends Controller {
 
         RoutingRequest rr = new RoutingRequest();
 
-        rr.useTraffic = useTraffic;
+     //   rr.useTraffic = useTraffic;
         rr.from = new GenericLocation(fromLat, fromLon);
         rr.to = new GenericLocation(toLat, toLon);
 
         // figure out the time
-        LocalDateTime dt = LocalDateTime.now();
-        dt = dt.with(ChronoField.DAY_OF_WEEK, day).withHour(0).withMinute(0).withSecond(0);
-        dt = dt.plusSeconds(time);
-        rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
+       // LocalDateTime dt = LocalDateTime.now();
+       // dt = dt.with(ChronoField.DAY_OF_WEEK, day).withHour(0).withMinute(0).withSecond(0);
+       // dt = dt.plusSeconds(time);
+       // rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
 
         TripPlan tp = routing.route(rr);
 

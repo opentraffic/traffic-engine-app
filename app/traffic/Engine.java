@@ -31,7 +31,6 @@ import com.conveyal.traffic.TrafficEngine;
 import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.geom.GPSPoint;
 import com.conveyal.traffic.stats.SpeedSample;
-import com.conveyal.traffic.stats.StatisticsCollector;
 import com.google.common.io.ByteStreams;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -57,6 +56,8 @@ public class Engine {
 	
     // map of loaded 
     private HashMap<String,Long> pbfFileIndex = new HashMap<String,Long>();
+    
+    private HashMap<String,Envelope> gridEnvIndex = new HashMap<String,Envelope>();
     
     private Quadtree osmBoundsIndex = new Quadtree();
     
@@ -99,7 +100,13 @@ public class Engine {
     }
     
     public void collectStatistics() {
-    	te.writeStatistics(new File("/tmp/traffic_stats.traffic.pbf"));
+    	File dataCache = new File("data/traffic");
+    	dataCache.mkdirs();
+    	
+    	for(String gridKey : gridEnvIndex.keySet()) {
+    		
+    		te.writeStatistics(new File(dataCache, gridKey + ".traffic.protobuf"), gridEnvIndex.get(gridKey));
+    	}
     }
     
     public void locationUpdate(GPSPoint gpsPoint) {
@@ -165,6 +172,9 @@ public class Engine {
 			    				int y = Integer.parseInt(nameParts[0]);
 			    				
 			    				env = tile2Envelope(x, y, z);
+			    				
+			    				gridEnvIndex.put(z + "-" + x + "-" + y, env);
+			    				
 			    				Logger.info("OSM file " + file.toFile().getName() + " for grid " + z + "/" + x + "/" + y + " (z/x/y)");
 			    				
 			    			}
@@ -292,6 +302,7 @@ public class Engine {
 	    		
 	    		loadPbfFile(yPbfFile);
 	    		
+	    		gridEnvIndex.put(z + "-" + x + "-" + y, env);
 	    		osmBoundsIndex.insert(env, env);
 	            
 			} catch (IOException e) {
