@@ -21,7 +21,8 @@ import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.standalone.Router;
 import org.opentripplanner.traffic.Segment;
 import org.opentripplanner.traffic.SegmentSpeedSample;
-import org.opentripplanner.traffic.StreetSpeedSource;
+import org.opentripplanner.traffic.StreetSpeedSnapshot;
+import org.opentripplanner.traffic.StreetSpeedSnapshotSource;
 import play.Logger;
 import play.Play;
 import play.libs.Akka;
@@ -68,37 +69,38 @@ public class Routing {
     private void update() {
         Map<Segment, SegmentSpeedSample> samples = Maps.newHashMap();
 
+        Envelope env = new Envelope();
+        env.expandToInclude(boundingBox.getMinX(), boundingBox.getMinY());
+        env.expandToInclude(boundingBox.getMaxX(), boundingBox.getMaxY());
+
         // not using an updater here as that requires dumping/loading PBFs.
-        for (Envelope env : Application.engine.getOsmEnvelopes()) {
-            if (env.getMaxX() > boundingBox.getMinX() && env.getMinX() < boundingBox.getMaxX() &&
-                    env.getMaxY() > boundingBox.getMinY() && env.getMinY() < boundingBox.getMaxX()) {
-                // we want to use speed samples from this envelope
-                for (SpatialDataItem sdi : Application.engine.getStreetSegments(env)) {
-                    StreetSegment ss = (StreetSegment) sdi;
-                    BaselineStatistics stats =
-                            Application.engine.getTrafficEngine().getSegementStatistics(ss.id);
+        for (SpatialDataItem sdi : Application.engine.getTrafficEngine().getStreetSegments(env)) {
+            StreetSegment ss = (StreetSegment) sdi;
+            BaselineStatistics stats =
+                    Application.engine.getTrafficEngine().getSegementStatistics(ss.id);
 
-                    SegmentSpeedSample samp;
-                    try {
-                        samp = new SegmentSpeedSample(stats);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        continue;
-                    }
+            if (stats == null || Double.isNaN(stats.getAverageSpeedKMH()))
+                continue;
 
-                    Segment seg = new Segment(ss.wayId, ss.startNodeId, ss.endNodeId);
-                    samples.put(seg, samp);
-                }
+            SegmentSpeedSample samp;
+            try {
+                samp = new SegmentSpeedSample(stats);
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
             }
+
+            Segment seg = new Segment(ss.wayId, ss.startNodeId, ss.endNodeId);
+            samples.put(seg, samp);
         }
 
         if (!samples.isEmpty()) {
             Logger.info("Applying {} speed samples to graph", samples.size());
 
             if (graph.graph.streetSpeedSource == null)
-                graph.graph.streetSpeedSource = new StreetSpeedSource();
+                graph.graph.streetSpeedSource = new StreetSpeedSnapshotSource();
 
-            graph.graph.streetSpeedSource.setSamples(samples);
+            graph.graph.streetSpeedSource.setSnapshot(new StreetSpeedSnapshot(samples));
         }
         else {
             Logger.info("Found no samples to apply to graph.");

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.opentripplanner.api.model.TripPlan;
 import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.routing.core.RoutingRequest;
+import org.opentripplanner.routing.core.TraverseMode;
+import org.opentripplanner.routing.core.TraverseModeSet;
 import play.mvc.Controller;
 import play.mvc.Result;
 import routing.Routing;
@@ -32,6 +34,7 @@ public class RoutingController extends Controller {
         rr.useTraffic = useTraffic;
         rr.from = new GenericLocation(fromLat, fromLon);
         rr.to = new GenericLocation(toLat, toLon);
+        rr.modes = new TraverseModeSet(TraverseMode.CAR);
 
         // figure out the time
         LocalDateTime dt = LocalDateTime.now();
