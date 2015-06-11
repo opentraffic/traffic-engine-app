@@ -1,4 +1,4 @@
-package traffic;
+package com.conveyal.traffic.trafficengine;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,12 +19,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.geotools.geometry.Envelope2D;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-
-import play.Logger;
-import play.Play;
 
 import com.conveyal.osmlib.OSM;
 import com.conveyal.traffic.TrafficEngine;
@@ -41,6 +40,8 @@ import com.vividsolutions.jts.index.quadtree.Quadtree;
 
 public class Engine {
 	
+	private static final Logger log = Logger.getLogger( Engine.class.getName());
+
 	private TrafficEngine te;
     
 	ExecutorService executor;
@@ -147,7 +148,7 @@ public class Engine {
     
     public void scanPbfDirectory() {
     	// enumerate PBF files in application.data.osmDirectory
-    	File osmDirectory = new File(Play.application().configuration().getString("application.data.osmDirectory"));
+    	File osmDirectory = new File(TrafficEngineApp.appProps.getProperty("application.data.osmDirectory"));
     	
     	try {
 			Files.walkFileTree(osmDirectory.toPath(), new FileVisitor<Path>() {
@@ -175,17 +176,17 @@ public class Engine {
 			    				
 			    				gridEnvIndex.put(z + "-" + x + "-" + y, env);
 			    				
-			    				Logger.info("OSM file " + file.toFile().getName() + " for grid " + z + "/" + x + "/" + y + " (z/x/y)");
+			    				log.log(Level.WARNING, "OSM file " + file.toFile().getName() + " for grid " + z + "/" + x + "/" + y + " (z/x/y)");
 			    				
 			    			}
 			    			catch(Exception e) {
-			    				Logger.info("OSM file " + file.toFile().getName() + " doesn't have tile gird info.");
+			    				log.log(Level.INFO, "OSM file " + file.toFile().getName() + " doesn't have tile gird info.");
 			    			}
 			    			
 			    			if(env != null)
 			    				osmBoundsIndex.insert(env, env);
 			    			else 
-			    				Logger.error("OSM file " + file.toFile().getName() + " is invalid");
+			    				log.log(Level.SEVERE, "OSM file " + file.toFile().getName() + " is invalid");
 			    		}
 			    			
 					}
@@ -223,7 +224,7 @@ public class Engine {
     
     public Envelope loadPbfFile(File pbfFile) {
     	
-    	Logger.info("loading osm from: " + pbfFile.getAbsolutePath());
+    	log.log(Level.INFO, "loading osm from: " + pbfFile.getAbsolutePath());
     	
     	// load pbf osm source and merge into traffic engine
 		OSM osm = new OSM(null);
@@ -239,7 +240,7 @@ public class Engine {
         }
         catch (Exception e) { 
         	e.printStackTrace();
-        	Logger.error("Unable to load osm: " + pbfFile.getAbsolutePath());
+        	log.log(Level.SEVERE, "Unable to load osm: " + pbfFile.getAbsolutePath());
         }
    
         return env;
@@ -255,7 +256,7 @@ public class Engine {
     
     public void loadOSMTile(int x, int y, int z) {
     	
-    	File osmDirectory = new File(Play.application().configuration().getString("application.data.osmDirectory"));
+    	File osmDirectory = new File(TrafficEngineApp.appProps.getProperty("application.data.osmDirectory"));
     	File zDir = new File(osmDirectory, "" + z);    	
     	File xDir = new File(zDir, "" + x);
     	File yPbfFile = new File(xDir, y + ".osm.pbf");
@@ -270,7 +271,7 @@ public class Engine {
     		Double north = env.getMinY() > env.getMaxY() ? env.getMinY() : env.getMaxY();
     		Double east = env.getMinX() > env.getMaxX() ? env.getMinX() : env.getMaxX();
 
-    		String vexUrl = Play.application().configuration().getString("application.vex");
+    		String vexUrl = TrafficEngineApp.appProps.getProperty("application.vex");
 
     		if (!vexUrl.endsWith("/"))
     			vexUrl += "/";
@@ -279,7 +280,7 @@ public class Engine {
 
     		HttpURLConnection conn;
     		
-    		Logger.info("loading osm from: " + vexUrl);
+    		log.log(Level.INFO, "loading osm from: " + vexUrl);
     		
 			try {
 				conn = (HttpURLConnection) new URL(vexUrl).openConnection();

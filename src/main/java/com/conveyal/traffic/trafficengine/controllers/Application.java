@@ -1,4 +1,4 @@
-package controllers;
+package com.conveyal.traffic.trafficengine.controllers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,34 +19,13 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-import traffic.*;
-import play.*;
-import play.libs.Json;
-import play.mvc.*;
-import views.html.*;
+import static spark.Spark.*;
 
-public class Application extends Controller {
+public class Application {
 
-	public static String dataPath = "data/cache";
-	
-    public static Engine engine = new Engine();
-   
-    public static Integer GPSsec;
-    public static Integer SamplesSec;
-    
-    public static Result index() {;
-        return ok(index.render());
-    }
-    
-    public static Result stats() {;
-    	StatsObject stats = new StatsObject();
-    	stats.vehicleCount = engine.getVehicleCount();
-    	stats.lastUpdate = engine.getLastUpdate();
-	    return ok(Json.toJson(stats));
-	}
 
     
-    public static Result osmEnvelopes() throws IOException {
+  /*  public static Result osmEnvelopes() throws IOException {
         // grap list of envelopes and generate geoJSON
         List<Envelope> envelopes = engine.getOsmEnvelopes();
         
@@ -104,5 +83,5 @@ public class Application extends Controller {
 
 
         return ok();
-    }
+    } */
 }

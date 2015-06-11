@@ -1,8 +1,9 @@
-package tiles;
+package com.conveyal.traffic.trafficengine.tiles;
 
 import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.geom.StreetSegment;
 import com.conveyal.traffic.stats.BaselineStatistics;
+import com.conveyal.traffic.trafficengine.TrafficEngineApp;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
@@ -10,7 +11,7 @@ import com.google.common.hash.Hashing;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-import controllers.Application;
+
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -19,12 +20,12 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
-public abstract class SimulatorTileRequest {
+public abstract class TrafficTileRequest {
 		
 	final public String type;
 	final public Integer x, y, z;
 	
-	public SimulatorTileRequest(Integer x, Integer y, Integer z, String type) {
+	public TrafficTileRequest(Integer x, Integer y, Integer z, String type) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -36,7 +37,7 @@ public abstract class SimulatorTileRequest {
 		return type + "_" + x + "_" + y + "_" + z;
 	}
 	
-	public boolean equals(SimulatorTileRequest tr) {
+	public boolean equals(TrafficTileRequest tr) {
 		return this.getId().equals(tr.getId());
 	}
 	
@@ -50,7 +51,7 @@ public abstract class SimulatorTileRequest {
 	abstract byte[] render();
 	
 	
-	public static class SegmentTile extends SimulatorTileRequest {
+	public static class SegmentTile extends TrafficTileRequest {
 	
 		public SegmentTile(Integer x, Integer y, Integer z) {
 			super(x, y, z, "segment");
@@ -67,9 +68,9 @@ public abstract class SimulatorTileRequest {
 			
 			HashSet<String> defaultEdges = new HashSet<String>();
  
-			List<Envelope> envelopes  = Application.engine.getOsmEnvelopes();
+			List<Envelope> envelopes  = TrafficEngineApp.engine.getOsmEnvelopes();
 			
-    		List<SpatialDataItem> segments = Application.engine.getStreetSegments(tile.envelope);
+    		List<SpatialDataItem> segments = TrafficEngineApp.engine.getStreetSegments(tile.envelope);
 
     		Color[] colors = new Color[12];
 			
@@ -107,7 +108,7 @@ public abstract class SimulatorTileRequest {
     				
     				int colorNum = 11;
     				
-    				BaselineStatistics baselineStats = Application.engine.getTrafficEngine().getSegementStatistics(((StreetSegment)sdi).id);
+    				BaselineStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().getSegementStatistics(((StreetSegment)sdi).id);
     				
     				if(baselineStats.getAverageSpeedKMH() > 0) {
         				averageSpeed = baselineStats.getAverageSpeedKMH();
@@ -138,7 +139,7 @@ public abstract class SimulatorTileRequest {
 		}
 	}
 	
-	public static class DataTile extends SimulatorTileRequest {
+	public static class DataTile extends TrafficTileRequest {
 		
 		public DataTile(Integer x, Integer y, Integer z) {
 			super(x, y, z, "segment");
@@ -155,9 +156,9 @@ public abstract class SimulatorTileRequest {
 			
 			HashSet<String> defaultEdges = new HashSet<String>();
  
-			List<Envelope> envelopes  = Application.engine.getOsmEnvelopes();
+			List<Envelope> envelopes  = TrafficEngineApp.engine.getOsmEnvelopes();
 			
-    		List<SpatialDataItem> segments = Application.engine.getStreetSegments(tile.envelope);
+    		List<SpatialDataItem> segments = TrafficEngineApp.engine.getStreetSegments(tile.envelope);
 
     		Color[] colors = new Color[12];
 			
@@ -176,7 +177,7 @@ public abstract class SimulatorTileRequest {
     		
 			Color vehicleColor = new Color(158/256.0f,1/256.0f,66/256.0f,0.75f);
 			
-			for(Point p : Application.engine.getCurrentVehicleLocations()) {
+			for(Point p : TrafficEngineApp.engine.getCurrentVehicleLocations()) {
 				try {
 					tile.renderPoint(p, 5,vehicleColor, 2);
 				} catch (MismatchedDimensionException e) {
@@ -210,7 +211,7 @@ public abstract class SimulatorTileRequest {
     				
     				
     				
-    				BaselineStatistics baselineStats = Application.engine.getTrafficEngine().getSegementStatistics(((StreetSegment)sdi).id);
+    				BaselineStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().getSegementStatistics(((StreetSegment)sdi).id);
     				if(baselineStats.getAverageSpeedKMH() > 0) {
     					colorNum = 5;
     				}
@@ -233,9 +234,8 @@ public abstract class SimulatorTileRequest {
 				return null;
 			}
 			
-		}
-	}
+		} 
+	} 
 	
 	
- 
 }

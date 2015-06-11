@@ -1,4 +1,4 @@
-package controllers;
+package com.conveyal.traffic.trafficengine.controllers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +14,7 @@ import org.geotools.geojson.geom.GeometryJSON;
 
 import com.conveyal.traffic.data.ExchangeFormat;
 import com.conveyal.traffic.geom.GPSPoint;
+import com.conveyal.traffic.trafficengine.TrafficEngineApp;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -25,14 +26,9 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-import traffic.*;
-import play.*;
-import play.mvc.*;
-import views.html.*;
+public class Api {
 
-public class Api extends Controller {
-
-    public static Result locationUpdate()  {;
+    /*public static locationUpdate()  {
     	
     	try {
     		ExchangeFormat.VehicleMessage vm = ExchangeFormat.VehicleMessage.parseFrom(request().body().asRaw().asBytes());
@@ -43,14 +39,13 @@ public class Api extends Controller {
     			
     			GPSPoint gpsPoint = new GPSPoint(location.getTimestamp(), vehicleId, location.getLon(), location.getLat());
     	
-    			Application.engine.locationUpdate(gpsPoint);
+    			TrafficEngineApp.engine.locationUpdate(gpsPoint);
     		}
     	}
     	catch (Exception e) {
-    		return badRequest();
+    		
     	}
     	
-    	return ok();
     }
     
     static Long getUniqueIdFromString(String data) throws NoSuchAlgorithmException {
@@ -64,6 +59,6 @@ public class Api extends Controller {
         buffer.flip();//need flip 
         return buffer.getLong();
     	
-    }
+    }*/
     
 }

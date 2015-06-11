@@ -1,13 +1,8 @@
-package controllers;
+package com.conveyal.traffic.trafficengine.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.opentripplanner.api.model.TripPlan;
-import org.opentripplanner.common.model.GenericLocation;
-import org.opentripplanner.routing.core.RoutingRequest;
-import play.mvc.Controller;
-import play.mvc.Result;
-import routing.Routing;
+
 
 import java.awt.*;
 //import java.time.LocalDateTime;
@@ -18,9 +13,9 @@ import java.awt.*;
 /**
  * Controller to do routing.
  */
-public class RoutingController extends Controller {
+public class RoutingController  {
     /** for starters one graph of the whole world */
-    private static Routing routing = new Routing(new Rectangle(-180, -90, 360, 180));
+    /*private static Routing routing = new Routing(new Rectangle(-180, -90, 360, 180));
 
     private static ObjectMapper mapper = new ObjectMapper();
 
@@ -51,5 +46,5 @@ public class RoutingController extends Controller {
             e.printStackTrace();
             return internalServerError();
         }
-    }
+    }*/
 }

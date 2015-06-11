@@ -1,11 +1,15 @@
-package traffic;
+package com.conveyal.traffic.trafficengine;
 
 import com.conveyal.traffic.geom.GPSPoint;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EngineWorker implements Runnable {
+	
+	private static final Logger log = Logger.getLogger( EngineWorker.class.getName());
 
 	private ConcurrentLinkedQueue<GPSPoint> locationQueue = new ConcurrentLinkedQueue<GPSPoint>();
 	
@@ -18,7 +22,6 @@ public class EngineWorker implements Runnable {
 		this.engine = engine;
 		
 		this.id = UUID.randomUUID().getLeastSignificantBits();
-	
 	}
 	
 	public Long getId() {
@@ -41,7 +44,7 @@ public class EngineWorker implements Runnable {
 				try {
 					int sampleCount = engine.getTrafficEngine().update(gpsPoint);
 				} catch (Exception e) {
-					e.printStackTrace();
+					log.log(Level.WARNING, e.getMessage());
 				}
 				
 			} else {

@@ -1,4 +1,4 @@
-package tiles;
+package com.conveyal.traffic.trafficengine.tiles;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -49,9 +49,9 @@ public class Tile {
 	public BufferedImage buffer;	
 	public Graphics2D gr;
 	
-	final public Envelope envelope;
+	final public Envelope envelope; 
 	
-	public Tile(SimulatorTileRequest req) {
+	public Tile(TrafficTileRequest req) {
 		
 		this.x = req.x;
 		this.y = req.y;
@@ -80,9 +80,9 @@ public class Tile {
     	
       	tr = gg.getCRSToGrid2D();
       	
-      	buffer = new BufferedImage(tileRequest.width, tileRequest.height, BufferedImage.TYPE_4BYTE_ABGR);
-      
-	}
+      	buffer = new BufferedImage(tileRequest.width, tileRequest.height, BufferedImage.TYPE_4BYTE_ABGR); 
+       
+	} 
 	
 	
 	public void renderPolygon(Geometry g, Color c, Color stroke) throws MismatchedDimensionException, TransformException {
@@ -250,5 +250,5 @@ public class Tile {
         ImageIO.write(buffer, "png", baos);
         
         return baos.toByteArray(); 
-	}
+	} 
 }
