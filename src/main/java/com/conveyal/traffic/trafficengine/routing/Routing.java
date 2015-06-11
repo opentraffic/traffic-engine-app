@@ -66,12 +66,6 @@ public class Routing {
         update();
 
         List<GraphPath> paths = gpf.graphPathFinderEntryPoint(request);
-        
-        for(GraphPath p : paths) {
-       
-        }
-        
-        
         return GraphPathToTripPlanConverter.generatePlan(paths, request);
     }
 
