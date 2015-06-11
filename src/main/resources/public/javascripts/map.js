@@ -194,7 +194,7 @@ var Traffic = Traffic || {};
 			var day = A.app.sidebar.$("#day").val();
 			var hour = A.app.sidebar.$("#hour").val() * 1;
 
-			$.getJSON('http://localhost:4567/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng + '&day=' + day + '&time=' + hour + '&useTraffic=true', function(data){
+			$.getJSON('http://localhost:4567/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng + '&day=' + day + '&time=' + (hour * 3600) + '&useTraffic=true', function(data){
 					var encoded = encoded = data.itineraries[0].legs[0].legGeometry.points;
 					A.app.pathOverlay = L.Polyline.fromEncoded(encoded);
 					A.app.pathOverlay.addTo(A.app.map);
