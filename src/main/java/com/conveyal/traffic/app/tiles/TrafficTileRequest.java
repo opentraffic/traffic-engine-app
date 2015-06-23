@@ -1,9 +1,9 @@
-package com.conveyal.traffic.trafficengine.tiles;
+package com.conveyal.traffic.app.tiles;
 
 import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.geom.StreetSegment;
-import com.conveyal.traffic.stats.BaselineStatistics;
-import com.conveyal.traffic.trafficengine.TrafficEngineApp;
+import com.conveyal.traffic.stats.SummaryStatistics;
+import com.conveyal.traffic.app.TrafficEngineApp;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
@@ -101,14 +101,15 @@ public abstract class TrafficTileRequest {
     					 continue;
     				else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_SECONDARY && z < 14)
     					continue;
-    				else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_TERTIARY && z < 16)
+    				else if((((StreetSegment)sdi).streetType == StreetSegment.TYPE_TERTIARY  || ((StreetSegment)sdi).streetType == StreetSegment.TYPE_RESIDENTIAL) && z < 16)
         				continue;
-    				else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_OTHER)
-    					continue;
+					else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_OTHER)
+						continue;
+
+
+					int colorNum = 11;
     				
-    				int colorNum = 11;
-    				
-    				BaselineStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().getSegementStatistics(((StreetSegment)sdi).id);
+    				SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(((StreetSegment)sdi).id);
     				
     				if(baselineStats.getAverageSpeedKMH() > 0) {
         				averageSpeed = baselineStats.getAverageSpeedKMH();
@@ -202,16 +203,16 @@ public abstract class TrafficTileRequest {
     					 continue;
     				else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_SECONDARY && z < 14)
     					continue;
-    				else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_TERTIARY && z < 16)
+    				else if((((StreetSegment)sdi).streetType == StreetSegment.TYPE_TERTIARY || ((StreetSegment)sdi).streetType == StreetSegment.TYPE_RESIDENTIAL) && z < 16)
         				continue;
-    				else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_OTHER)
-    					continue;
+					else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_OTHER)
+						continue;
     				
     				int colorNum = 11;
     				
     				
     				
-    				BaselineStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().getSegementStatistics(((StreetSegment)sdi).id);
+    				SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(((StreetSegment)sdi).id);
     				if(baselineStats.getAverageSpeedKMH() > 0) {
     					colorNum = 5;
     				}

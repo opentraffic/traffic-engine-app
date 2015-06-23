@@ -1,6 +1,6 @@
-package com.conveyal.traffic.trafficengine.controllers;
+package com.conveyal.traffic.app.controllers;
 
-import com.conveyal.traffic.trafficengine.TrafficEngineApp;
+import com.conveyal.traffic.app.TrafficEngineApp;
 
 public class StatsObject{
 	public Integer vehicleCount;

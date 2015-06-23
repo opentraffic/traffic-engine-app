@@ -1,11 +1,11 @@
-package com.conveyal.traffic.trafficengine.routing;
+package com.conveyal.traffic.app.routing;
 
 
 import com.beust.jcommander.internal.Maps;
 import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.geom.StreetSegment;
-import com.conveyal.traffic.stats.BaselineStatistics;
-import com.conveyal.traffic.trafficengine.TrafficEngineApp;
+import com.conveyal.traffic.stats.SummaryStatistics;
+import com.conveyal.traffic.app.TrafficEngineApp;
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -57,21 +57,18 @@ public class Routing {
     }
 
     private boolean unbuilt = true;
+    private boolean updated = false;
 
     /** Get a trip plan, or null if the graph is not yet built */
     public TripPlan route (RoutingRequest request) {
         if (graph == null)
             return null;
 
-        update();
+        if(!updated)
+            update();
 
         List<GraphPath> paths = gpf.graphPathFinderEntryPoint(request);
-        
-        for(GraphPath p : paths) {
-       
-        }
-        
-        
+
         return GraphPathToTripPlanConverter.generatePlan(paths, request);
     }
 
@@ -86,8 +83,7 @@ public class Routing {
         // not using an updater here as that requires dumping/loading PBFs.
         for (SpatialDataItem sdi : TrafficEngineApp.engine.getTrafficEngine().getStreetSegments(env)) {
             StreetSegment ss = (StreetSegment) sdi;
-            BaselineStatistics stats =
-            		TrafficEngineApp.engine.getTrafficEngine().getSegementStatistics(ss.id);
+            SummaryStatistics stats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(ss.id);
 
             if (stats == null || Double.isNaN(stats.getAverageSpeedKMH()))
                 continue;
@@ -118,6 +114,8 @@ public class Routing {
             // clear existing samples
             graph.graph.streetSpeedSource = null;
         }
+
+        updated = true;
     }
 
     public void buildIfUnbuilt () {
@@ -129,12 +127,6 @@ public class Routing {
         unbuilt = false;
         ExecutorService es = Executors.newCachedThreadPool();
         es.execute( new BuildGraphs(this));
-        
-//         Akka.system().scheduler().scheduleOnce(
-//                Duration.create(10, "milliseconds"),
-//                new BuildGraphs(this),
-//                Akka.system().dispatcher()
-//        );
     }
 
     /** Build graphs so we can do routing with traffic data */

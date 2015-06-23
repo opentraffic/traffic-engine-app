@@ -1,4 +1,4 @@
-package com.conveyal.traffic.trafficengine;
+package com.conveyal.traffic.app;
 
 import java.awt.Rectangle;
 import java.io.FileInputStream;
@@ -14,6 +14,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.conveyal.traffic.app.engine.Engine;
 import org.opentripplanner.api.model.TripPlan;
 import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.routing.core.RoutingRequest;
@@ -22,10 +23,10 @@ import org.opentripplanner.routing.core.TraverseModeSet;
 
 import com.conveyal.traffic.data.ExchangeFormat;
 import com.conveyal.traffic.geom.GPSPoint;
-import com.conveyal.traffic.trafficengine.controllers.StatsObject;
-import com.conveyal.traffic.trafficengine.routing.Routing;
-import com.conveyal.traffic.trafficengine.tiles.TrafficTileRequest.DataTile;
-import com.conveyal.traffic.trafficengine.tiles.TrafficTileRequest.SegmentTile;
+import com.conveyal.traffic.app.controllers.StatsObject;
+import com.conveyal.traffic.app.routing.Routing;
+import com.conveyal.traffic.app.tiles.TrafficTileRequest.DataTile;
+import com.conveyal.traffic.app.tiles.TrafficTileRequest.SegmentTile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static spark.Spark.*;
@@ -40,7 +41,7 @@ public class TrafficEngineApp {
 	
 	public static Properties appProps = new Properties();
 		
-    public static Engine engine = new Engine();
+    public static Engine engine;
   	
 	public static void main(String[] args) {
 		
@@ -49,6 +50,8 @@ public class TrafficEngineApp {
 		
 		// setup public folder
 		staticFileLocation("/public");
+
+		engine = new Engine();
 		
 		get("/stats", (request, response) -> new StatsObject(), mapper::writeValueAsString);
 		

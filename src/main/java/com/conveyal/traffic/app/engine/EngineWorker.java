@@ -1,4 +1,4 @@
-package com.conveyal.traffic.trafficengine;
+package com.conveyal.traffic.app.engine;
 
 import com.conveyal.traffic.geom.GPSPoint;
 
