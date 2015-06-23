@@ -194,11 +194,8 @@ var Traffic = Traffic || {};
 			var day = A.app.sidebar.$("#day").val() * 1;
 			var hour = A.app.sidebar.$("#hour").val() * 1;
 
-			useTraffic = true;
-			if(day == 7)
-				useTraffic = false;
+			$.getJSON('http://localhost:4567/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng + '&day=' + day + '&time=' + (hour * 3600) + '&useTraffic=true', function(data){
 
-			$.getJSON('http://localhost:4567/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng + '&day=' + day + '&time=' + hour + '&useTraffic=' + useTraffic, function(data){
 					var encoded = encoded = data.itineraries[0].legs[0].legGeometry.points;
 					A.app.pathOverlay = L.Polyline.fromEncoded(encoded);
 					A.app.pathOverlay.addTo(A.app.map);
@@ -206,17 +203,8 @@ var Traffic = Traffic || {};
 					A.app.sidebar.$("#clickInfo").hide();
 					A.app.sidebar.$("#journeyInfo").show();
 
-					var duration;
-
-					if(hour > 6 && hour < 9)
-						duration = data.itineraries[0].legs[0].duration * 1.219;
-					else if(hour > 8 && hour < 11)
-							duration = data.itineraries[0].legs[0].duration * 1.35;
-					else if(hour > 13  && hour < 18)
-							duration = data.itineraries[0].legs[0].duration * 1.223;
-					else
-						duration = data.itineraries[0].legs[0].duration;
-
+					var duration = data.itineraries[0].legs[0].duration;
+				;
 					var seconds = duration % 60;
 					var minutes = duration / 60;
 
