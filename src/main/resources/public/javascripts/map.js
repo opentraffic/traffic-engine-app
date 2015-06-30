@@ -1,6 +1,26 @@
 var Traffic = Traffic || {};
 
-(function(A, $, L) {
+(function(A, $, L, Chart) {
+
+	Chart.types.Bar.extend({
+		name: "BarHighlight",
+		draw: function () {
+			Chart.types.Bar.prototype.draw.apply(this, arguments);
+			// overlay the highlight
+			var ctx = this.chart.ctx;
+			var scale = this.scale;
+			var xColumnWidth = (scale.width - scale.xScalePaddingLeft - scale.xScalePaddingRight) / scale.xLabels.length;
+			ctx.fillStyle = 'rgba(0, 0, 255, 0.1)';
+			ctx.fillRect(
+				scale.xScalePaddingLeft + xColumnWidth * this.options.highlightFromIndex,
+				scale.startPoint,
+				xColumnWidth,
+				scale.endPoint - scale.startPoint);
+
+
+		}
+	});
+
 
 	A.app = {};
 
@@ -36,7 +56,7 @@ var Traffic = Traffic || {};
 			setInterval(function(){
 				$.getJSON('/stats', function(data){
 					_this.$('#vehicleCount').text(data.vehicleCount);
-					_this.$('#lastTime').text(new Date(data.lastUpdate/1000).toString());
+					_this.$('#lastTime').text(new Date(data.lastUpdate).toString());
 				});
 			}, 3000);
 
@@ -71,6 +91,156 @@ var Traffic = Traffic || {};
 		}
 	});
 
+	A.app.AnalysisSidebar = Marionette.Layout.extend({
+
+		template: Handlebars.getTemplate('app', 'sidebar-analysis'),
+
+		events : {
+			'click #resetRoute' : 'resetRoute',
+			'change #day' : 'getRoute',
+			'change #hour' : 'getRoute'
+		},
+
+		resetRoute : function() {
+			A.app.nav.resetRoute();
+		},
+
+		getRoute : function() {
+			A.app.nav.getRoute();
+		},
+
+		initialize : function() {
+
+			var _this = this;
+
+			A.app.map.on("moveend", this.updateChart);
+
+		},
+
+		onShow : function() {
+
+			var _this = this;
+
+			$.getJSON('/weeks', function(data) {
+
+				data.sort(function(a, b) {
+					return a.weekId - b.weekId;
+				});
+
+				_this.$("#weekList").empty();
+
+				_this.$("#weekList").append('<option value="0">All Weeks</option>');
+				for(var i in data) {
+					var weekDate = new Date( data[i].weekStartTime);
+					_this.$("#weekList").append('<option value="' + data[i].weekId + '">Week of ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
+				}
+			});
+
+			this.updateChart();
+			this.selectedDay = -1;
+			this.selectedHour = -1;
+		},
+
+		updateChart : function() {
+
+			var _this = this;
+
+			var bounds = A.app.map.getBounds();
+			var x1 = bounds.getWest();
+			var x2 = bounds.getEast();
+			var y1 = bounds.getNorth();
+			var y2 = bounds.getSouth();
+
+			$.getJSON('/weeklyStats?x1=' + x1 + '&x2=' + x2 + '&y1=' + y1 + '&y2=' + y2, function(chartData){
+
+				A.app.sidebar.chartData = chartData;
+				A.app.sidebar.renderDayChart();
+				A.app.sidebar.renderHourChart();
+			});
+		},
+
+		renderDayChart : function() {
+
+			var _this = this;
+			var days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+			var dailyData = {
+				labels: days,
+				datasets: [
+					{
+						label: "Daily",
+						fillColor: "rgba(220,220,220,0.5)",
+						strokeColor: "rgba(220,220,220,0.8)",
+						highlightFill: "rgba(220,255,220,0.75)",
+						highlightStroke: "rgba(220,255,220,1)",
+						data: this.chartData.dailyStats
+					}
+				]
+			};
+
+			var steps = 5;
+			var max = 50;
+			var dailyChartCtx = $("#dailyChart").get(0).getContext("2d");
+			var dailyChart = new Chart(dailyChartCtx).BarHighlight(dailyData, {animation:false, showTooltips:false, scaleLabel: "<%=value%> km/h", scaleOverride: true,
+				scaleSteps: steps,
+				scaleStepWidth: Math.ceil(max / steps),
+				scaleStartValue: 0 });
+
+			$("#dailyChart").click(function(evt){
+				var activePoints = dailyChart.getBarsAtEvent(evt);
+
+				if(activePoints[0]) {
+					_this.selectedDay = _.indexOf(days, activePoints[0].label);
+					dailyChart.options.highlightFromIndex = _this.selectedDay;
+					dailyChart.update();
+				}
+
+				_this.renderHourChart();
+			});
+		},
+
+		renderHourChart : function() {
+
+			if(this.selectedDay < 0)
+				return;
+
+			var hourLabels = new Array();
+			for(i = 0; i < 24; i++) {
+				hourLabels.push(i); //i + "h");
+			}
+
+			var hourlyData = {
+				labels: hourLabels,
+				datasets: [
+					{
+						label: "Daily",
+						fillColor: "rgba(220,220,220,0.5)",
+						strokeColor: "rgba(220,220,220,0.8)",
+						highlightFill: "rgba(220,220,220,0.75)",
+						highlightStroke: "rgba(220,220,220,1)",
+						data: this.chartData.hourlyStats.slice(24 * this.selectedDay, 24 * (this.selectedDay + 1))
+					}
+				]
+			};
+
+			var steps = 5;
+			var max = 50;
+
+
+			var hourlyChartCtx = $("#hourlyChart").get(0).getContext("2d");
+			var hourlyChart = new Chart(hourlyChartCtx).Bar(hourlyData, {animation:false, showTooltips:false, scaleLabel: "<%=value%> km/h",  barValueSpacing: 2, scaleOverride: true,
+				scaleSteps: steps,
+				scaleStepWidth: Math.ceil(max / steps),
+				scaleStartValue: 0 });
+		},
+
+		onRender : function () {
+			this.$("#journeyInfo").hide();
+		}
+	});
+
+
+
 	A.app.Nav = Marionette.Layout.extend({
 
 		template: Handlebars.getTemplate('app', 'navbar'),
@@ -98,7 +268,7 @@ var Traffic = Traffic || {};
 			if(A.app.map.hasLayer(A.app.segmentOverlay))
 				A.app.map.removeLayer(A.app.segmentOverlay);
 
-			A.app.dataOverlay = L.tileLayer('http://localhost:4567//tile/data?z={z}&x={x}&y={y}').addTo(A.app.map);
+			A.app.dataOverlay = L.tileLayer('/tile/data?z={z}&x={x}&y={y}').addTo(A.app.map);
 		},
 
 		clickRouting: function(evt) {
@@ -123,6 +293,9 @@ var Traffic = Traffic || {};
 
 		clickAnalysis: function(evt) {
 
+			A.app.sidebar = new A.app.AnalysisSidebar();
+			A.app.instance.sidebar.show(A.app.sidebar);
+
 			this.endRouting();
 
 			this.$("li").removeClass("active");
@@ -131,7 +304,7 @@ var Traffic = Traffic || {};
 			if(A.app.map.hasLayer(A.app.dataOverlay))
 				A.app.map.removeLayer(A.app.dataOverlay);
 
-			A.app.segmentOverlay = L.tileLayer('http://localhost:4567//tile/segment?z={z}&x={x}&y={y}').addTo(A.app.map);
+			A.app.segmentOverlay = L.tileLayer('/tile/segment?z={z}&x={x}&y={y}').addTo(A.app.map);
 		},
 
 		resetRoute : function() {
@@ -194,7 +367,7 @@ var Traffic = Traffic || {};
 			var day = A.app.sidebar.$("#day").val() * 1;
 			var hour = A.app.sidebar.$("#hour").val() * 1;
 
-			$.getJSON('http://localhost:4567/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng + '&day=' + day + '&time=' + (hour * 3600) + '&useTraffic=true', function(data){
+			$.getJSON('/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng + '&day=' + day + '&time=' + (hour * 3600) + '&useTraffic=true', function(data){
 
 					var encoded = encoded = data.itineraries[0].legs[0].legGeometry.points;
 					A.app.pathOverlay = L.Polyline.fromEncoded(encoded);
@@ -229,7 +402,7 @@ var Traffic = Traffic || {};
 	});
 
 
-})(Traffic, jQuery, L);
+})(Traffic, jQuery, L, Chart);
 
 
 $(document).ready(function() {

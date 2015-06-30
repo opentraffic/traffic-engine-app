@@ -12,6 +12,9 @@ public class EngineWorker implements Runnable {
 	private static final Logger log = Logger.getLogger( EngineWorker.class.getName());
 
 	private ConcurrentLinkedQueue<GPSPoint> locationQueue = new ConcurrentLinkedQueue<GPSPoint>();
+
+	private Long totalProcessed = 0l;
+	private Long totalSamples = 0l;
 	
 	private final Long id;
 	
@@ -31,7 +34,19 @@ public class EngineWorker implements Runnable {
 	public void enqueueLocationUpdate(GPSPoint gpsPoint) {
 		locationQueue.add(gpsPoint);
 	}
-	
+
+	public long getQueueSize() {
+		return locationQueue.size();
+	}
+
+	public long getTotalProcessed() {
+		return totalProcessed;
+	}
+
+	public long getTotalSamples() {
+		return totalSamples;
+	}
+
 	@Override
 	public void run() {
 		
@@ -42,7 +57,8 @@ public class EngineWorker implements Runnable {
 			
 			if(gpsPoint != null) {
 				try {
-					int sampleCount = engine.getTrafficEngine().update(gpsPoint);
+					totalSamples += engine.getTrafficEngine().update(gpsPoint);
+					totalProcessed++;
 				} catch (Exception e) {
 					log.log(Level.WARNING, e.getMessage());
 				}

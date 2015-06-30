@@ -52,7 +52,15 @@ public class Engine {
 	private ArrayList<Long> workerIdList = new ArrayList<Long>();
 	private int nextWorkerIndex = 0;
 
-    private long lastUpdate; 
+    private long lastUpdate;
+
+	private long lastStatsCheck;
+
+	private long totalSamplesProcessedLastStatsCheck;
+	private long totalUpdatesProcessedLastStatsCheck;
+
+	private double lastLocationProcessingRate;
+	private double lastSampleProcessingRate;
     
     public Engine() {
 
@@ -104,8 +112,7 @@ public class Engine {
     public void locationUpdate(GPSPoint gpsPoint) {
     	if(!vehicleWorkerMap.containsKey(gpsPoint.vehicleId))
     		vehicleWorkerMap.put(gpsPoint.vehicleId, getNextWorkerId());
-    	
-    	te.checkOsm(gpsPoint.lat, gpsPoint.lon);
+
     	GeometryFactory gf = new GeometryFactory();
     	
     	lastUpdate = gpsPoint.time;
@@ -113,8 +120,25 @@ public class Engine {
     	locationMap.put(gpsPoint.vehicleId, gf.createPoint(new Coordinate(gpsPoint.lon, gpsPoint.lat)));
     	
     	workerMap.get(vehicleWorkerMap.get(gpsPoint.vehicleId)).enqueueLocationUpdate(gpsPoint);
-    	
-    	
+
+		if(lastStatsCheck > 0) {
+			long currentTime = System.currentTimeMillis();
+			long delta = currentTime - lastStatsCheck;
+
+			if(delta > 5000) {
+				long totalLocationsProcessed = getTotalLocationsProcessed();
+				long totalSamplesProcessed = getTotalSamplesProcessed();
+
+				lastSampleProcessingRate = (double)(totalSamplesProcessed  - totalSamplesProcessedLastStatsCheck) / ((double)delta / 1000.0);
+				lastLocationProcessingRate = (double)(totalLocationsProcessed  - totalUpdatesProcessedLastStatsCheck) / ((double)delta / 1000.0);
+
+				totalSamplesProcessedLastStatsCheck = totalSamplesProcessed;
+				totalUpdatesProcessedLastStatsCheck = totalLocationsProcessed;
+				lastStatsCheck = currentTime;
+			}
+		}
+		else
+			lastStatsCheck = System.currentTimeMillis();
     }
     
     public List<SpatialDataItem> getStreetSegments(Envelope env) {
@@ -128,7 +152,38 @@ public class Engine {
     public int getVehicleCount() {
     	return te.getVehicleCount();
     }
-    
+
+	public long getQueueSize() {
+		Long queuedUpdates = 0l;
+		for(EngineWorker worker : workerMap.values()) {
+			queuedUpdates += worker.getQueueSize();
+		}
+		return queuedUpdates;
+	}
+
+	public long getTotalLocationsProcessed() {
+		Long totalProcessed = 0l;
+		for(EngineWorker worker : workerMap.values()) {
+			totalProcessed += worker.getTotalProcessed();
+		}
+		return totalProcessed;
+	}
+
+	public long getTotalSamplesProcessed() {
+		Long totalSamples = 0l;
+		for(EngineWorker worker : workerMap.values()) {
+			totalSamples += worker.getTotalSamples();
+		}
+		return totalSamples;
+	}
+
+	public double getLocationProcessingRate() {
+		return this.lastLocationProcessingRate;
+	}
+	public double getSampleProcessingRate() {
+		return this.lastSampleProcessingRate;
+	}
+
     public Collection<Point> getCurrentVehicleLocations() {
     	return locationMap.values();
     }

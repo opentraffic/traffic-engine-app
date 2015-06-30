@@ -10,11 +10,18 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.conveyal.traffic.app.data.WeekObject;
+import com.conveyal.traffic.app.data.WeeklyStatsObject;
 import com.conveyal.traffic.app.engine.Engine;
+import com.conveyal.traffic.data.SpatialDataItem;
+import com.conveyal.traffic.stats.SegmentStatistics;
+import com.vividsolutions.jts.geom.Envelope;
 import org.opentripplanner.api.model.TripPlan;
 import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.routing.core.RoutingRequest;
@@ -23,7 +30,7 @@ import org.opentripplanner.routing.core.TraverseModeSet;
 
 import com.conveyal.traffic.data.ExchangeFormat;
 import com.conveyal.traffic.geom.GPSPoint;
-import com.conveyal.traffic.app.controllers.StatsObject;
+import com.conveyal.traffic.app.data.StatsObject;
 import com.conveyal.traffic.app.routing.Routing;
 import com.conveyal.traffic.app.tiles.TrafficTileRequest.DataTile;
 import com.conveyal.traffic.app.tiles.TrafficTileRequest.SegmentTile;
@@ -54,20 +61,66 @@ public class TrafficEngineApp {
 		engine = new Engine();
 		
 		get("/stats", (request, response) -> new StatsObject(), mapper::writeValueAsString);
+
+		get("/weeks", (request, response) ->  {
+
+			List<Long> weeks = engine.getTrafficEngine().getWeekList();
+			List<WeekObject> weekObjects = new ArrayList();
+			for(Long week : weeks) {
+				WeekObject weekObj = new WeekObject();
+				weekObj.weekId = week;
+				weekObj.weekStartTime = SegmentStatistics.getTimeForWeek(week);
+				weekObjects.add(weekObj);
+			}
+			return weekObjects;
+		}, mapper::writeValueAsString);
+
+		get("/weeklyStats", (request, response) -> {
+
+			response.header("Access-Control-Allow-Origin", "*");
+			response.header("Access-Control-Request-Method", "*");
+			response.header("Access-Control-Allow-Headers", "*");
+
+			double x1 = request.queryMap("x1").doubleValue();
+			double x2 = request.queryMap("x2").doubleValue();
+			double y1 = request.queryMap("y1").doubleValue();
+			double y2 = request.queryMap("y2").doubleValue();
+
+			Integer week = request.queryMap("week").integerValue();
+
+			Envelope env1 = new Envelope(x1, x2, y1, y2);
+
+			SegmentStatistics segmentStatistics = new SegmentStatistics();
+
+				for (SpatialDataItem segment : TrafficEngineApp.engine.getStreetSegments(env1)) {
+					SegmentStatistics stats = TrafficEngineApp.engine.getTrafficEngine().getSegmentStatistics(segment.id);
+					if (stats != null) {
+						segmentStatistics.avgStats(stats);
+					}
+				}
+
+			return new WeeklyStatsObject(segmentStatistics);
+		}, mapper::writeValueAsString);
 		
 		post("/locationUpdate", (request, response) -> {
-			ExchangeFormat.VehicleMessage vm = ExchangeFormat.VehicleMessage.parseFrom(request.bodyAsBytes());
-	    	
-    		long vehicleId = getUniqueIdFromString(vm.getSourceId() + "_" + vm.getVehicleId());
-    		
-    		for(ExchangeFormat.VehicleLocation location : vm.getLocationsList()) {
-    			
-    			GPSPoint gpsPoint = new GPSPoint(location.getTimestamp(), vehicleId, location.getLon(), location.getLat());
-    	
-    			TrafficEngineApp.engine.locationUpdate(gpsPoint);
-    		}
-    		
-    		return response;
+
+			ExchangeFormat.VehicleMessageEnvelope vmEnvelope = ExchangeFormat.VehicleMessageEnvelope.parseFrom(request.bodyAsBytes());
+
+			long sourceId = vmEnvelope.getSourceId();
+
+			for(ExchangeFormat.VehicleMessage vm : vmEnvelope.getMessagesList()) {
+
+				long vehicleId = getUniqueIdFromString(sourceId + "_" + vm.getVehicleId());
+
+				for (ExchangeFormat.VehicleLocation location : vm.getLocationsList()) {
+
+					GPSPoint gpsPoint = new GPSPoint(location.getTimestamp(), vehicleId, location.getLon(), location.getLat());
+
+					if(gpsPoint.lat != 0.0 && gpsPoint.lon !=  0.0)
+						TrafficEngineApp.engine.locationUpdate(gpsPoint);
+				}
+			}
+			return response;
 		});
 		
 		// routing requests 
@@ -81,7 +134,7 @@ public class TrafficEngineApp {
 			double toLat = request.queryMap("toLat").doubleValue(); 
 			double toLon = request.queryMap("toLon").doubleValue(); 
 			int day = request.queryMap("day").integerValue(); 
-			int time = request.queryMap("time").integerValue(); 
+			int time = request.queryMap("time").integerValue();
 			boolean useTraffic = request.queryMap("useTraffic").booleanValue(); 
 			
 	        routing.buildIfUnbuilt();
@@ -103,8 +156,6 @@ public class TrafficEngineApp {
 
 	        return mapper.writeValueAsString(tp);
 		});
-		
-		// tile requests
 		
 		get("/tile/data", (request, response) -> {
 			
@@ -170,4 +221,5 @@ public class TrafficEngineApp {
 			e.printStackTrace();
 		}
 	}
+
 }
