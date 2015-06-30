@@ -11,8 +11,8 @@ Requires Java 1.8+
 ```
  java -jar traffic-engine-app.jar
 ```
-4. View web application at http://localhost:4567/
-5. Use csv-loader project (https://github.com/opentraffic/csv-loader) to submit CSV data sets for processing
+* View web application at http://localhost:4567/
+* Use csv-loader project (https://github.com/opentraffic/csv-loader) to submit CSV data sets for processing
 
 ## Build Instructions
 
