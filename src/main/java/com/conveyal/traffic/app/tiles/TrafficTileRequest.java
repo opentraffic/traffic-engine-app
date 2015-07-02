@@ -120,7 +120,7 @@ public abstract class TrafficTileRequest {
     				
     				Color color = colors[colorNum];
     				
-    				tile.renderLineString(sdi.geometry, color, 2);
+    				tile.renderLineString(sdi.getGeometry(), color, 2);
     			
 					
 				} catch (MismatchedDimensionException | TransformException e) {
@@ -218,7 +218,7 @@ public abstract class TrafficTileRequest {
     				}
     				
     				Color color = colors[colorNum];
-    				tile.renderLineString(sdi.geometry, color, 2);
+    				tile.renderLineString(sdi.getGeometry(), color, 2);
     			
 					
 				} catch (MismatchedDimensionException | TransformException e) {

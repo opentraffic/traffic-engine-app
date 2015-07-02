@@ -58,6 +58,7 @@ public class Engine {
 
 	private long totalSamplesProcessedLastStatsCheck;
 	private long totalUpdatesProcessedLastStatsCheck;
+	private long totalSamplesWrittenLastStatsCheck;
 
 	private double lastLocationProcessingRate;
 	private double lastSampleProcessingRate;
@@ -73,7 +74,7 @@ public class Engine {
     	executor = Executors.newFixedThreadPool(5);
     	
     	for (int i = 0; i < 5; i++) {
-    		EngineWorker worker = new EngineWorker(this);
+    		EngineWorker worker = new EngineWorker(i, this);
     		
     		workerMap.put(worker.getId(), worker);
     		
@@ -149,7 +150,7 @@ public class Engine {
     	return lastUpdate;
     }
     
-    public int getVehicleCount() {
+    public long getVehicleCount() {
     	return te.getVehicleCount();
     }
 
@@ -175,6 +176,10 @@ public class Engine {
 			totalSamples += worker.getTotalSamples();
 		}
 		return totalSamples;
+	}
+
+	public long getSampleQueueSize() {
+		return te.getSampleQueueSize();
 	}
 
 	public double getLocationProcessingRate() {

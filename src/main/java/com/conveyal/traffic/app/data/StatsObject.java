@@ -8,7 +8,8 @@ public class StatsObject{
 	public Long locationsQueued;
 	public Long locationsProcessed;
 	public Long samplesProcessed;
-	public Integer vehicleCount;
+	public Long samplesQueued;
+	public Long vehicleCount;
 	public Long lastUpdate;
 	
 	public StatsObject() {
@@ -16,6 +17,7 @@ public class StatsObject{
 		samplesPerSecond = TrafficEngineApp.engine.getSampleProcessingRate();
 		locationsProcessed = TrafficEngineApp.engine.getTotalLocationsProcessed();
 		samplesProcessed = TrafficEngineApp.engine.getTotalSamplesProcessed();
+		samplesQueued = TrafficEngineApp.engine.getSampleQueueSize();
 		locationsQueued = TrafficEngineApp.engine.getQueueSize();
 		vehicleCount = TrafficEngineApp.engine.getVehicleCount();
     	lastUpdate = TrafficEngineApp.engine.getLastUpdate();
