@@ -83,7 +83,7 @@ public class Routing {
         // not using an updater here as that requires dumping/loading PBFs.
         for (SpatialDataItem sdi : TrafficEngineApp.engine.getTrafficEngine().getStreetSegments(env)) {
             StreetSegment ss = (StreetSegment) sdi;
-            SummaryStatistics stats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(ss.id);
+            SummaryStatistics stats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(ss.id, null);
 
             if (stats == null || Double.isNaN(stats.getAverageSpeedKMH()))
                 continue;

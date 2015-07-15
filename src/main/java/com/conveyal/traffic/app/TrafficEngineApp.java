@@ -11,6 +11,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -49,6 +50,8 @@ public class TrafficEngineApp {
 	public static Properties appProps = new Properties();
 		
     public static Engine engine;
+
+	public static HashMap<String,Long> vehicleIdMap = new HashMap<>();
   	
 	public static void main(String[] args) {
 		
@@ -181,13 +184,16 @@ public class TrafficEngineApp {
 			int x = request.queryMap("x").integerValue();
 			int y = request.queryMap("y").integerValue();
 			int z = request.queryMap("z").integerValue();
+
+			Integer week = request.queryMap("compareWeek").integerValue();
+			Integer hour = request.queryMap("compareHour").integerValue();
 			
 			response.raw().setHeader("CACHE_CONTROL", "no-cache, no-store, must-revalidate");
 			response.raw().setHeader("PRAGMA", "no-cache");
 			response.raw().setHeader("EXPIRES", "0");
 			response.raw().setContentType("image/png");
 			
-			SegmentTile dataTile = new SegmentTile(x, y, z);
+			SegmentTile dataTile = new SegmentTile(x, y, z, week, hour);
 			
 			byte[] imageData = dataTile.render();
 			
@@ -198,17 +204,22 @@ public class TrafficEngineApp {
 
 	
 	static Long getUniqueIdFromString(String data) throws NoSuchAlgorithmException {
-    	
+
+		if(vehicleIdMap.containsKey(data))
+			return vehicleIdMap.get(data);
+
     	MessageDigest md = MessageDigest.getInstance("MD5");
 		
 		md.update(data.getBytes());
 		ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / 8);  
 		
 		buffer.put(md.digest(), 0, Long.SIZE / 8);
-        buffer.flip();//need flip 
-        return buffer.getLong();
-    	
-    }
+        buffer.flip();//need flip
+
+		vehicleIdMap.put(data, buffer.getLong());
+        return vehicleIdMap.get(data);
+
+	}
 	
 	public static void loadSettings() {
 		try {

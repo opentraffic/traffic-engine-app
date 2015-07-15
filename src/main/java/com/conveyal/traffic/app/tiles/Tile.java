@@ -165,7 +165,7 @@ public class Tile {
 		gr.setColor(c);
 		
 		if(strokeWidth != null)
-			gr.setStroke(new BasicStroke(5));
+			gr.setStroke(new BasicStroke(strokeWidth));
 		
 		Shape circle = new Ellipse2D.Double(gTr.getCoordinate().x - radius, gTr.getCoordinate().y - radius, 2.0 * radius, 2.0 * radius);
 		
