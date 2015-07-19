@@ -7,9 +7,8 @@ import java.util.logging.Logger;
 
 import com.conveyal.traffic.TrafficEngine;
 import com.conveyal.traffic.app.TrafficEngineApp;
-import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.geom.GPSPoint;
-import com.vividsolutions.jts.geom.Envelope;
+import com.conveyal.traffic.osm.OSMArea;
 import com.vividsolutions.jts.geom.Point;
 
 
@@ -28,6 +27,24 @@ public class Engine {
 		String osmDirectory = TrafficEngineApp.appProps.getProperty("application.data.osmDirectory");
 		String osmServer = TrafficEngineApp.appProps.getProperty("application.vex");
 
+		Boolean enableTimeZoneConversion;
+		try {
+			enableTimeZoneConversion = Boolean.parseBoolean(TrafficEngineApp.appProps.getProperty("application.enableTimeZoneConversion"));
+		} catch(Exception e) {
+			enableTimeZoneConversion = true;
+			log.log(Level.INFO, "Property enableTimeZoneConversion not set, defaulting to enabled");
+
+		}
+
+		Integer numberOfWorkerCores;
+		try {
+			numberOfWorkerCores = Integer.parseInt(TrafficEngineApp.appProps.getProperty("writeStatistics"));
+		} catch(Exception e) {
+			numberOfWorkerCores = Runtime.getRuntime().availableProcessors() / 2;
+			log.log(Level.INFO, "Property numberOfWorkerCores not set, defaulting to " + numberOfWorkerCores + " cores.");
+
+		}
+
 		Integer osmCacheSize;
 		try {
 			osmCacheSize = Integer.parseInt(TrafficEngineApp.appProps.getProperty("application.osmCacheSize"));
@@ -36,7 +53,7 @@ public class Engine {
 			osmCacheSize = 1_000_000;
 		}
 
-    	te = new TrafficEngine(new File(cacheDirectory), new File(osmDirectory), osmServer, osmCacheSize);
+    	te = new TrafficEngine(numberOfWorkerCores, new File(cacheDirectory), new File(osmDirectory), osmServer, osmCacheSize, enableTimeZoneConversion);
 
     }
     
@@ -47,13 +64,14 @@ public class Engine {
 
     
     public void collectStatistics() {
-    	File dataCache = new File("data/traffic");
+		String trafficTilePath = TrafficEngineApp.appProps.getProperty("application.data.trafficTileDirectory");
+
+		File dataCache = new File(trafficTilePath);
     	dataCache.mkdirs();
     	
-    	//for(String gridKey : gridEnvIndex.keySet()) {
-    	//
-    	//	te.writeStatistics(new File(dataCache, gridKey + ".traffic.protobuf"), gridEnvIndex.get(gridKey));
-    	//}
+    	for(OSMArea osmArea : te.getOsmAreas()) {
+			te.writeStatistics(new File(dataCache, osmArea.z + "_" + osmArea.x + "_" + osmArea.y + ".traffic.protobuf"), osmArea.env);
+    	}
     }
     
     public void locationUpdate(GPSPoint gpsPoint) {
@@ -61,13 +79,5 @@ public class Engine {
     	te.enqeueGPSPoint(gpsPoint);
 
     }
-    
-    public List<SpatialDataItem> getStreetSegments(Envelope env) {
-    	return te.getStreetSegments(env);
-    }
 
-
-    public List<Envelope> getOsmEnvelopes() {
-    	return (List<Envelope>)te.getOsmEnvelopes();
-    }
 }

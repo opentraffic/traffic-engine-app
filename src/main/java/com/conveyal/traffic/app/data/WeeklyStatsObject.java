@@ -1,48 +1,34 @@
 package com.conveyal.traffic.app.data;
 
 import com.conveyal.traffic.stats.SegmentStatistics;
+import com.conveyal.traffic.stats.SummaryStatistics;
+import com.conveyal.traffic.stats.SummaryStatisticsComparison;
 
 import java.util.Arrays;
 
 public class WeeklyStatsObject {
 
 	public static double MS_TO_KMH = 3.6d;
+	public static int HOURS_IN_WEEK = 24 * 7;
 
-	public Double[]  dailyStats = new Double[7];
-	public Double[]  hourlyStats = new Double[7 * 24];
+	public HourStats[] hours = new HourStats[HOURS_IN_WEEK];
 
 	public WeeklyStatsObject(SegmentStatistics stats) {
 
-		Arrays.fill(dailyStats, 0.0);
-		Arrays.fill(hourlyStats, 0.0);
+		for(int hour = 0; hour < (HOURS_IN_WEEK); hour++) {
 
-		long dailyCount = 0l;
-		double dailySum = 0.0;
+			HourStats hourStats = new HourStats();
+			hourStats.h = hour;
+			hourStats.s = stats.hourSampleSum[hour];
+			hourStats.c = stats.hourSampleCount[hour];
 
-		int day = 0;
-		for(int hour = 0; hour < (24 * 7); hour++) {
-
-			if(stats.hourSampleCount[hour] > 0) {
-				hourlyStats[hour] = (stats.hourSampleSum[hour] / stats.hourSampleCount[hour]) * MS_TO_KMH;
-
-				dailyCount += stats.hourSampleCount[hour];
-				dailySum += stats.hourSampleSum[hour];
-			}
-
-			if(day != ((hour - (hour % 24)) / 24)) {
-
-				if(dailyCount > 0)
-					dailyStats[day] = (dailySum / dailyCount)  * MS_TO_KMH;
-
-				dailySum = 0.0;
-				dailyCount = 0l;
-
-				day = ((hour - (hour % 24)) / 24);
-			}
+			hours[hour] = hourStats;
 		}
+	}
 
-		if(dailyCount > 0)
-			dailyStats[day] = dailySum / dailyCount  * MS_TO_KMH;
-
+	private static class HourStats {
+		public int h;
+		public double s;
+		public long c;
 	}
 }

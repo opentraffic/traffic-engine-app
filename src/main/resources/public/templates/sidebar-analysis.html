@@ -1,19 +1,36 @@
 <h4>Analysis</h4>
-<hr/>
 
-    <p>
-        <select id="weekList">
+<hr style="margin-top: 5px; margin-bottom: 10px;"/>
+
+<div>
+        <select style="display: inline; width: 150px;" class="form-control input-sm" id="week1FromList">
         </select>
-    </p>
+        <span id="week1To">
+            to
+            <select style="display: inline; width: 150px;" class="form-control input-sm" id="week1ToList">
+            </select>
+        </span>
 
-    <p>
-        <strong>Speed by Day of Week</strong>
-        <canvas id="dailyChart" width="400" height="100"></canvas>
-    </p>
+        <input type="checkbox" id="compare"> Compare
 
-    <p>
-        <strong>Speed by Hour of Day</strong><br/>
-        <canvas id="hourlyChart" width="400" height="100"></canvas>
-    </p>
+</div>
+<div id="compareWeekSelector" style="margin-top: 10px;">
+        <select style="display: inline; width: 150px;" class="form-control input-sm" id="week2FromList">
+        </select>
+        <span id="week2To">
+            to
+            <select style="display: inline; width: 150px;" class="form-control input-sm" id="week2ToList">
+            </select>
+        </span>
+</div>
+
+<div style="margin-top: 10px;">
+        <strong><span id="percentChangeTitle">Percent Change in </span>Speed by Day of Week</strong>
+        <div id="dailyChart"></div>
+</div>
+<div style="margin-top: 10px;">
+        <strong><span id="percentChangeTitle">Percent Change in </span>Speed by Hour of Day</strong><br/>
+        <div id="hourlyChart"></div>
+</div>
 
 

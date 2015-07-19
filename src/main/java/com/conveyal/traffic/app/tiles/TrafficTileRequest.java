@@ -6,6 +6,7 @@ import com.conveyal.traffic.geom.StreetSegment;
 import com.conveyal.traffic.stats.SegmentStatistics;
 import com.conveyal.traffic.stats.SummaryStatistics;
 import com.conveyal.traffic.app.TrafficEngineApp;
+import com.conveyal.traffic.stats.SummaryStatisticsComparison;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
@@ -15,6 +16,8 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
+import org.apache.commons.imaging.ImageWriteException;
+import org.jcolorbrewer.ColorBrewer;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 
@@ -23,6 +26,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class TrafficTileRequest {
 		
@@ -53,110 +57,85 @@ public abstract class TrafficTileRequest {
 	}
 	
 	abstract byte[] render();
-	
-	
+
 	public static class SegmentTile extends TrafficTileRequest {
-		Integer week, hour;
+		Set<Integer> hours;
+		Set<Integer> w1, w2;
 	
-		public SegmentTile(Integer x, Integer y, Integer z, Integer week, Integer hour) {
+		public SegmentTile(Integer x, Integer y, Integer z, List<Integer> hours, List<Integer> w1, List<Integer> w2) {
 			super(x, y, z, "segment");
 
-			this.week = week;
-			this.hour = null;
+			this.hours = new HashSet<>(hours);
+			this.w1 = new HashSet<>(w1);
+			this.w2 = new HashSet<>(w2);
 		}
 		
 		public String getId() {
 			return super.getId();
 		}
-		
-		public byte[] render(){
 
-			GeometryFactory gf = new GeometryFactory();
+		public byte[] render() {
+			if(this.w2 != null && this.w2.size() > 0)
+				return renderPercentChange();
+			else
+				return renderSpeed();
+		}
+
+		public byte[] renderPercentChange() {
+
 			Tile tile = new Tile(this);
-			
-			HashSet<String> defaultEdges = new HashSet<String>();
- 
-			List<Envelope> envelopes  = TrafficEngineApp.engine.getOsmEnvelopes();
-			
-    		List<SpatialDataItem> segments = TrafficEngineApp.engine.getStreetSegments(tile.envelope);
 
-    		Color[] colors = new Color[12];
-			
-			colors[0] = new Color(158/256.0f,1/256.0f,66/256.0f,0.5f);
-			colors[1] = new Color(213/256.0f,62/256.0f,79/256.0f,0.5f);
-			colors[2] = new Color(244/256.0f,109/256.0f,67/256.0f,0.5f);
-			colors[3] = new Color(253/256.0f,174/256.0f,97/256.0f,0.5f);
-			colors[4] = new Color(254/256.0f,224/256.0f,139/256.0f,0.5f);
-			colors[5] = new Color(255/256.0f,255/256.0f,191/256.0f,0.5f);
-			colors[6] = new Color(230/256.0f,245/256.0f,152/256.0f,0.5f);
-			colors[7] = new Color(171/256.0f,221/256.0f,164/256.0f,0.5f);
-			colors[8] = new Color(102/256.0f,194/256.0f,165/256.0f,0.5f);
-			colors[9] = new Color(50/256.0f,136/256.0f,189/256.0f,0.5f);
-			colors[10] = new Color(94/256.0f,79/256.0f,162/256.0f,0.5f);
-			colors[11] = new Color(96/256.0f,96/256.0f,96/256.0f,0.5f);
-    		
-			
-    		for(SpatialDataItem sdi : segments) {
-    			
-    			
+    		List<Long> segmentIds = TrafficEngineApp.engine.getTrafficEngine().getStreetSegmentIds(tile.envelope);
+
+			for(Long id : segmentIds) {
+
     			try {
-    				
-    				int count = 0;
+
     				double averageSpeed = 0.0;
-    			
-    					
-    				if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_PRIMARY && z < 11)
+
+					int streetType = TrafficEngineApp.engine.getTrafficEngine().getStreetTypeById(id);
+
+    				if(streetType== StreetSegment.TYPE_PRIMARY && z < 11)
     					 continue;
-    				else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_SECONDARY && z < 14)
+    				else if(streetType == StreetSegment.TYPE_SECONDARY && z < 14)
     					continue;
-    				else if((((StreetSegment)sdi).streetType == StreetSegment.TYPE_TERTIARY  || ((StreetSegment)sdi).streetType == StreetSegment.TYPE_RESIDENTIAL) && z < 16)
+    				else if((streetType == StreetSegment.TYPE_TERTIARY) && z < 15)
         				continue;
-					else if(((StreetSegment)sdi).streetType == StreetSegment.TYPE_OTHER)
+					else if((streetType == StreetSegment.TYPE_RESIDENTIAL) && z < 17)
 						continue;
-
-
-					int colorNum = 11;
+					else if(streetType == StreetSegment.TYPE_OTHER || streetType ==  StreetSegment.TYPE_NON_ROADWAY)
+						continue;
 
 					Color color;
 
-    				SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(sdi.id, null);
-					if(hour != null) {
-						//SummaryStatistics weekStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(sdi.id, week);
+    				SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(id, hours, w1);
+					SummaryStatistics comparisonStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(id, hours, w2);
 
-						averageSpeed = baselineStats.getAverageSpeedKMH();
-						double hourSpeed = baselineStats.getSpeedByHourOfWeekKMH(hour);
-						if(!Double.isNaN(hourSpeed)) {
-							double speedPercentChange = (averageSpeed - hourSpeed) / averageSpeed;
+					SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(baselineStats, comparisonStats);
 
-							if(speedPercentChange > .25)
-								colorNum = 10;
-							else if(speedPercentChange < -.25)
-								colorNum = 0;
-							else {
-								speedPercentChange = 0.25 / speedPercentChange;
-								colorNum = 5 + (int)Math.round(5 / speedPercentChange);
-							}
-						}
-					}
-					else {
-						if(baselineStats.getAverageSpeedKMH() > 0) {
-							averageSpeed = baselineStats.getAverageSpeedKMH();
-							colorNum = (int) (10 / (50.0 / averageSpeed));
-							if(colorNum > 10)
-								colorNum = 10;
+					Color[] colors;
+
+					double speedPercentChange = statsComparison.getAverageSpeedPercentChange();
+					if(!Double.isNaN(speedPercentChange)  && baselineStats.getTotalObservationCount() > 5 && comparisonStats.getTotalObservationCount() > 5) {
+
+						if(speedPercentChange < 0)
+							colors = ColorBrewer.Reds.getColorPalette(5);
+						else
+							colors = ColorBrewer.Blues.getColorPalette(5);
+
+						int colorNum;
+
+						if(Math.abs(speedPercentChange) > .5)
+							colorNum = 4;
+						else {
+							speedPercentChange = Math.abs(speedPercentChange) / 0.5 ;
+							colorNum = (int)Math.round(4 * speedPercentChange);
 						}
 
+						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 2);
+
 					}
 
-					color = colors[colorNum];
-
-					if(colorNum == 1)
-						tile.renderLineString(sdi.getGeometry(), color, 2);
-
-					else
-
-    				tile.renderLineString(sdi.getGeometry(), color, 2);
-					
 				} catch (MismatchedDimensionException | TransformException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -165,12 +144,66 @@ public abstract class TrafficTileRequest {
     		
     		try {
 				return tile.generateImage();
-			} catch (IOException e) {
+			} catch (IOException | ImageWriteException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return null;
 			}
-			
+		}
+
+		public byte[] renderSpeed(){
+
+			Tile tile = new Tile(this);
+
+			List<Long> segmentIds = TrafficEngineApp.engine.getTrafficEngine().getStreetSegmentIds(tile.envelope);
+
+			Color[] colors = ColorBrewer.RdYlBu.getColorPalette(11);
+
+			for(Long id : segmentIds) {
+
+				try {
+
+					double averageSpeed = 0.0;
+
+					int streetType = TrafficEngineApp.engine.getTrafficEngine().getStreetTypeById(id);
+
+					if(streetType== StreetSegment.TYPE_PRIMARY && z < 11)
+						continue;
+					else if(streetType == StreetSegment.TYPE_SECONDARY && z < 14)
+						continue;
+					else if((streetType == StreetSegment.TYPE_TERTIARY) && z < 15)
+						continue;
+					else if((streetType == StreetSegment.TYPE_RESIDENTIAL) && z < 17)
+						continue;
+					else if(streetType == StreetSegment.TYPE_OTHER || streetType ==  StreetSegment.TYPE_NON_ROADWAY)
+						continue;
+
+					int colorNum;
+
+					SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(id, hours, w1);
+
+					if(baselineStats.getAverageSpeedKMH() > 0 && baselineStats.getTotalObservationCount() > 3) {
+						averageSpeed = baselineStats.getAverageSpeedKMH();
+						colorNum = (int) (10 / (50.0 / averageSpeed));
+						if(colorNum > 10)
+							colorNum = 10;
+
+						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 2);
+					}
+
+				} catch (MismatchedDimensionException | TransformException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			try {
+				return tile.generateImage();
+			} catch (IOException | ImageWriteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
 		}
 	}
 	
@@ -192,7 +225,6 @@ public abstract class TrafficTileRequest {
     		List<SpatialDataItem> segments = TrafficEngineApp.engine.getTrafficEngine().getOffMapTraces(tile.envelope);
 
     		Color pathColor = new Color(94/256.0f,79/256.0f,162/256.0f,0.5f);
-			Color pointColor = new Color(200/256.0f,20/256.0f,20/256.0f,0.5f);
 
 			try {
 				HashMap<String, Integer> traceCounts = new HashMap<>();
@@ -208,14 +240,11 @@ public abstract class TrafficTileRequest {
     		
     		try {
 				return tile.generateImage();
-			} catch (IOException e) {
+			} catch (IOException | ImageWriteException e ) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return null;
 			}
-			
 		} 
-	} 
-	
-	
+	}
 }

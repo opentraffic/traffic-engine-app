@@ -10,10 +10,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,7 +59,12 @@ public class TrafficEngineApp {
 		staticFileLocation("/public");
 
 		engine = new Engine();
-		
+
+		get("/writeTrafficTiles", (request, response) -> {
+			engine.collectStatistics();
+			return "Traffic tiles written.";
+		});
+
 		get("/stats", (request, response) -> new StatsObject(), mapper::writeValueAsString);
 
 		get("/weeks", (request, response) ->  {
@@ -89,20 +91,44 @@ public class TrafficEngineApp {
 			double y1 = request.queryMap("y1").doubleValue();
 			double y2 = request.queryMap("y2").doubleValue();
 
-			Integer week = request.queryMap("week").integerValue();
+			List<Integer> weeks1 = new ArrayList<>();
+			List<Integer> weeks2 = new ArrayList<>();
+
+			if(request.queryMap("w1").value() != null && !request.queryMap("w1").value().trim().isEmpty()) {
+				String valueStr[] = request.queryMap("w1").value().trim().split(",");
+				List<String> values = new ArrayList(Arrays.asList(valueStr));
+				values.forEach(v -> weeks1.add(Integer.parseInt(v.trim())));
+			}
+
+			if(request.queryMap("w2").value() != null && !request.queryMap("w2").value().trim().isEmpty()) {
+				String valueStr[] = request.queryMap("w2").value().trim().split(",");
+				List<String> values = new ArrayList(Arrays.asList(valueStr));
+				values.forEach(v -> weeks2.add(Integer.parseInt(v.trim())));
+			}
 
 			Envelope env1 = new Envelope(x1, x2, y1, y2);
 
-			SegmentStatistics segmentStatistics = new SegmentStatistics();
+			SegmentStatistics segmentStatisticsSpeed = new SegmentStatistics();
+			SegmentStatistics segmentStatisticsPercentChange = new SegmentStatistics();
 
-				for (SpatialDataItem segment : TrafficEngineApp.engine.getStreetSegments(env1)) {
-					SegmentStatistics stats = TrafficEngineApp.engine.getTrafficEngine().getSegmentStatistics(segment.id);
-					if (stats != null) {
-						segmentStatistics.avgStats(stats);
+			for (SpatialDataItem segment : TrafficEngineApp.engine.getTrafficEngine().getStreetSegments(env1)) {
+				SegmentStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().getSegmentStatistics(segment.id, weeks1);
+				if (stats1 != null) {
+					segmentStatisticsSpeed.avgStats(stats1);
+				}
+				if(weeks2.size() > 0) {
+					SegmentStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().getSegmentStatistics(segment.id, weeks2);
+					if (stats2 != null) {
+						segmentStatisticsPercentChange.avgPercentChangeStats(stats1, stats2);
 					}
 				}
+			}
 
-			return new WeeklyStatsObject(segmentStatistics);
+			if(weeks2.size() > 0)
+				return new WeeklyStatsObject(segmentStatisticsPercentChange);
+			else
+				return new WeeklyStatsObject(segmentStatisticsSpeed);
+
 		}, mapper::writeValueAsString);
 		
 		post("/locationUpdate", (request, response) -> {
@@ -179,21 +205,41 @@ public class TrafficEngineApp {
 			return response;
 		});
 		
-		get("/tile/segment", (request, response) -> {
+		get("/tile/traffic", (request, response) -> {
 			
 			int x = request.queryMap("x").integerValue();
 			int y = request.queryMap("y").integerValue();
 			int z = request.queryMap("z").integerValue();
 
-			Integer week = request.queryMap("compareWeek").integerValue();
-			Integer hour = request.queryMap("compareHour").integerValue();
-			
+			List<Integer> hours = new ArrayList<>();
+
+			if(request.queryMap("h").value() != null && !request.queryMap("h").value().trim().isEmpty()) {
+				String valueStr[] = request.queryMap("h").value().trim().split(",");
+				List<String> values = new ArrayList(Arrays.asList(valueStr));
+				values.forEach(v -> hours.add(Integer.parseInt(v.trim())));
+			}
+
+			List<Integer> w1 = new ArrayList<>();
+			List<Integer> w2 = new ArrayList<>();
+
+			if(request.queryMap("w1").value() != null && !request.queryMap("w1").value().trim().isEmpty()) {
+				String valueStr[] = request.queryMap("w1").value().trim().split(",");
+				List<String> values = new ArrayList(Arrays.asList(valueStr));
+				values.forEach(v -> w1.add(Integer.parseInt(v.trim())));
+			}
+
+			if(request.queryMap("w2").value() != null && !request.queryMap("w2").value().trim().isEmpty()) {
+				String valueStr[] = request.queryMap("w2").value().trim().split(",");
+				List<String> values = new ArrayList(Arrays.asList(valueStr));
+				values.forEach(v -> w2.add(Integer.parseInt(v.trim())));
+			}
+
 			response.raw().setHeader("CACHE_CONTROL", "no-cache, no-store, must-revalidate");
 			response.raw().setHeader("PRAGMA", "no-cache");
 			response.raw().setHeader("EXPIRES", "0");
 			response.raw().setContentType("image/png");
 			
-			SegmentTile dataTile = new SegmentTile(x, y, z, week, hour);
+			SegmentTile dataTile = new SegmentTile(x, y, z, hours, w1, w2);
 			
 			byte[] imageData = dataTile.render();
 			
@@ -232,5 +278,7 @@ public class TrafficEngineApp {
 			e.printStackTrace();
 		}
 	}
+
+
 
 }

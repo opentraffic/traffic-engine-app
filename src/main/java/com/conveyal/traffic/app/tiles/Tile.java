@@ -12,9 +12,12 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.imageio.ImageIO;
-
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageWriteException;
+import org.apache.commons.imaging.Imaging;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.Envelope2D;
@@ -202,7 +205,7 @@ public class Tile {
     	gr.draw(path);    
 	}
 	
-	public byte[] generateImage() throws IOException {
+	public byte[] generateImage() throws IOException, ImageWriteException {
 		
 		if(this.scaleFactor > 1) {
 			
@@ -238,10 +241,12 @@ public class Tile {
 		if(gr != null)
 			gr.dispose();
 		gr = null;
-		
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(buffer, "png", baos);
-        
-        return baos.toByteArray(); 
+
+
+
+		Map<String, Object> params = new HashMap<>();
+		//params.put(ImagingConstants.PARAM_KEY_COMPRESSION, PngConstants.COMPRESSION_DEFLATE_INFLATE);
+
+		return Imaging.writeImageToBytes(buffer, ImageFormats.PNG, params);
 	} 
 }
