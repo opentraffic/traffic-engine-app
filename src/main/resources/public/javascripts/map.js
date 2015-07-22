@@ -17,7 +17,7 @@ var Traffic = Traffic || {};
 
 		A.app.instance.navbar.show(A.app.nav);
 
-		A.app.map = L.map('map').setView([10.3586888,123.8830313], 13);
+		A.app.map = L.map('map').setView([10.3036741,123.8982952], 13);
 
 		L.tileLayer('https://a.tiles.mapbox.com/v4/conveyal.gepida3i/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiY29udmV5YWwiLCJhIjoiMDliQURXOCJ9.9JWPsqJY7dGIdX777An7Pw', {
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery �� <a href="http://mapbox.com">Mapbox</a>',
@@ -109,6 +109,8 @@ var Traffic = Traffic || {};
 			this.$("#week2To").hide();
 			this.$("#compareWeekSelector").hide();
 			this.$("#percentChangeTitle").hide();
+			this.$("#percentChangeLegend").hide();
+
 
 			$.getJSON('/weeks', function(data) {
 
@@ -151,11 +153,16 @@ var Traffic = Traffic || {};
 			if(this.$("#compare").prop( "checked" )) {
 				this.$("#compareWeekSelector").show();
 				this.$("#percentChangeTitle").show();
+				this.$("#percentChangeLegend").show();
+				this.$("#speedLegend").hide();
+
 				A.app.sidebar.percentChange = true;
 			}
 			else {
 				this.$("#compareWeekSelector").hide();
 				this.$("#percentChangeTitle").hide();
+				this.$("#percentChangeLegend").hide();
+				this.$("#speedLegend").show();
 				A.app.sidebar.percentChange = false;
 			}
 
@@ -378,6 +385,7 @@ var Traffic = Traffic || {};
 					})
 					.gap(10)
 					.x(d3.scale.linear().domain([0.5, 7.5]))
+					.renderHorizontalGridLines(true)
 					.elasticY(true)
 					.xAxis().tickFormat(function (d) {
 						return dayLabel[d]
@@ -409,6 +417,7 @@ var Traffic = Traffic || {};
 					})
 					.gap(5)
 					.x(d3.scale.linear().domain([0.5, 24.5]))
+					.renderHorizontalGridLines(true)
 					.elasticY(true)
 					.xAxis().tickFormat();
 
@@ -443,6 +452,8 @@ var Traffic = Traffic || {};
 				this.hourlyChart.brush().on("brushend.custom", A.app.sidebar.updateTrafficTiles);
 				this.dailyChart.brush().on("brushend.custom", A.app.sidebar.updateTrafficTiles);
 			}
+
+
 
 			dc.renderAll();
 
@@ -648,24 +659,39 @@ var Traffic = Traffic || {};
 			var day = A.app.sidebar.$("#day").val() * 1;
 			var hour = A.app.sidebar.$("#hour").val() * 1;
 
-			$.getJSON('/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng + '&day=' + day + '&time=' + (hour * 3600) + '&useTraffic=true', function(data){
+			$.getJSON('/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng + '&day=' + day + '&time=' + (hour * 3600) + '&useTraffic=false', function(data){
 
-					var encoded = encoded = data.itineraries[0].legs[0].legGeometry.points;
-					A.app.pathOverlay = L.Polyline.fromEncoded(encoded);
-					A.app.pathOverlay.addTo(A.app.map);
+				var distance = 0;
+				var time = 0;
 
-					A.app.sidebar.$("#clickInfo").hide();
-					A.app.sidebar.$("#journeyInfo").show();
+				var lines = new Array();
+				for(i in data.pathEdges) {
+					var edge = data.pathEdges[i];
 
-					var duration = data.itineraries[0].legs[0].duration;
-				;
-					var seconds = duration % 60;
-					var minutes = duration / 60;
+					var polyLine = L.Polyline.fromEncoded(edge.geometry);
 
-					var speed =  (data.itineraries[0].legs[0].distance / duration) * 3.6;
+					lines.push(L.polyline(polyLine.getLatLngs(), {opacity: 1.0, color: edge.color}));
 
-					A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
-					A.app.sidebar.$("#avgSpeed").text(speed.toPrecision(2) + "km")
+					if(edge.length > 0) {
+						distance += edge.length;
+						time += edge.length * (1 /edge.speed);
+					}
+				}
+
+				A.app.pathOverlay = L.featureGroup(lines);
+
+				A.app.pathOverlay.addTo(A.app.map);
+
+				A.app.sidebar.$("#clickInfo").hide();
+				A.app.sidebar.$("#journeyInfo").show();
+
+				var seconds = time % 60;
+				var minutes = time / 60;
+
+				var speed =  (distance / time) * 3.6;
+
+				A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
+				A.app.sidebar.$("#avgSpeed").text(speed.toPrecision(2) + "km")
 			});
 		},
 

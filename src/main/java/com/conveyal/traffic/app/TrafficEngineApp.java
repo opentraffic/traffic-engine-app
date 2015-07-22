@@ -13,20 +13,24 @@ import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import com.conveyal.traffic.app.data.TrafficPath;
 import com.conveyal.traffic.app.data.WeekObject;
 import com.conveyal.traffic.app.data.WeeklyStatsObject;
 import com.conveyal.traffic.app.engine.Engine;
 import com.conveyal.traffic.data.SpatialDataItem;
-import com.conveyal.traffic.stats.SegmentStatistics;
+import com.conveyal.traffic.data.stats.SummaryStatistics;
+import com.conveyal.traffic.geom.StreetSegment;
+import com.conveyal.traffic.data.stats.SegmentStatistics;
 import com.vividsolutions.jts.geom.Envelope;
-import org.opentripplanner.api.model.TripPlan;
+import org.mapdb.Fun;
 import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 
-import com.conveyal.traffic.data.ExchangeFormat;
+import com.conveyal.traffic.data.pbf.ExchangeFormat;
 import com.conveyal.traffic.geom.GPSPoint;
 import com.conveyal.traffic.app.data.StatsObject;
 import com.conveyal.traffic.app.routing.Routing;
@@ -69,9 +73,9 @@ public class TrafficEngineApp {
 
 		get("/weeks", (request, response) ->  {
 
-			List<Long> weeks = engine.getTrafficEngine().getWeekList();
+			List<Integer> weeks = engine.getTrafficEngine().getWeekList();
 			List<WeekObject> weekObjects = new ArrayList();
-			for(Long week : weeks) {
+			for(Integer week : weeks) {
 				WeekObject weekObj = new WeekObject();
 				weekObj.weekId = week;
 				weekObj.weekStartTime = SegmentStatistics.getTimeForWeek(week);
@@ -91,8 +95,8 @@ public class TrafficEngineApp {
 			double y1 = request.queryMap("y1").doubleValue();
 			double y2 = request.queryMap("y2").doubleValue();
 
-			List<Integer> weeks1 = new ArrayList<>();
-			List<Integer> weeks2 = new ArrayList<>();
+			Set<Integer> weeks1 = new HashSet<>();
+			Set<Integer> weeks2 = new HashSet<>();
 
 			if(request.queryMap("w1").value() != null && !request.queryMap("w1").value().trim().isEmpty()) {
 				String valueStr[] = request.queryMap("w1").value().trim().split(",");
@@ -108,26 +112,12 @@ public class TrafficEngineApp {
 
 			Envelope env1 = new Envelope(x1, x2, y1, y2);
 
-			SegmentStatistics segmentStatisticsSpeed = new SegmentStatistics();
-			SegmentStatistics segmentStatisticsPercentChange = new SegmentStatistics();
+			Set<Long> segmentIds = TrafficEngineApp.engine.getTrafficEngine().getStreetSegmentIds(env1)
+					.stream().collect(Collectors.toSet());
 
-			for (SpatialDataItem segment : TrafficEngineApp.engine.getTrafficEngine().getStreetSegments(env1)) {
-				SegmentStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().getSegmentStatistics(segment.id, weeks1);
-				if (stats1 != null) {
-					segmentStatisticsSpeed.avgStats(stats1);
-				}
-				if(weeks2.size() > 0) {
-					SegmentStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().getSegmentStatistics(segment.id, weeks2);
-					if (stats2 != null) {
-						segmentStatisticsPercentChange.avgPercentChangeStats(stats1, stats2);
-					}
-				}
-			}
+			SummaryStatistics summaryStats = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(segmentIds, weeks1, null);
 
-			if(weeks2.size() > 0)
-				return new WeeklyStatsObject(segmentStatisticsPercentChange);
-			else
-				return new WeeklyStatsObject(segmentStatisticsSpeed);
+			return new WeeklyStatsObject(summaryStats);
 
 		}, mapper::writeValueAsString);
 		
@@ -181,9 +171,41 @@ public class TrafficEngineApp {
 	        dt = dt.plusSeconds(time);
 	        rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
 
-	        TripPlan tp = routing.route(rr);
+			List<Fun.Tuple3<Long, Long, Long>> edges = routing.route(rr);
 
-	        return mapper.writeValueAsString(tp);
+			TrafficPath trafficPath =new TrafficPath();
+
+			Fun.Tuple3<Long, Long, Long> lastUnmatchedEdgeId = null;
+			for(Fun.Tuple3<Long, Long, Long> edgeId : edges) {
+				List<SpatialDataItem> streetSegments = engine.getTrafficEngine().getStreetSegmentsBySegmentId(edgeId);
+				if(streetSegments.size() == 0) {
+					if(lastUnmatchedEdgeId != null && lastUnmatchedEdgeId.a.equals(edgeId.a)) {
+						edgeId = new Fun.Tuple3<>(edgeId.a, lastUnmatchedEdgeId.b, edgeId.c);
+					}
+					streetSegments = engine.getTrafficEngine().getStreetSegmentsBySegmentId(edgeId);
+				}
+				if(streetSegments.size() != 0) {
+					for(SpatialDataItem sdi : streetSegments) {
+						StreetSegment streetSegment = (StreetSegment)sdi;
+						if(streetSegment != null) {
+							lastUnmatchedEdgeId = null;
+
+							SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(streetSegment.id, null);
+							if(summaryStatistics != null)
+								trafficPath.addSegment(streetSegment, summaryStatistics);
+						}
+						else {
+							lastUnmatchedEdgeId = edgeId;
+						}
+					}
+				}
+				else {
+					lastUnmatchedEdgeId = edgeId;
+				}
+
+			}
+
+	        return mapper.writeValueAsString(trafficPath);
 		});
 		
 		get("/tile/data", (request, response) -> {

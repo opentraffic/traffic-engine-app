@@ -1,10 +1,6 @@
 package com.conveyal.traffic.app.data;
 
-import com.conveyal.traffic.stats.SegmentStatistics;
-import com.conveyal.traffic.stats.SummaryStatistics;
-import com.conveyal.traffic.stats.SummaryStatisticsComparison;
-
-import java.util.Arrays;
+import com.conveyal.traffic.data.stats.SummaryStatistics;
 
 public class WeeklyStatsObject {
 
@@ -13,14 +9,15 @@ public class WeeklyStatsObject {
 
 	public HourStats[] hours = new HourStats[HOURS_IN_WEEK];
 
-	public WeeklyStatsObject(SegmentStatistics stats) {
+	public WeeklyStatsObject(SummaryStatistics stats) {
 
 		for(int hour = 0; hour < (HOURS_IN_WEEK); hour++) {
 
 			HourStats hourStats = new HourStats();
 			hourStats.h = hour;
-			hourStats.s = stats.hourSampleSum[hour];
-			hourStats.c = stats.hourSampleCount[hour];
+			hourStats.s = stats.hourSum.get(hour);
+			hourStats.c = stats.hourCount.get(hour);
+			hourStats.std = stats.getStdDev(hour);
 
 			hours[hour] = hourStats;
 		}
@@ -29,6 +26,7 @@ public class WeeklyStatsObject {
 	private static class HourStats {
 		public int h;
 		public double s;
-		public long c;
+		public double c;
+		public double std;
 	}
 }

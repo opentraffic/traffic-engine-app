@@ -4,18 +4,19 @@ package com.conveyal.traffic.app.routing;
 import com.beust.jcommander.internal.Maps;
 import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.geom.StreetSegment;
-import com.conveyal.traffic.stats.SummaryStatistics;
+import com.conveyal.traffic.data.stats.SummaryStatistics;
 import com.conveyal.traffic.app.TrafficEngineApp;
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Envelope;
 
+import org.mapdb.Fun;
 import org.opentripplanner.analyst.core.SlippyTile;
-import org.opentripplanner.api.model.TripPlan;
-import org.opentripplanner.api.resource.GraphPathToTripPlanConverter;
 import org.opentripplanner.graph_builder.GraphBuilder;
 import org.opentripplanner.graph_builder.module.osm.OpenStreetMapModule;
 import org.opentripplanner.openstreetmap.impl.AnyFileBasedOpenStreetMapProviderImpl;
 import org.opentripplanner.routing.core.RoutingRequest;
+import org.opentripplanner.routing.edgetype.StreetEdge;
+import org.opentripplanner.routing.graph.Edge;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.impl.DefaultStreetVertexIndexFactory;
 import org.opentripplanner.routing.impl.GraphPathFinder;
@@ -28,6 +29,7 @@ import org.opentripplanner.traffic.StreetSpeedSnapshotSource;
 
 import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -60,32 +62,49 @@ public class Routing {
     private boolean updated = false;
 
     /** Get a trip plan, or null if the graph is not yet built */
-    public TripPlan route (RoutingRequest request) {
+    public List<Fun.Tuple3<Long, Long, Long>> route(RoutingRequest request) {
         if (graph == null)
             return null;
 
-        if(!updated)
-            update();
+        Envelope env = new Envelope();
+        env.expandToInclude(request.to.lng, request.to.lat);
+        env.expandToInclude(request.from.lng, request.from.lat);
+
+        //if(!updated)
+        //    update(env);
 
         List<GraphPath> paths = gpf.graphPathFinderEntryPoint(request);
 
-        return GraphPathToTripPlanConverter.generatePlan(paths, request);
+        List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>();
+
+        if(paths.size() > 0) {
+            for(Edge edge : paths.get(0).edges) {
+                if(edge instanceof StreetEdge) {
+
+                    StreetEdge streetEdge = (StreetEdge)edge;
+                    if(streetEdge.wayId > 0) {
+                        Fun.Tuple3<Long, Long, Long> streetEdgeId = new Fun.Tuple3<>(streetEdge.wayId, streetEdge.getStartOsmNodeId(), streetEdge.getEndOsmNodeId());
+                        edges.add(streetEdgeId);
+                    }
+
+                }
+
+            }
+        }
+
+        return edges;
     }
 
     /** Update the traffic data in the graph */
-    private void update() {
+    private void update(Envelope env) {
         Map<Segment, SegmentSpeedSample> samples = Maps.newHashMap();
-
-        Envelope env = new Envelope();
-        env.expandToInclude(boundingBox.getMinX(), boundingBox.getMinY());
-        env.expandToInclude(boundingBox.getMaxX(), boundingBox.getMaxY());
 
         // not using an updater here as that requires dumping/loading PBFs.
         for (SpatialDataItem sdi : TrafficEngineApp.engine.getTrafficEngine().getStreetSegments(env)) {
             StreetSegment ss = (StreetSegment) sdi;
-            SummaryStatistics stats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(ss.id, null, null);
+            SummaryStatistics stats = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(ss.id, null, null);
 
-            if (stats == null || Double.isNaN(stats.getAverageSpeedKMH()))
+            if (stats == null || Double.isNaN(stats.getMean()))
                 continue;
 
             SegmentSpeedSample samp;

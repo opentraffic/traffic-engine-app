@@ -1,20 +1,14 @@
 package com.conveyal.traffic.app.tiles;
 
 import com.conveyal.traffic.data.SpatialDataItem;
-import com.conveyal.traffic.geom.OffMapTrace;
 import com.conveyal.traffic.geom.StreetSegment;
-import com.conveyal.traffic.stats.SegmentStatistics;
-import com.conveyal.traffic.stats.SummaryStatistics;
+import com.conveyal.traffic.data.stats.SummaryStatistics;
 import com.conveyal.traffic.app.TrafficEngineApp;
-import com.conveyal.traffic.stats.SummaryStatisticsComparison;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 
 import org.apache.commons.imaging.ImageWriteException;
 import org.jcolorbrewer.ColorBrewer;
@@ -29,7 +23,9 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class TrafficTileRequest {
-		
+
+	public static final double MS_TO_KMS = 3.6d;
+
 	final public String type;
 	final public Integer x, y, z;
 	
@@ -108,10 +104,10 @@ public abstract class TrafficTileRequest {
 
 					Color color;
 
-    				SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(id, hours, w1);
-					SummaryStatistics comparisonStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(id, hours, w2);
+    				SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(id, hours, w1);
+					SummaryStatistics comparisonStats = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(id, hours, w2);
 
-					SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(baselineStats, comparisonStats);
+					/*SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(baselineStats, comparisonStats);
 
 					Color[] colors;
 
@@ -134,9 +130,9 @@ public abstract class TrafficTileRequest {
 
 						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 2);
 
-					}
+					}*/
 
-				} catch (MismatchedDimensionException | TransformException e) {
+				} catch (MismatchedDimensionException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -180,10 +176,10 @@ public abstract class TrafficTileRequest {
 
 					int colorNum;
 
-					SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().collectSummaryStatisics(id, hours, w1);
+					SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(id, hours, w1);
 
-					if(baselineStats.getAverageSpeedKMH() > 0 && baselineStats.getTotalObservationCount() > 3) {
-						averageSpeed = baselineStats.getAverageSpeedKMH();
+					if(baselineStats.getMean() > 0) {
+						averageSpeed = baselineStats.getMean() * MS_TO_KMS;
 						colorNum = (int) (10 / (50.0 / averageSpeed));
 						if(colorNum > 10)
 							colorNum = 10;
