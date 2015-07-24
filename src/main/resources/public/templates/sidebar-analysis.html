@@ -25,11 +25,11 @@
 </div>
 
 <div style="margin-top: 10px;">
-        <strong><span id="percentChangeTitle">Percent Change in </span>Speed by Day of Week</strong>
+        <strong><span id="percentChangeTitle1">Percent Change in </span>Speed by Day of Week</strong>
         <div id="dailyChart"></div>
 </div>
 <div style="margin-top: 10px;">
-        <strong><span id="percentChangeTitle">Percent Change in </span>Speed by Hour of Day</strong><br/>
+        <strong><span id="percentChangeTitle2">Percent Change in </span>Speed by Hour of Day</strong><br/>
         <div id="hourlyChart"></div>
 </div>
 
@@ -52,6 +52,21 @@
 </div>
 
 <div style="margin-bottom: 25px; margin-top: 25px;" id="percentChangeLegend">
+
+    <div class="pull-right">
+        <select style="display: inline; width: 150px;" class="form-control input-sm" id="confidenceInterval">
+            <option value="0">90% CI</option>
+            <option selected value="1">95% CI</option>
+            <option value="2">97% CI</option>
+            <option value="3">99% CI</option>
+        </select>
+        <br/>
+        <select style="display: inline; width: 150px; margin-top: 5px;" class="form-control input-sm" id="normalizeByTime">
+            <option selected value="true">Normalize Time</option>
+            <option value="false">Normalize Vehicles</option>
+        </select>
+
+    </div>
 
         0%<svg style="margin-left: 15px; margin-right: -140px;" width="270" height="24">
             <rect fill="rgb(254,229,217)" width="24" height="24" x="0"></rect>

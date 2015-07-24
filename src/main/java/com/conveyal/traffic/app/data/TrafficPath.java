@@ -13,6 +13,12 @@ public class TrafficPath {
 
     public List<TrafficPathEdge> pathEdges = new ArrayList<>();
 
+    public WeeklyStatsObject weeklyStats;
+
+    public void setWeeklyStats(SummaryStatistics stats) {
+        weeklyStats = new WeeklyStatsObject(stats);
+    }
+
     public void addSegment(StreetSegment streetSegment, SummaryStatistics summaryStatistics) {
 
         TrafficPathEdge pathEdge = new TrafficPathEdge(streetSegment, summaryStatistics);

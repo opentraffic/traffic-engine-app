@@ -26,7 +26,7 @@ public class TrafficPathEdge {
         EncodedPolylineBean encodedPolyline = PolylineEncoder.createEncodings(streetSegment.getGeometry());
         geometry = encodedPolyline.getPoints();
 
-        int colorNum = (int) (10 / (50.0 / summaryStatistics.getMean()));
+        int colorNum = (int) (10 / (50.0 / (summaryStatistics.getMean() * 3.6)));
         if(colorNum > 10)
             colorNum = 10;
 

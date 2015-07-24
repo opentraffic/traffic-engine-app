@@ -1,6 +1,7 @@
 package com.conveyal.traffic.app.data;
 
 import com.conveyal.traffic.data.stats.SummaryStatistics;
+import com.conveyal.traffic.data.stats.SummaryStatisticsComparison;
 
 public class WeeklyStatsObject {
 
@@ -15,9 +16,45 @@ public class WeeklyStatsObject {
 
 			HourStats hourStats = new HourStats();
 			hourStats.h = hour;
-			hourStats.s = stats.hourSum.get(hour);
-			hourStats.c = stats.hourCount.get(hour);
-			hourStats.std = stats.getStdDev(hour);
+			double sum =stats.hourSum.get(hour);
+			double count = stats.hourCount.get(hour);
+			double std = stats.getStdDev(hour);
+			if(!Double.isNaN(sum) && !Double.isNaN(count) && !Double.isNaN(std)){
+				hourStats.s = sum;
+				hourStats.c = count;
+				hourStats.std = std;
+			} else {
+				hourStats.s = 0;
+				hourStats.c = 0;
+				hourStats.std = 0;
+			}
+
+			hours[hour] = hourStats;
+		}
+	}
+
+	public WeeklyStatsObject(SummaryStatisticsComparison stats) {
+
+		for(int hour = 0; hour < (HOURS_IN_WEEK); hour++) {
+
+			HourStats hourStats = new HourStats();
+			hourStats.h = hour;
+			double diff = stats.differenceAsPercent(hour);
+			double meanSize = stats.getMeanSize(hour);
+			double std = stats.combinedStdDev(hour);
+			if(stats.tTest(hour) && !Double.isNaN(diff) && !Double.isNaN(meanSize) && !Double.isNaN(meanSize)) {
+				hourStats.s = diff * meanSize;
+				hourStats.c = meanSize;
+				hourStats.std = std;
+			}
+			else {
+				hourStats.s = 0;
+				hourStats.c = stats.getMeanSize(hour);
+				hourStats.std = stats.combinedStdDev(hour);
+			}
+
+
+
 
 			hours[hour] = hourStats;
 		}
@@ -28,5 +65,6 @@ public class WeeklyStatsObject {
 		public double s;
 		public double c;
 		public double std;
+		public boolean t;
 	}
 }

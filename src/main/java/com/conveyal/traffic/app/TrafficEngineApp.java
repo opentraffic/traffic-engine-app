@@ -21,6 +21,7 @@ import com.conveyal.traffic.app.data.WeeklyStatsObject;
 import com.conveyal.traffic.app.engine.Engine;
 import com.conveyal.traffic.data.SpatialDataItem;
 import com.conveyal.traffic.data.stats.SummaryStatistics;
+import com.conveyal.traffic.data.stats.SummaryStatisticsComparison;
 import com.conveyal.traffic.geom.StreetSegment;
 import com.conveyal.traffic.data.stats.SegmentStatistics;
 import com.vividsolutions.jts.geom.Envelope;
@@ -73,7 +74,7 @@ public class TrafficEngineApp {
 
 		get("/weeks", (request, response) ->  {
 
-			List<Integer> weeks = engine.getTrafficEngine().getWeekList();
+			List<Integer> weeks = engine.getTrafficEngine().osmData.statsDataStore.getWeekList();
 			List<WeekObject> weekObjects = new ArrayList();
 			for(Integer week : weeks) {
 				WeekObject weekObj = new WeekObject();
@@ -98,6 +99,9 @@ public class TrafficEngineApp {
 			Set<Integer> weeks1 = new HashSet<>();
 			Set<Integer> weeks2 = new HashSet<>();
 
+			boolean normalizeByTime = request.queryMap("normalizeByTime").booleanValue();
+			int confidenceInterval = request.queryMap("confidenceInterval").integerValue();
+
 			if(request.queryMap("w1").value() != null && !request.queryMap("w1").value().trim().isEmpty()) {
 				String valueStr[] = request.queryMap("w1").value().trim().split(",");
 				List<String> values = new ArrayList(Arrays.asList(valueStr));
@@ -115,9 +119,16 @@ public class TrafficEngineApp {
 			Set<Long> segmentIds = TrafficEngineApp.engine.getTrafficEngine().getStreetSegmentIds(env1)
 					.stream().collect(Collectors.toSet());
 
-			SummaryStatistics summaryStats = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(segmentIds, weeks1, null);
+			SummaryStatistics summaryStats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(segmentIds,normalizeByTime, weeks1, null);
 
-			return new WeeklyStatsObject(summaryStats);
+			if (weeks2.size() > 0) {
+				SummaryStatistics summaryStats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(segmentIds,normalizeByTime, weeks2, null);
+				SummaryStatisticsComparison summaryStatisticsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[confidenceInterval], summaryStats1, summaryStats2);
+
+				return new WeeklyStatsObject(summaryStatisticsComparison);
+			}
+			else
+				return new WeeklyStatsObject(summaryStats1);
 
 		}, mapper::writeValueAsString);
 		
@@ -151,11 +162,34 @@ public class TrafficEngineApp {
 			double fromLat = request.queryMap("fromLat").doubleValue();
 			double fromLon = request.queryMap("fromLon").doubleValue(); 
 			double toLat = request.queryMap("toLat").doubleValue(); 
-			double toLon = request.queryMap("toLon").doubleValue(); 
-			int day = request.queryMap("day").integerValue(); 
-			int time = request.queryMap("time").integerValue();
-			boolean useTraffic = request.queryMap("useTraffic").booleanValue(); 
-			
+			double toLon = request.queryMap("toLon").doubleValue();
+			boolean useTraffic = false;
+			boolean normalizeByTime = true;
+
+
+			Set<Integer> hours = new HashSet<>();
+
+			if(request.queryMap("h").value() != null && !request.queryMap("h").value().trim().isEmpty()) {
+				String valueStr[] = request.queryMap("h").value().trim().split(",");
+				List<String> values = new ArrayList(Arrays.asList(valueStr));
+				values.forEach(v -> hours.add(Integer.parseInt(v.trim())));
+			}
+
+			Set<Integer> w1 = new HashSet<>();
+			Set<Integer> w2 = new HashSet<>();
+
+			if(request.queryMap("w1").value() != null && !request.queryMap("w1").value().trim().isEmpty()) {
+				String valueStr[] = request.queryMap("w1").value().trim().split(",");
+				List<String> values = new ArrayList(Arrays.asList(valueStr));
+				values.forEach(v -> w1.add(Integer.parseInt(v.trim())));
+			}
+
+			if(request.queryMap("w2").value() != null && !request.queryMap("w2").value().trim().isEmpty()) {
+				String valueStr[] = request.queryMap("w2").value().trim().split(",");
+				List<String> values = new ArrayList(Arrays.asList(valueStr));
+				values.forEach(v -> w2.add(Integer.parseInt(v.trim())));
+			}
+
 	        routing.buildIfUnbuilt();
 
 	        RoutingRequest rr = new RoutingRequest();
@@ -167,13 +201,13 @@ public class TrafficEngineApp {
 
 	        // figure out the time
 	        LocalDateTime dt = LocalDateTime.now();
-	        dt = dt.with(ChronoField.DAY_OF_WEEK, day).withHour(0).withMinute(0).withSecond(0);
-	        dt = dt.plusSeconds(time);
 	        rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
 
-			List<Fun.Tuple3<Long, Long, Long>> edges = routing.route(rr);
+			List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>(routing.route(rr));
 
 			TrafficPath trafficPath =new TrafficPath();
+
+			Set<Long> edgeIds = new HashSet<>();
 
 			Fun.Tuple3<Long, Long, Long> lastUnmatchedEdgeId = null;
 			for(Fun.Tuple3<Long, Long, Long> edgeId : edges) {
@@ -189,8 +223,8 @@ public class TrafficEngineApp {
 						StreetSegment streetSegment = (StreetSegment)sdi;
 						if(streetSegment != null) {
 							lastUnmatchedEdgeId = null;
-
-							SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(streetSegment.id, null);
+							edgeIds.add(streetSegment.id);
+							SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
 							if(summaryStatistics != null)
 								trafficPath.addSegment(streetSegment, summaryStatistics);
 						}
@@ -204,6 +238,9 @@ public class TrafficEngineApp {
 				}
 
 			}
+
+			SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, true, w1, null);
+			trafficPath.setWeeklyStats(summaryStatistics);
 
 	        return mapper.writeValueAsString(trafficPath);
 		});
@@ -233,6 +270,9 @@ public class TrafficEngineApp {
 			int y = request.queryMap("y").integerValue();
 			int z = request.queryMap("z").integerValue();
 
+			boolean normalizeByTime = request.queryMap("normalizeByTime").booleanValue();
+			int confidenceInterval = request.queryMap("confidenceInterval").integerValue();
+
 			List<Integer> hours = new ArrayList<>();
 
 			if(request.queryMap("h").value() != null && !request.queryMap("h").value().trim().isEmpty()) {
@@ -261,7 +301,7 @@ public class TrafficEngineApp {
 			response.raw().setHeader("EXPIRES", "0");
 			response.raw().setContentType("image/png");
 			
-			SegmentTile dataTile = new SegmentTile(x, y, z, hours, w1, w2);
+			SegmentTile dataTile = new SegmentTile(x, y, z, normalizeByTime, confidenceInterval, w1, w2, hours);
 			
 			byte[] imageData = dataTile.render();
 			

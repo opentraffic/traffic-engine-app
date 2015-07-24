@@ -1,6 +1,7 @@
 package com.conveyal.traffic.app.tiles;
 
 import com.conveyal.traffic.data.SpatialDataItem;
+import com.conveyal.traffic.data.stats.SummaryStatisticsComparison;
 import com.conveyal.traffic.geom.StreetSegment;
 import com.conveyal.traffic.data.stats.SummaryStatistics;
 import com.conveyal.traffic.app.TrafficEngineApp;
@@ -57,13 +58,18 @@ public abstract class TrafficTileRequest {
 	public static class SegmentTile extends TrafficTileRequest {
 		Set<Integer> hours;
 		Set<Integer> w1, w2;
-	
-		public SegmentTile(Integer x, Integer y, Integer z, List<Integer> hours, List<Integer> w1, List<Integer> w2) {
+
+		Boolean normalizeByTime;
+		Integer confidenceInterval;
+
+		public SegmentTile(Integer x, Integer y, Integer z, Boolean normalizeByTime, Integer confidenceInterval, List<Integer> w1, List<Integer> w2, List<Integer> hours) {
 			super(x, y, z, "segment");
 
 			this.hours = new HashSet<>(hours);
 			this.w1 = new HashSet<>(w1);
 			this.w2 = new HashSet<>(w2);
+			this.normalizeByTime = normalizeByTime;
+			this.confidenceInterval =confidenceInterval;
 		}
 		
 		public String getId() {
@@ -104,15 +110,16 @@ public abstract class TrafficTileRequest {
 
 					Color color;
 
-    				SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(id, hours, w1);
-					SummaryStatistics comparisonStats = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(id, hours, w2);
+    				SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(id, normalizeByTime, w1, hours);
+					SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(id, normalizeByTime, w2, hours);
 
-					/*SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(baselineStats, comparisonStats);
+					SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[confidenceInterval], stats1, stats2);
 
 					Color[] colors;
 
-					double speedPercentChange = statsComparison.getAverageSpeedPercentChange();
-					if(!Double.isNaN(speedPercentChange)  && baselineStats.getTotalObservationCount() > 5 && comparisonStats.getTotalObservationCount() > 5) {
+					if(statsComparison.tTest()) {
+
+						double speedPercentChange = statsComparison.differenceAsPercent();
 
 						if(speedPercentChange < 0)
 							colors = ColorBrewer.Reds.getColorPalette(5);
@@ -130,13 +137,17 @@ public abstract class TrafficTileRequest {
 
 						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 2);
 
-					}*/
+					}
+					//else
+					//	tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  Color.GREEN, 2);
 
 				} catch (MismatchedDimensionException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (TransformException e) {
+					e.printStackTrace();
 				}
-    		}
+			}
     		
     		try {
 				return tile.generateImage();
@@ -176,7 +187,7 @@ public abstract class TrafficTileRequest {
 
 					int colorNum;
 
-					SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().getSummaryStatistics(id, hours, w1);
+					SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(id,normalizeByTime, w1, hours);
 
 					if(baselineStats.getMean() > 0) {
 						averageSpeed = baselineStats.getMean() * MS_TO_KMS;
