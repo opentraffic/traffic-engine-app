@@ -942,11 +942,23 @@ var Traffic = Traffic || {};
 		events : {
 			'click #data' : 'clickData',
 			'click #routing' : 'clickRouting',
-			'click #analysis' : 'clickAnalysis'
+			'click #analysis' : 'clickAnalysis',
+			'click #manilaLocation' : 'clickManila',
+			'click #cebuLocation' : 'clickCebu'
+
+
 		},
 
 		initialize : function() {
-			_.bindAll(this, 'onMapClick');
+			_.bindAll(this, 'onMapClick', 'clickAnalysis', 'clickCebu',  'clickManila');
+		},
+
+		clickCebu : function() {
+			A.app.map.setView([10.3036741,123.8982952], 13);
+		},
+
+		clickManila : function() {
+			A.app.map.setView([14.5980716,120.9796513], 13);
 		},
 
 		clickData: function(evt) {
