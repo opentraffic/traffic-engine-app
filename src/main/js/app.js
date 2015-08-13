@@ -7,12 +7,16 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-var React = require('react');
+import L from 'leaflet';
 
+const position = [51.505, -0.09];
+const map = L.map('map-container-test').setView(position, 13);
 
-var Leaflet = require('leaflet');
+L.Icon.Default.imagePath = 'stylesheets/leaflet/images';
 
-React.render(
-    <h1>App</h1>,
-    document.getElementById('app')
-);
+L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+L.marker(position).addTo(map)
+    .bindPopup('A pretty CSS3 popup. <br> Easily customizable.');

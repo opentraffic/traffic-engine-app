@@ -15,6 +15,28 @@
   </properties>
 
   <build>
+      <!-- "Wagon" necessary for uploading/deploying artifacts to the Conveyal Maven repo on Amazon S3. -->
+      <extensions>
+          <!--
+          <extension>
+              <groupId>org.springframework.build</groupId>
+              <artifactId>aws-maven</artifactId>
+              <version>5.0.0.RELEASE</version>
+          </extension>
+          -->
+          <!--
+            The Spring S3 Wagon throws ResourceDoesNotExistException when it is asked to put a directory.
+            The site contains a lot of subdirectories, so use the kuali s3 wagon which handles directories.
+            This is only important if you're deploying the OTP site to an S3 bucket as a static web site,
+            which is not a bad idea.
+          -->
+          <extension>
+              <groupId>org.kuali.maven.wagons</groupId>
+              <artifactId>maven-s3-wagon</artifactId>
+              <version>1.2.1</version>
+          </extension>
+      </extensions>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -39,7 +61,7 @@
    	      <transformers>
    		<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
    	          <manifestEntries>
-   	            <Main-Class>com.conveyal.traffic.app.TrafficEngineApp</Main-Class>
+   	            <Main-Class>io.opentraffic.engine.app.TrafficEngineApp</Main-Class>
 		    		<Specification-Title>Java Advanced Imaging Image I/O Tools</Specification-Title>
                     <Specification-Version>1.1</Specification-Version>
                     <Specification-Vendor>Sun Microsystems, Inc.</Specification-Vendor>
@@ -67,6 +89,43 @@
    	  </execution>
 	</executions>
       </plugin>
+
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.1.1</version>
+            <executions>
+                <execution>
+                    <id>build-js</id>
+                    <phase>compile</phase>
+                    <goals>
+                        <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                        <executable>npm</executable>
+                        <arguments>
+                            <argument>run</argument>
+                            <argument>build-js</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>build-css</id>
+                    <phase>compile</phase>
+                    <goals>
+                        <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                        <executable>npm</executable>
+                        <arguments>
+                            <argument>run</argument>
+                            <argument>build-css</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+            </executions>
+
+        </plugin>
     </plugins>
    </build>
    <repositories>
@@ -125,9 +184,9 @@
       <version>12.2</version>
     </dependency>
     <dependency>
-  		<groupId>com.conveyal</groupId>
+  		<groupId>io.opentraffic</groupId>
   		<artifactId>traffic-engine</artifactId>
-  		<version>0.1-SNAPSHOT</version>
+  		<version>0.3</version>
     </dependency>
     <dependency>
   		<groupId>org.mapdb</groupId>
