@@ -1,0 +1,99 @@
+<button type="button"  id="resetRoute"  class="btn btn-sm pull-right" data-toggle="button">
+  Reset Route
+</button>
+
+<h4>Routing</h4>
+<hr style="margin-top: 10px; margin-bottom: 10px;"/>
+
+
+<div id="clickInfo" class="alert alert-info" role="alert">Click the map to define a start and end location for a journey.</div>
+
+
+<div id="routeData">
+
+  <h4>Travel Time: <span id="travelTime"></span></h4>
+  <h4>Average Speed: <span id="avgSpeed"></span></h4>
+
+  <div>
+    <select style="display: inline; width: 150px;" class="form-control input-sm" id="week1FromList">
+    </select>
+          <span id="week1To">
+              to
+              <select style="display: inline; width: 150px;" class="form-control input-sm" id="week1ToList">
+              </select>
+          </span>
+
+
+
+  </div>
+  <div id="compareWeekSelector" style="margin-top: 10px;">
+    <select style="display: inline; width: 150px;" class="form-control input-sm" id="week2FromList">
+    </select>
+          <span id="week2To">
+              to
+              <select style="display: inline; width: 150px;" class="form-control input-sm" id="week2ToList">
+              </select>
+          </span>
+  </div>
+
+  <div style="margin-top: 10px;">
+    <strong><span id="percentChangeTitle1">Percent Change in </span>Speed by Day of Week</strong>
+    <div id="dailyChart"></div>
+  </div>
+  <div style="margin-top: 10px;">
+    <strong><span id="percentChangeTitle2">Percent Change in </span>Speed by Hour of Day</strong><br/>
+    <div id="hourlyChart"></div>
+  </div>
+
+  <div style="margin-bottom: 25px; margin-top: 25px;" id="speedLegend">
+
+    0km/h
+    <svg style="margin-left: 5px; margin-right: -30px;" width="270" height="24">
+      <rect fill="rgb(165,0,38)" width="24" height="24" x="0"></rect>
+      <rect fill="rgb(215,48,39)" width="24" height="24" x="24"></rect>
+      <rect fill="rgb(244,109,67)" width="24" height="24" x="48"></rect>
+      <rect fill="rgb(253,174,97)" width="24" height="24" x="72"></rect>
+      <rect fill="rgb(254,224,144)" width="24" height="24" x="96"></rect>
+      <rect fill="rgb(224,243,248)" width="24" height="24" x="120"></rect>
+      <rect fill="rgb(171,217,233)" width="24" height="24" x="144"></rect>
+      <rect fill="rgb(116,173,209)" width="24" height="24" x="168"></rect>
+      <rect fill="rgb(69,117,180)" width="24" height="24" x="192"></rect>
+      <rect fill="rgb(49,54,149)" width="24" height="24" x="216"></rect>
+    </svg>
+    50+km/h
+  </div>
+
+  <div style="margin-bottom: 25px; margin-top: 25px;" id="percentChangeLegend">
+
+    <div class="pull-right">
+      <select style="display: inline; width: 150px;" class="form-control input-sm" id="confidenceInterval">
+        <option value="0">90% CI</option>
+        <option selected value="1">95% CI</option>
+        <option value="2">97% CI</option>
+        <option value="3">99% CI</option>
+      </select>
+      <br/>
+      <select style="display: inline; width: 150px; margin-top: 5px;" class="form-control input-sm" id="normalizeByTime">
+        <option selected value="true">Normalize Time</option>
+        <option value="false">Normalize Vehicles</option>
+      </select>
+
+    </div>
+
+    0%<svg style="margin-left: 15px; margin-right: -140px;" width="270" height="24">
+    <rect fill="rgb(254,229,217)" width="24" height="24" x="0"></rect>
+    <rect fill="rgb(252,174,145)" width="24" height="24" x="24"></rect>
+    <rect fill="rgb(251,106,74)" width="24" height="24" x="48"></rect>
+    <rect fill="rgb(222,45,38)" width="24" height="24" x="72"></rect>
+    <rect fill="rgb(165,15,21)" width="24" height="24" x="96"></rect>
+  </svg> -50% change <br/>
+
+    0%<svg style="margin-left: 15px; margin-right: -140px;"  width="270" height="24">
+    <rect fill="rgb(239,243,255)" width="24" height="24" x="0"></rect>
+    <rect fill="rgb(189,215,231)" width="24" height="24" x="24"></rect>
+    <rect fill="rgb(107,174,214)" width="24" height="24" x="48"></rect>
+    <rect fill="rgb(49,130,189)" width="24" height="24" x="72"></rect>
+    <rect fill="rgb(8,81,156)" width="24" height="24" x="96"></rect>
+  </svg> +50% change
+  </div>
+</div>
