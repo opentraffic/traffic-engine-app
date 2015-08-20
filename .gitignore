@@ -4,3 +4,5 @@
 /target
 /target/
 /.idea
+node_modules
+bundle.js
