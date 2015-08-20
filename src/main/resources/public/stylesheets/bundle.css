@@ -1,3 +1,40 @@
+html, body, div {
+    margin: 0px;
+    padding: 0px;
+}
+
+.navbar-default {
+    border: none;
+}
+
+.nav > li > a {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.logo  {
+    height: 30px;
+    vertical-align: middle;
+    margin-top: -5px;
+    display: inline !important;
+}
+
+#map {
+    position: absolute;
+    margin: 0;
+    right: 350px;
+}
+
+#panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    overflow: auto;
+    width: 350px;
+    height: 100%;
+    background : #fcfcfc;
+}
+
 div.dc-chart {
     float: left;
 }

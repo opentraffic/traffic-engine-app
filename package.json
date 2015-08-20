@@ -11,7 +11,9 @@
     "object-assign": "^1.0.0",
     "react": "^0.13.0",
     "leaflet": "^0.7.0",
-    "dc": "2.0.0-beta.14"
+    "jquery" : "^2.1.4",
+    "dc": "2.0.0-beta.14",
+    "bootstrap":"^3.3.5"
   },
   "devDependencies": {
     "browserify": "^6.2.0",
@@ -24,7 +26,7 @@
   },
   "scripts": {
     "build-js": "browserify -d -o src/main/resources/public/javascripts/bundle.js src/main/js/app.js",
-    "build-css": "cat node_modules/*/*.css node_modules/*/*/*.css > src/main/resources/public/stylesheets/bundle.css",
+    "build-css": "cat src/main/resources/public/stylesheets/main.css node_modules/*/*.css node_modules/*/*/*.css > src/main/resources/public/stylesheets/bundle.css",
     "test": "jest"
   },
   "author": "Bill Fisher",

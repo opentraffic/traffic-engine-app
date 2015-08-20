@@ -97,7 +97,7 @@
             <executions>
                 <execution>
                     <id>build-js</id>
-                    <phase>compile</phase>
+                    <phase>process-sources</phase>
                     <goals>
                         <goal>exec</goal>
                     </goals>
@@ -111,7 +111,7 @@
                 </execution>
                 <execution>
                     <id>build-css</id>
-                    <phase>compile</phase>
+                    <phase>process-sources</phase>
                     <goals>
                         <goal>exec</goal>
                     </goals>
