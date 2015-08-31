@@ -943,22 +943,28 @@ var Traffic = Traffic || {};
 			'click #data' : 'clickData',
 			'click #routing' : 'clickRouting',
 			'click #analysis' : 'clickAnalysis',
-			'click #manilaLocation' : 'clickManila',
-			'click #cebuLocation' : 'clickCebu'
+			'click #location' : 'clickLocation'
 
 
 		},
 
 		initialize : function() {
-			_.bindAll(this, 'onMapClick', 'clickAnalysis', 'clickCebu',  'clickManila');
+			var _this = this;
+
+			$.getJSON('/clusters', function(data) {
+				var sortedClusters = _.sortBy(data.clusters, function(item){ return item.name});
+				_this.clusters = sortedClusters;
+				_this.render();
+			});
+
+			_.bindAll(this, 'onMapClick', 'clickAnalysis', 'clickLocation');
 		},
 
-		clickCebu : function() {
-			A.app.map.setView([10.3036741,123.8982952], 13);
-		},
+		clickLocation : function(evt) {
+			var lat = $(evt.target).data('lat');
+			var lon = $(evt.target).data('lon');
 
-		clickManila : function() {
-			A.app.map.setView([14.5980716,120.9796513], 13);
+			A.app.map.setView([lat,lon], 13);
 		},
 
 		clickData: function(evt) {
@@ -1140,9 +1146,19 @@ var Traffic = Traffic || {};
 
 		onRender : function() {
 
+			var _this = this;
+
 			// Get rid of that pesky wrapping-div.
 			// Assumes 1 child element present in template.
 			this.$el = this.$el.children();
+
+			this.$("#locationList").empty();
+
+			_.each(this.clusters, function(cluster) {
+				_this.$("#locationList").append('<li><a href="#" id="location" data-lat="' + cluster.lat + '" data-lon="' + cluster.lon + '">' + cluster.name + '</a></li>');
+			});
+
+
 
 			this.$el.unwrap();
 			this.setElement(this.$el);

@@ -14,9 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import io.opentraffic.engine.app.data.TrafficPath;
-import io.opentraffic.engine.app.data.WeekObject;
-import io.opentraffic.engine.app.data.WeeklyStatsObject;
+import io.opentraffic.engine.app.data.*;
 import io.opentraffic.engine.app.engine.Engine;
 import io.opentraffic.engine.data.SpatialDataItem;
 import io.opentraffic.engine.data.stats.SummaryStatistics;
@@ -24,11 +22,11 @@ import io.opentraffic.engine.data.stats.SummaryStatisticsComparison;
 import io.opentraffic.engine.geom.StreetSegment;
 import io.opentraffic.engine.data.stats.SegmentStatistics;
 import com.vividsolutions.jts.geom.Envelope;
-import io.opentraffic.engine.app.data.StatsObject;
 import io.opentraffic.engine.app.routing.Routing;
 import io.opentraffic.engine.app.tiles.TrafficTileRequest;
 import io.opentraffic.engine.data.pbf.ExchangeFormat;
 import io.opentraffic.engine.geom.GPSPoint;
+import io.opentraffic.engine.osm.OSMCluster;
 import org.mapdb.Fun;
 import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.routing.core.RoutingRequest;
@@ -66,6 +64,11 @@ public class TrafficEngineApp {
 		get("/writeTrafficTiles", (request, response) -> {
 			engine.collectStatistics();
 			return "Traffic tiles written.";
+		});
+
+		get("/clusters", (request, response) -> {
+			List<OSMCluster> clusters = engine.getTrafficEngine().osmData.getOSMClusters();
+			return mapper.writeValueAsString(new ClusterList(clusters));
 		});
 
 		get("/stats", (request, response) -> new StatsObject(), mapper::writeValueAsString);
