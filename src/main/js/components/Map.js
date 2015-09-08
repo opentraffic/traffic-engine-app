@@ -1,14 +1,9 @@
 import React from 'react';
 import L from 'leaflet';
+import Radium from 'radium';
 import $ from 'jquery'
 
-class FullHeightMap extends React.Component {
-
-    constructor(center, zoom) {
-        super();
-        this.center = [50,50];
-        this.zoom = 13;
-    }
+class Map extends React.Component {
 
     updateDimensions() {
         if(this.leafletElement) {
@@ -24,12 +19,16 @@ class FullHeightMap extends React.Component {
 
     componentDidMount() {
 
-        this.leafletElement = L.map('map').setView(this.center, this.zoom);
+        this.leafletElement = L.map('map');
+        this.leafletElement.on("moveend", function(){
+            this.props.onIncrement(this.leafletElement.getZoom(), this.leafletElement.getCenter());
+        });
+
+        L.tileLayer(this.props.map.baseLayerURL, {}).addTo(this.leafletElement);
+
         this.setState({map: this.leafletElement});
 
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(this.leafletElement);
+        this.updateMapFromProps();
 
         window.addEventListener("resize", function(){
             this.updateDimensions();
@@ -42,14 +41,35 @@ class FullHeightMap extends React.Component {
         window.removeEventListener("resize", this.updateDimensions);
     }
 
+    updateMapFromProps() {
+        if(this.leafletElement) {
+            const map = this.leafletElement;
+
+            map.setView(this.props.map.center, this.props.map.zoom);
+
+            // TODO pop layers on and off stack from props
+        }
+    }
+
     render() {
+
         const map = this.leafletElement;
         const children = map ? React.Children.map(this.props.children, child => {
             return child ? React.cloneElement(child, {map}) : null;
         }) : null;
 
-        return (<div id="map">{children}</div>);
+        return (<div style={[
+                    styles.base
+                ]}> id="map">{children}</div>);
     }
 }
 
-export default FullHeightMap;
+var styles = {
+    base: {
+        position: 'absolute',
+        margin: 0,
+        right: '350px'
+    }
+};
+
+export default Radium(Map);

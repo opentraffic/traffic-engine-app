@@ -1,43 +1,32 @@
 {
   "name": "traffic-engine-app",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "Traffic Engine App",
   "repository": "https://github.com/opentraffic/traffic-engine-app",
   "main": "src/main/js/app.js",
   "dependencies": {
     "classnames": "^2.1.3",
-    "flux": "^2.0.1",
-    "keymirror": "~0.1.0",
-    "object-assign": "^1.0.0",
-    "react": "^0.13.0",
+    "redux": "^2.0.0",
+    "redux-devtools": "^2.0.0",
+    "react-redux": "^2.1.0",
+    "react-router":"1.0.0-beta3",
+    "radium" : "^0.13.8",
     "leaflet": "^0.7.0",
     "jquery" : "^2.1.4",
     "dc": "2.0.0-beta.14",
     "bootstrap":"^3.3.5"
   },
   "devDependencies": {
-    "babelify": "^6.1.3",
-    "browserify": "^6.2.0",
-    "catw": "~0.0.1",
-    "envify": "^3.0.0",
-    "jest-cli": "^0.4.3",
-    "standard": "^5.1.0",
-    "uglify-js": "~2.4.15",
-    "watchify": "^2.1.1"
+    "babel-core": "^5.6.18",
+    "babel-loader": "^5.1.4",
+    "react-hot-loader": "^1.3.0",
+    "webpack": "^1.9.11",
+    "webpack-dev-server": "^1.9.0"
   },
   "scripts": {
-    "build-js": "browserify -d -o src/main/resources/public/javascripts/bundle.js src/main/js/app.js",
-    "build-css": "cat node_modules/*/*.css node_modules/*/*/*.css > src/main/resources/public/stylesheets/bundle.css",
-    "develop": "watchify -d -o src/main/resources/public/javascripts/bundle.js src/main/js/app.js",
-    "lint": "standard",
     "test": "jest"
   },
   "author": "Bill Fisher",
-  "browserify": {
-    "transform": [
-      "babelify"
-    ]
-  },
   "jest": {
     "rootDir": "./src/main/js/"
   }

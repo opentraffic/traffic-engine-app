@@ -186,7 +186,7 @@
     <dependency>
   		<groupId>io.opentraffic</groupId>
   		<artifactId>traffic-engine</artifactId>
-  		<version>0.3</version>
+  		<version>0.4-SNAPSHOT</version>
     </dependency>
     <dependency>
   		<groupId>org.mapdb</groupId>
