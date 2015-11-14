@@ -38,7 +38,7 @@ public class Engine {
 
 		Integer numberOfWorkerCores;
 		try {
-			numberOfWorkerCores = Integer.parseInt(TrafficEngineApp.appProps.getProperty("writeStatistics"));
+			numberOfWorkerCores = Integer.parseInt(TrafficEngineApp.appProps.getProperty("application.numberOfWorkerCores"));
 		} catch(Exception e) {
 			numberOfWorkerCores = Runtime.getRuntime().availableProcessors() / 2;
 			log.log(Level.INFO, "Property numberOfWorkerCores not set, defaulting to " + numberOfWorkerCores + " cores.");
