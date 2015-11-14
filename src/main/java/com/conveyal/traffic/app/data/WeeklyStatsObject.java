@@ -1,7 +1,7 @@
 package com.conveyal.traffic.app.data;
 
-import com.conveyal.traffic.data.stats.SummaryStatistics;
-import com.conveyal.traffic.data.stats.SummaryStatisticsComparison;
+import io.opentraffic.engine.data.stats.SummaryStatistics;
+import io.opentraffic.engine.data.stats.SummaryStatisticsComparison;
 
 public class WeeklyStatsObject {
 

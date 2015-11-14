@@ -1,7 +1,7 @@
 package com.conveyal.traffic.app.data;
 
-import com.conveyal.traffic.data.stats.SummaryStatistics;
-import com.conveyal.traffic.geom.StreetSegment;
+import io.opentraffic.engine.data.stats.SummaryStatistics;
+import io.opentraffic.engine.geom.StreetSegment;
 import org.jcolorbrewer.ColorBrewer;
 import org.opentripplanner.util.PolylineEncoder;
 import org.opentripplanner.util.model.EncodedPolylineBean;
