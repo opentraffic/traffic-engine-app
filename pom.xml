@@ -125,7 +125,7 @@
       <version>12.2</version>
     </dependency>
     <dependency>
-  		<groupId>com.conveyal</groupId>
+  		<groupId>io.opentraffic</groupId>
   		<artifactId>traffic-engine</artifactId>
   		<version>0.3</version>
     </dependency>

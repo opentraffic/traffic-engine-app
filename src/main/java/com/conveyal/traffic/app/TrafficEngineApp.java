@@ -1,6 +1,29 @@
 package com.conveyal.traffic.app;
 
-import java.awt.Rectangle;
+import com.conveyal.traffic.app.data.StatsObject;
+import com.conveyal.traffic.app.data.TrafficPath;
+import com.conveyal.traffic.app.data.WeekObject;
+import com.conveyal.traffic.app.data.WeeklyStatsObject;
+import com.conveyal.traffic.app.engine.Engine;
+import com.conveyal.traffic.app.routing.Routing;
+import com.conveyal.traffic.app.tiles.TrafficTileRequest.DataTile;
+import com.conveyal.traffic.app.tiles.TrafficTileRequest.SegmentTile;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vividsolutions.jts.geom.Envelope;
+import io.opentraffic.engine.data.SpatialDataItem;
+import io.opentraffic.engine.data.pbf.ExchangeFormat;
+import io.opentraffic.engine.data.stats.SegmentStatistics;
+import io.opentraffic.engine.data.stats.SummaryStatistics;
+import io.opentraffic.engine.data.stats.SummaryStatisticsComparison;
+import io.opentraffic.engine.geom.GPSPoint;
+import io.opentraffic.engine.geom.StreetSegment;
+import org.mapdb.Fun;
+import org.opentripplanner.common.model.GenericLocation;
+import org.opentripplanner.routing.core.RoutingRequest;
+import org.opentripplanner.routing.core.TraverseMode;
+import org.opentripplanner.routing.core.TraverseModeSet;
+
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -9,37 +32,20 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoField;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import com.conveyal.traffic.app.data.TrafficPath;
-import com.conveyal.traffic.app.data.WeekObject;
-import com.conveyal.traffic.app.data.WeeklyStatsObject;
-import com.conveyal.traffic.app.engine.Engine;
-import com.conveyal.traffic.data.SpatialDataItem;
-import com.conveyal.traffic.data.stats.SummaryStatistics;
-import com.conveyal.traffic.data.stats.SummaryStatisticsComparison;
-import com.conveyal.traffic.geom.StreetSegment;
-import com.conveyal.traffic.data.stats.SegmentStatistics;
-import com.vividsolutions.jts.geom.Envelope;
-import org.mapdb.Fun;
-import org.opentripplanner.common.model.GenericLocation;
-import org.opentripplanner.routing.core.RoutingRequest;
-import org.opentripplanner.routing.core.TraverseMode;
-import org.opentripplanner.routing.core.TraverseModeSet;
-
-import com.conveyal.traffic.data.pbf.ExchangeFormat;
-import com.conveyal.traffic.geom.GPSPoint;
-import com.conveyal.traffic.app.data.StatsObject;
-import com.conveyal.traffic.app.routing.Routing;
-import com.conveyal.traffic.app.tiles.TrafficTileRequest.DataTile;
-import com.conveyal.traffic.app.tiles.TrafficTileRequest.SegmentTile;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import static spark.Spark.*;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.staticFileLocation;
 
 public class TrafficEngineApp {
 	

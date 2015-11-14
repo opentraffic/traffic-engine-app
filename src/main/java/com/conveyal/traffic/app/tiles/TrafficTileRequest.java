@@ -1,9 +1,9 @@
 package com.conveyal.traffic.app.tiles;
 
-import com.conveyal.traffic.data.SpatialDataItem;
-import com.conveyal.traffic.data.stats.SummaryStatisticsComparison;
-import com.conveyal.traffic.geom.StreetSegment;
-import com.conveyal.traffic.data.stats.SummaryStatistics;
+import io.opentraffic.engine.data.SpatialDataItem;
+import io.opentraffic.engine.data.stats.SummaryStatisticsComparison;
+import io.opentraffic.engine.geom.StreetSegment;
+import io.opentraffic.engine.data.stats.SummaryStatistics;
 import com.conveyal.traffic.app.TrafficEngineApp;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;

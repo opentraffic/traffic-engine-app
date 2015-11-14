@@ -2,9 +2,9 @@ package com.conveyal.traffic.app.routing;
 
 
 import com.beust.jcommander.internal.Maps;
-import com.conveyal.traffic.data.SpatialDataItem;
-import com.conveyal.traffic.geom.StreetSegment;
-import com.conveyal.traffic.data.stats.SummaryStatistics;
+import io.opentraffic.engine.data.SpatialDataItem;
+import io.opentraffic.engine.geom.StreetSegment;
+import io.opentraffic.engine.data.stats.SummaryStatistics;
 import com.conveyal.traffic.app.TrafficEngineApp;
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Envelope;

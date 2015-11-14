@@ -1,15 +1,15 @@
 package com.conveyal.traffic.app.engine;
 
+import com.conveyal.traffic.app.TrafficEngineApp;
+import com.vividsolutions.jts.geom.Point;
+import io.opentraffic.engine.TrafficEngine;
+import io.opentraffic.engine.geom.GPSPoint;
+import io.opentraffic.engine.osm.OSMArea;
+
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.conveyal.traffic.TrafficEngine;
-import com.conveyal.traffic.app.TrafficEngineApp;
-import com.conveyal.traffic.geom.GPSPoint;
-import com.conveyal.traffic.osm.OSMArea;
-import com.vividsolutions.jts.geom.Point;
 
 
 public class Engine {
