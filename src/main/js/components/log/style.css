@@ -1,0 +1,9 @@
+
+.log {
+  height: 100%;
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #55595c;
+  overflow: scroll;
+}

@@ -1,0 +1,14 @@
+
+.logItem {
+  margin-bottom: 8px;
+}
+
+.label {
+  text-transform: capitalize;
+}
+
+.createdAt {
+  opacity: 0.75;
+  margin-right: 6px;
+  vertical-align: text-top;
+}

@@ -66,7 +66,7 @@ public class TrafficEngineApp {
 			return "Traffic tiles written.";
 		});
 
-		get("/clusters", (request, response) -> {
+		get("/api/clusters", (request, response) -> {
 			List<OSMCluster> clusters = engine.getTrafficEngine().osmData.getOSMClusters();
 			return mapper.writeValueAsString(new ClusterList(clusters));
 		});
