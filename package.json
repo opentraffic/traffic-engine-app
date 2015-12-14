@@ -1,44 +1,106 @@
 {
   "name": "traffic-engine-app",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Traffic Engine App",
-  "repository": "https://github.com/opentraffic/traffic-engine-app",
-  "main": "src/main/js/app.js",
-  "dependencies": {
-    "classnames": "^2.1.3",
-    "flux": "^2.0.1",
-    "keymirror": "~0.1.0",
-    "object-assign": "^1.0.0",
-    "react": "^0.13.0",
-    "leaflet": "^0.7.0",
-    "dc": "2.0.0-beta.14"
-  },
-  "devDependencies": {
-    "browserify": "^6.2.0",
-    "envify": "^3.0.0",
-    "jest-cli": "^0.4.3",
-    "reactify": "^0.15.2",
-    "catw": "~0.0.1",
-    "uglify-js": "~2.4.15",
-    "watchify": "^2.1.1"
-  },
+  "main": "src/js/index.js",
   "scripts": {
-    "watch-js": "watchify -o src/main/resources/public/javascripts/bundle.js -v -d src/main/js/app.js",
-    "watch-css": "catw node_modules/*/*.css node_modules/*/*/*.css -o src/main/resources/public/stylesheets/bundle.css",
-    "build-js": "browserify . -t [envify --NODE_ENV production] | uglifyjs -cm > js/bundle.min.js",
-    "build-css": "cat *.css */*.css >",
-    "build": "npm run build-js && npm run build-css",
-    "start": "npm run watch-js & npm run watch-css",
-    "test": "jest"
+    "start": "node server.js",
+    "test": "standard"
   },
-  "author": "Bill Fisher",
-  "browserify": {
-    "transform": [
-      "reactify",
-      "envify"
-    ]
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:opentraffic/traffic-engine-app.git"
   },
-  "jest": {
-    "rootDir": "./src/main/js/"
+  "keywords": [
+    "traffic",
+    "opentraffic"
+  ],
+  "author": "Conveyal",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/opentraffic/traffic-engine-app/issues"
+  },
+  "homepage": "http://opentraffic.io/",
+  "devDependencies": {
+    "babel-core": "^5.8.25",
+    "babel-eslint": "^4.1.3",
+    "babel-loader": "^5.3.2",
+    "babel-plugin-react-transform": "^1.1.1",
+    "express": "^4.13.3",
+    "react-transform-catch-errors": "^1.0.0",
+    "react-transform-hmr": "^1.0.1",
+    "redbox-react": "^1.1.1",
+    "redux-devtools": "^2.1.5",
+    "webpack": "^1.12.2",
+    "webpack-dev-middleware": "^1.2.0",
+    "webpack-hot-middleware": "^2.4.1"
+  },
+  "dependencies": {
+    "classnames" : "2.2.1",
+    "material-ui": "0.13.4",
+    "react-tap-event-plugin":"^0.2.0",
+    "babel-runtime": "^5.8.25",
+    "concat-stream": "^1.5.1",
+    "css-loader": "^0.20.2",
+    "debounce": "^1.0.0",
+    "debug": "^2.2.0",
+    "extract-text-webpack-plugin": "^0.8.2",
+    "file-loader": "^0.8.4",
+    "history": "^1.12.5",
+    "isomorphic-fetch": "^2.2.0",
+    "leaflet": "^0.7.5",
+    "moment": "^2.10.6",
+    "postcss-loader": "^0.7.0",
+    "qs": "^5.2.0",
+    "react": "^0.14.0",
+    "react-addons-css-transition-group": "^0.14.0",
+    "react-dom": "^0.14.0",
+    "react-leaflet": "^0.8.0",
+    "react-redux": "^4.0.0",
+    "react-router": "^1.0.0-rc3",
+    "redux": "^3.0.3",
+    "redux-actions": "^0.8.0",
+    "redux-promise": "^0.5.0",
+    "redux-router": "^1.0.0-beta3",
+    "redux-thunk": "^1.0.0",
+    "style-loader": "^0.13.0",
+    "to-camel-case": "^0.2.1",
+    "url-loader": "^0.5.6",
+    "xhr": "^2.1.0"
+  },
+  "babel": {
+    "stage": 0,
+    "env": {
+      "development": {
+        "plugins": [
+          "react-transform"
+        ],
+        "extra": {
+          "react-transform": {
+            "transforms": [
+              {
+                "transform": "react-transform-hmr",
+                "imports": [
+                  "react"
+                ],
+                "locals": [
+                  "module"
+                ]
+              },
+              {
+                "transform": "react-transform-catch-errors",
+                "imports": [
+                  "react",
+                  "redbox-react"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "standard": {
+    "parser": "babel-eslint"
   }
 }

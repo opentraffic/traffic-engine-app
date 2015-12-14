@@ -5,7 +5,7 @@ const initialLocationsState = {
   sets: [
     {
       text: '',
-      payload: ''
+      payload: 'test'
     }
   ]
 }

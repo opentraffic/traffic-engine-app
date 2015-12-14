@@ -5,24 +5,26 @@ import {connect} from 'react-redux'
 import {updateMapMarker, updateMap} from '../../actions'
 import {mapbox} from '../../config'
 import LocationSelect from '../../components/location-select'
+import TimeRangeSelect from '../../components/time-range-select'
+import DataImport from '../../components/data-import'
+import DataExport from '../../components/data-export'
+import TrafficAnalysis from '../../components/traffic-analysis'
+import Routing from '../../components/routing'
 import Fullscreen from '../../components/fullscreen'
 import log from '../../log'
 import Log from '../../components/log'
 import Map from '../../components/map'
+import TrafficIconButton from '../../components/traffic-icon-button'
 import styles from './style.css'
 
 const AppBar = require('material-ui/lib/app-bar');
-const Toolbar = require('material-ui/lib/toolbar/toolbar');
-const ToolbarGroup = require('material-ui/lib/toolbar/toolbar-group');
-
-const baseUrl = 'http://localhost:4567'
-const localUrl = 'http://localhost:3000/test/data'
 
 function printLL (ll) {
   return `[ ${ll[0].toFixed(4)}, ${ll[1].toFixed(4)} ]`
 }
 
 class Traffic extends Component {
+
   static propTypes = {
     dispatch: PropTypes.any,
     map: PropTypes.object
@@ -55,18 +57,19 @@ class Traffic extends Component {
           </Map>
           <div className={styles.sideBar}>
           <AppBar
-            title="Traffic Engine" />
-            <Toolbar>
-              <LocationSelect className='form-control' />
-            </Toolbar>
+            title="Traffic Engine"
+            iconElementLeft={<TrafficIconButton/>}/>
             <div className={styles.scrollable}>
+              <LocationSelect className='form-control' />
+              <TimeRangeSelect className='form-control' />
+              <TrafficAnalysis className='form-control' />
+              <Routing className='form-control' />
+              <DataImport className='form-control' />
+              <DataExport className='form-control' />
 
 
             </div>
 
-
-
-            <div className={styles.dockedActionLog}><Log /></div>
           </div>
         </div>
       </Fullscreen>

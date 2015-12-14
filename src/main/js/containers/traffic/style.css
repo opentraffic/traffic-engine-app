@@ -13,7 +13,6 @@
 .sideBar {
   position: absolute;
   overflow: hidden;
-  padding-bottom: 150px;
   top: 0;
   bottom: 0;
   right: 0;
@@ -42,7 +41,11 @@
 .scrollable {
   overflow-y: scroll;
   height: 100%;
-  padding: 60px 8px 0;
+  padding: 0px 4px 0;
+}
+
+.section {
+  padding: 0px 16px 0;
 }
 
 .dockedActionLog {

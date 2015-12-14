@@ -1,3 +1,16 @@
 body {
   margin: 0
 }
+
+.header {
+    display: inline-block;
+    height: 50px;
+}
+
+.headerText, .headerIcon {
+    line-height: 50px;
+}
+
+.headerIcon {
+    vertical-align: middle;
+}

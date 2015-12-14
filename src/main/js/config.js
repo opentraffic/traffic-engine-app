@@ -1,10 +1,12 @@
 const config = {
   mapbox: {
     accessToken: 'pk.eyJ1IjoiY29udmV5YWwiLCJhIjoiMDliQURXOCJ9.9JWPsqJY7dGIdX777An7Pw',
-    mapId: 'conveyal.ie3o67m0'
+    mapId: 'conveyal.gepida3i'
   },
-  center: [39.7691, -86.1570],
-  zoom: 13
+  center: [0,120],
+  zoom: 3,
+  baseUrl:'http://localhost:4567',
+  localUrl:'http://localhost:3000/test/data'
 }
 
 export default config

@@ -28,6 +28,10 @@ export default class Map extends Component {
           url={url}
           attribution={ATTRIBUTION}
         />
+        <TileLayer
+          url="http://localhost:4567/tile/traffic?z={z}&x={x}&y={y}&confidenceInterval=1&normalizeByTime=true"
+          attribution=""
+        />
         {children}
       </BaseMap>
     )

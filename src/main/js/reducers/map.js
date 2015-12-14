@@ -11,7 +11,8 @@ const initialMap = {
 const mapReducers = handleActions({
   UPDATE_MAP: (state, action) => {
     return Object.assign({}, state, {
-      center: action.payload.latlng
+      center: action.payload.latlng,
+      zoom: 12
     })
   },
   UPDATE_MAP_MARKER: (state, {payload}) => {
