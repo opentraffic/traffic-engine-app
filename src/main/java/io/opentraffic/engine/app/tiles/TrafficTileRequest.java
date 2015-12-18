@@ -138,11 +138,11 @@ public abstract class TrafficTileRequest {
 							colorNum = (int)Math.round(4 * speedPercentChange);
 						}
 
-						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 3);
+						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 6);
 
 					}
 					//else
-					//	tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  Color.GREEN, 2);
+					//	tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  Color.GREEN, 4);
 
 				} catch (MismatchedDimensionException e) {
 					// TODO Auto-generated catch block
@@ -198,7 +198,7 @@ public abstract class TrafficTileRequest {
 						if(colorNum > 10)
 							colorNum = 10;
 
-						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 3);
+						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 6);
 					}
 
 				} catch (MismatchedDimensionException | TransformException e) {
