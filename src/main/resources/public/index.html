@@ -35,36 +35,24 @@
         <link rel="stylesheet" type="text/css" href="stylesheets/main.css">
         <link href='stylesheets/dc.css' rel='stylesheet' type='text/css'>
 
-        <style>
-           .navbar {
-            margin-bottom: 0px;
-           }
-           body, div {
-               padding: 0;
-               margin: 0;
-           }
-           html, body, #map {
-               height : 100% ;
-               width : 100% ;
-           }
-       </style>
-
     </head>
     <body>
-        <div id="navbar"></div>
+      <div id="navbar"></div>
+      <div id="main">
+        <div id="content">
+          <div id="map"></div>
+        </div>
+      </div>
+      <div id="sidebar-tabs"></div>
+    <script>
+      Traffic = {};
 
-        <div id="map"></div>
-		<div id="side-panel" class="container panel panel-default"></div>
+      Traffic.config = {};
+      Traffic.config.templatePath = "templates";
+    </script>
 
-		<script>
-			Traffic = {};
-
-			Traffic.config = {};
-			Traffic.config.templatePath = "templates";
-		</script>
-
-		<script src="javascripts/util.js?version=1"></script>
-	    <script src="javascripts/map.js?version=1"></script>
+    <script src="javascripts/util.js?version=1"></script>
+      <script src="javascripts/map.js?version=1"></script>
 
     </body>
 </html>

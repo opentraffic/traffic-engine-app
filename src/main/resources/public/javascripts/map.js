@@ -8,14 +8,17 @@ var Traffic = Traffic || {};
 
 	A.app.instance.addRegions({
 		navbar: "#navbar",
+		sidebarTabs: "#sidebar-tabs",
 		sidebar: "#side-panel"
 	});
 
 	A.app.instance.addInitializer(function(options){
 
 		A.app.nav = new A.app.Nav();
-
 		A.app.instance.navbar.show(A.app.nav);
+
+		A.app.sidebarTabs = new A.app.SidebarTabs();
+		A.app.instance.sidebarTabs.show(A.app.sidebarTabs);
 
 		A.app.map = L.map('map').setView([10.3036741,123.8982952], 13);
 		L.control.scale().addTo(A.app.map);
@@ -23,6 +26,9 @@ var Traffic = Traffic || {};
 		L.tileLayer('https://a.tiles.mapbox.com/v4/conveyal.gepida3i/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiY29udmV5YWwiLCJhIjoiMDliQURXOCJ9.9JWPsqJY7dGIdX777An7Pw', {
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery �� <a href="http://mapbox.com">Mapbox</a>',
 		maxZoom: 17 }).addTo(A.app.map);
+
+		// Click Routing in sidebar
+		$('#routing').click();
 
 	});
 
@@ -61,11 +67,11 @@ var Traffic = Traffic || {};
 
 
 		resetRoute : function() {
-			A.app.nav.resetRoute();
+			A.app.sidebarTabs.resetRoute();
 		},
 
 		getRoute : function() {
-			A.app.nav.getRoute();
+			A.app.sidebarTabs.getRoute();
 		},
 
 		onShow : function() {
@@ -114,7 +120,7 @@ var Traffic = Traffic || {};
 
 		onDestroy : function() {
 
-			A.app.nav.resetRoute();
+			A.app.sidebarTabs.resetRoute();
 		},
 
 		changeFromWeek : function() {
@@ -195,7 +201,7 @@ var Traffic = Traffic || {};
 				}
 			}
 
-			A.app.nav.getRoute(hours);
+			A.app.sidebarTabs.getRoute(hours);
 		},
 
 		getWeek1List : function() {
@@ -446,11 +452,11 @@ var Traffic = Traffic || {};
 		},
 
 		resetRoute : function() {
-			A.app.nav.resetRoute();
+			A.app.sidebarTabs.resetRoute();
 		},
 
 		getRoute : function() {
-			A.app.nav.getRoute();
+			A.app.sidebarTabs.getRoute();
 		},
 
 		initialize : function() {
@@ -941,12 +947,7 @@ var Traffic = Traffic || {};
 		template: Handlebars.getTemplate('app', 'navbar'),
 
 		events : {
-			'click #data' : 'clickData',
-			'click #routing' : 'clickRouting',
-			'click #analysis' : 'clickAnalysis',
 			'click #location' : 'clickLocation'
-
-
 		},
 
 		initialize : function() {
@@ -958,7 +959,7 @@ var Traffic = Traffic || {};
 				_this.render();
 			});
 
-			_.bindAll(this, 'onMapClick', 'clickAnalysis', 'clickLocation');
+			_.bindAll(this, 'clickLocation');
 		},
 
 		clickLocation : function(evt) {
@@ -966,6 +967,44 @@ var Traffic = Traffic || {};
 			var lon = $(evt.target).data('lon');
 
 			A.app.map.setView([lat,lon], 13);
+		},
+
+		onRender : function() {
+
+			var _this = this;
+
+			// Get rid of that pesky wrapping-div.
+			// Assumes 1 child element present in template.
+			this.$el = this.$el.children();
+
+			this.$("#locationList").empty();
+
+			_.each(this.clusters, function(cluster) {
+				_this.$("#locationList").append('<li><a href="#" id="location" data-lat="' + cluster.lat + '" data-lon="' + cluster.lon + '">' + cluster.name + '</a></li>');
+			});
+
+
+
+			this.$el.unwrap();
+			this.setElement(this.$el);
+
+		}
+	});
+
+	A.app.SidebarTabs = Marionette.Layout.extend({
+
+		template: Handlebars.getTemplate('app', 'sidebar-tabs'),
+
+		events : {
+			'click #data' : 'clickData',
+			'click #routing' : 'clickRouting',
+			'click #analysis' : 'clickAnalysis'
+		},
+
+		initialize : function() {
+			var _this = this;
+
+			_.bindAll(this, 'onMapClick', 'clickAnalysis');
 		},
 
 		clickData: function(evt) {
@@ -1143,27 +1182,6 @@ var Traffic = Traffic || {};
 				A.app.sidebar.$("#routeData").show();
 
 			});
-		},
-
-		onRender : function() {
-
-			var _this = this;
-
-			// Get rid of that pesky wrapping-div.
-			// Assumes 1 child element present in template.
-			this.$el = this.$el.children();
-
-			this.$("#locationList").empty();
-
-			_.each(this.clusters, function(cluster) {
-				_this.$("#locationList").append('<li><a href="#" id="location" data-lat="' + cluster.lat + '" data-lon="' + cluster.lon + '">' + cluster.name + '</a></li>');
-			});
-
-
-
-			this.$el.unwrap();
-			this.setElement(this.$el);
-
 		}
 	});
 
