@@ -18,6 +18,7 @@ var Traffic = Traffic || {};
 		A.app.instance.navbar.show(A.app.nav);
 
 		A.app.map = L.map('map').setView([10.3036741,123.8982952], 13);
+		L.control.scale().addTo(A.app.map);
 
 		L.tileLayer('https://a.tiles.mapbox.com/v4/conveyal.gepida3i/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiY29udmV5YWwiLCJhIjoiMDliQURXOCJ9.9JWPsqJY7dGIdX777An7Pw', {
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery �� <a href="http://mapbox.com">Mapbox</a>',
