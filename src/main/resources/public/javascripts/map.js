@@ -27,8 +27,8 @@ var Traffic = Traffic || {};
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery �� <a href="http://mapbox.com">Mapbox</a>',
 		maxZoom: 17 }).addTo(A.app.map);
 
-		// Click Routing in sidebar
-		$('#routing').click();
+		// Click Data in sidebar
+		$('#data').click();
 
 	});
 
