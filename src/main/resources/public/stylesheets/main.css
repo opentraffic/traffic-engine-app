@@ -40,7 +40,6 @@ body, div {
 	top: 50px;
   bottom: 0;
   right: 0;
-	z-index: 2000;
 	position: absolute;
 	width: 480px;
   overflow: auto;
