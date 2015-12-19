@@ -1,6 +1,27 @@
 package io.opentraffic.engine.app;
 
-import java.awt.Rectangle;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vividsolutions.jts.geom.Envelope;
+import io.opentraffic.engine.app.data.*;
+import io.opentraffic.engine.app.engine.Engine;
+import io.opentraffic.engine.app.routing.Routing;
+import io.opentraffic.engine.app.tiles.TrafficTileRequest;
+import io.opentraffic.engine.data.SpatialDataItem;
+import io.opentraffic.engine.data.pbf.ExchangeFormat;
+import io.opentraffic.engine.data.stats.SegmentStatistics;
+import io.opentraffic.engine.data.stats.SummaryStatistics;
+import io.opentraffic.engine.data.stats.SummaryStatisticsComparison;
+import io.opentraffic.engine.geom.GPSPoint;
+import io.opentraffic.engine.geom.StreetSegment;
+import io.opentraffic.engine.osm.OSMCluster;
+import org.apache.commons.cli.*;
+import org.mapdb.Fun;
+import org.opentripplanner.common.model.GenericLocation;
+import org.opentripplanner.routing.core.RoutingRequest;
+import org.opentripplanner.routing.core.TraverseMode;
+import org.opentripplanner.routing.core.TraverseModeSet;
+
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -10,30 +31,10 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import io.opentraffic.engine.app.data.*;
-import io.opentraffic.engine.app.engine.Engine;
-import io.opentraffic.engine.data.SpatialDataItem;
-import io.opentraffic.engine.data.stats.SummaryStatistics;
-import io.opentraffic.engine.data.stats.SummaryStatisticsComparison;
-import io.opentraffic.engine.geom.StreetSegment;
-import io.opentraffic.engine.data.stats.SegmentStatistics;
-import com.vividsolutions.jts.geom.Envelope;
-import io.opentraffic.engine.app.routing.Routing;
-import io.opentraffic.engine.app.tiles.TrafficTileRequest;
-import io.opentraffic.engine.data.pbf.ExchangeFormat;
-import io.opentraffic.engine.geom.GPSPoint;
-import io.opentraffic.engine.osm.OSMCluster;
-import org.mapdb.Fun;
-import org.opentripplanner.common.model.GenericLocation;
-import org.opentripplanner.routing.core.RoutingRequest;
-import org.opentripplanner.routing.core.TraverseMode;
-import org.opentripplanner.routing.core.TraverseModeSet;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static spark.Spark.*;
 
@@ -51,10 +52,22 @@ public class TrafficEngineApp {
 
 	public static HashMap<String,Long> vehicleIdMap = new HashMap<>();
   	
-	public static void main(String[] args) {
-		
+	public static void main(String[] args) throws ParseException {
+
+        Options options = new Options();
+        options.addOption("c", true, "config file");
+
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse( options, args);
+
+        String configFilePath = null;
+
+        if(cmd.hasOption("c")){
+            configFilePath = cmd.getOptionValue("c");
+        }
+
 		// load settings file
-		loadSettings();
+		loadSettings(configFilePath);
 		
 		// setup public folder
 		staticFileLocation("/public");
@@ -330,9 +343,11 @@ public class TrafficEngineApp {
 
 	}
 	
-	public static void loadSettings() {
+	public static void loadSettings(String configFilePath) {
+        if(configFilePath == null)
+            configFilePath = "application.conf";
 		try {
-			FileInputStream in = new FileInputStream("application.conf");
+			FileInputStream in = new FileInputStream(configFilePath);
 			appProps.load(in);
 			in.close();
 			
