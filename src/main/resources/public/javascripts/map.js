@@ -118,8 +118,7 @@ var Traffic = Traffic || {};
 			this.changeFromWeek();
 		},
 
-		onDestroy : function() {
-
+		onClose : function() {
 			A.app.sidebarTabs.resetRoute();
 		},
 
@@ -467,8 +466,7 @@ var Traffic = Traffic || {};
 
 		},
 
-		onDestroy : function() {
-
+		onClose : function() {
 			A.app.map.off("moveend", A.app.sidebar.mapMove);
 		},
 
@@ -983,8 +981,6 @@ var Traffic = Traffic || {};
 				_this.$("#locationList").append('<li><a href="#" id="location" data-lat="' + cluster.lat + '" data-lon="' + cluster.lon + '">' + cluster.name + '</a></li>');
 			});
 
-
-
 			this.$el.unwrap();
 			this.setElement(this.$el);
 
@@ -1008,7 +1004,6 @@ var Traffic = Traffic || {};
 		},
 
 		clickData: function(evt) {
-
 			this.endRouting();
 
 			A.app.sidebar = new A.app.DataSidebar();
@@ -1024,7 +1019,6 @@ var Traffic = Traffic || {};
 		},
 
 		clickRouting: function(evt) {
-
 			this.startRouting();
 
 			A.app.sidebar = new A.app.RoutingSidebar();
@@ -1044,7 +1038,6 @@ var Traffic = Traffic || {};
 		},
 
 		clickAnalysis: function(evt) {
-
 			A.app.sidebar = new A.app.AnalysisSidebar();
 			A.app.instance.sidebar.show(A.app.sidebar);
 
