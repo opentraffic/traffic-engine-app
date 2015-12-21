@@ -20,17 +20,60 @@ var Traffic = Traffic || {};
 		A.app.sidebarTabs = new A.app.SidebarTabs();
 		A.app.instance.sidebarTabs.show(A.app.sidebarTabs);
 
-		A.app.map = L.map('map').setView([10.3036741,123.8982952], 13);
-		L.control.scale().addTo(A.app.map);
-
-		L.tileLayer('https://a.tiles.mapbox.com/v4/conveyal.gepida3i/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiY29udmV5YWwiLCJhIjoiMDliQURXOCJ9.9JWPsqJY7dGIdX777An7Pw', {
-		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery �� <a href="http://mapbox.com">Mapbox</a>',
-		maxZoom: 17 }).addTo(A.app.map);
+		var mapWrapper = Object.create(A.app.MapWrapper);
+		mapWrapper.init('map', {
+			center: [10.3036741,123.8982952],
+			 zoom: 13
+		});
+		
+		A.app.mapWrapper = mapWrapper;
+		A.app.map = mapWrapper.LMmap;
 
 		// Click Data in sidebar
 		$('#data').click();
 
 	});
+
+	A.app.MapWrapper = {
+
+		LMmap: null, // Leaflet map object
+
+		ENGLISH_TILE_LAYER: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+					maxZoom: 17
+				}),
+		LOCALIZED_TILE_LAYER: L.tileLayer('https://a.tiles.mapbox.com/v4/conveyal.gepida3i/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiY29udmV5YWwiLCJhIjoiMDliQURXOCJ9.9JWPsqJY7dGIdX777An7Pw', {
+					attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
+					maxZoom: 17
+				}),
+
+		init:function(mapId, options) {
+			options = options || {};
+      options.layers = [this.ENGLISH_TILE_LAYER, this.LOCALIZED_TILE_LAYER];
+
+      this.LMmap = L.map(mapId, options);
+
+			this.addScalebar();
+			this.addLayersControl();
+    },
+
+    addScalebar: function() {
+    	if(this.LMmap) {
+    		L.control.scale().addTo(this.LMmap);
+    	}
+    },
+
+    addLayersControl: function() {
+    	var baseMaps = {
+			  "English Basemap": this.ENGLISH_TILE_LAYER,
+			  "International Basemap": this.LOCALIZED_TILE_LAYER
+			};
+
+			if(this.LMmap) {
+				L.control.layers(baseMaps).addTo(this.LMmap);
+			}
+    }
+	};
 
 	A.app.DataSidebar = Marionette.Layout.extend({
 
