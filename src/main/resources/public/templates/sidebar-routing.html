@@ -1,12 +1,12 @@
 <br>
 
-<div id="clickInfo" class="alert alert-info" role="alert">Click the map to define a start and end location for a journey.</div>
+<div id="clickInfo" class="alert alert-info" role="alert">{{I18n "define_routing_instructions"}}</div>
 
 
 <div id="routeData">
 
-  <h4>Travel Time: <span id="travelTime"></span></h4>
-  <h4>Average Speed: <span id="avgSpeed"></span></h4>
+  <h4>{{I18n "travel_time"}}: <span id="travelTime"></span></h4>
+  <h4>{{I18n "average_speed"}}: <span id="avgSpeed"></span></h4>
 
   <div>
     <select style="display: inline; width: 150px;" class="form-control input-sm" id="week1FromList">
@@ -31,11 +31,11 @@
   </div>
 
   <div style="margin-top: 10px;">
-    <strong><span id="percentChangeTitle1">Percent Change in </span>Speed by Day of Week</strong>
+    <strong><span id="percentChangeTitle1">{{I18n "percent_change_in"}} </span>{{I18n "speed_by_day_of_week"}}</strong>
     <div id="dailyChart"></div>
   </div>
   <div style="margin-top: 10px;">
-    <strong><span id="percentChangeTitle2">Percent Change in </span>Speed by Hour of Day</strong><br/>
+    <strong><span id="percentChangeTitle2">{{I18n "percent_change_in"}} </span>{{I18n "speed_by_hour_of_day"}}</strong><br/>
     <div id="hourlyChart"></div>
   </div>
 
@@ -68,8 +68,8 @@
       </select>
       <br/>
       <select style="display: inline; width: 150px; margin-top: 5px;" class="form-control input-sm" id="normalizeByTime">
-        <option selected value="true">Normalize Time</option>
-        <option value="false">Normalize Vehicles</option>
+        <option selected value="true">{{I18n "normalize_time"}}</option>
+        <option value="false">{{I18n "normalize_vehicles"}}</option>
       </select>
 
     </div>
@@ -80,7 +80,7 @@
     <rect fill="rgb(251,106,74)" width="24" height="24" x="48"></rect>
     <rect fill="rgb(222,45,38)" width="24" height="24" x="72"></rect>
     <rect fill="rgb(165,15,21)" width="24" height="24" x="96"></rect>
-  </svg> -50% change <br/>
+  </svg> -50% {{I18n "change"}} <br/>
 
     0%<svg style="margin-left: 15px; margin-right: -140px;"  width="270" height="24">
     <rect fill="rgb(239,243,255)" width="24" height="24" x="0"></rect>
@@ -88,12 +88,12 @@
     <rect fill="rgb(107,174,214)" width="24" height="24" x="48"></rect>
     <rect fill="rgb(49,130,189)" width="24" height="24" x="72"></rect>
     <rect fill="rgb(8,81,156)" width="24" height="24" x="96"></rect>
-  </svg> +50% change
+  </svg> +50% {{I18n "change"}}
   </div>
 </div>
 
 <div style="text-align: center;">
   <button type="button"  id="resetRoute"  class="btn btn-sm" data-toggle="button">
-    Reset Route
+    {{I18n "reset_route"}}
   </button>
 </div>

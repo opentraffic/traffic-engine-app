@@ -1037,13 +1037,45 @@ var Traffic = Traffic || {};
 		events : {
 			'click #data' : 'clickData',
 			'click #routing' : 'clickRouting',
-			'click #analysis' : 'clickAnalysis'
+			'click #analysis' : 'clickAnalysis',
+			'click #localeItem' : 'selectLocale'
 		},
 
 		initialize : function() {
 			var _this = this;
 
-			_.bindAll(this, 'onMapClick', 'clickAnalysis');
+			_.bindAll(this, 'onMapClick', 'clickAnalysis', 'selectLocale');
+		},
+
+		onRender : function() {
+
+			var _this = this;
+
+			if(A.translations) {
+				this.$el = this.$el.children();
+
+				this.$("#localeList").empty();
+
+				var locales = A.translations.getAvailableLocales() || {};
+
+				_.each(locales, function(locale, name) {
+					_this.$("#localeList").append('<li><a href="#" id="localeItem" data-locale="' + locale + '">' + name + '</a></li>');
+				});
+
+				var currentLocale = locales[A.translations.getLocale()] || "";
+				this.$('#localeLabel').text(currentLocale);
+
+				this.$el.unwrap();
+				this.setElement(this.$el);
+			}
+		},
+
+		selectLocale : function(evt) {
+			var locale = $(evt.target).data('locale');
+			if(A.translations) {
+				A.translations.setLocale(locale);
+				window.location.reload();
+			}
 		},
 
 		clickData: function(evt) {
@@ -1226,6 +1258,9 @@ var Traffic = Traffic || {};
 
 
 $(document).ready(function() {
+	if(Traffic.translations != undefined) {
+		Traffic.translations.init();
+	}
 
 	Traffic.app.instance.start();
 

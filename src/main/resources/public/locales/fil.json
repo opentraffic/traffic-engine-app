@@ -1,0 +1,20 @@
+{
+  "site_title":           "[fil]Traffic Engine[/fil]",
+  "location":             "[fil]Location[/fil]",
+  "compare":              "[fil]Compare[/fil]",
+  "percent_change_in":    "[fil]Percent change in[/fil]",
+  "speed_by_day_of_week": "[fil]Speed by day of week[/fil]",
+  "speed_by_hour_of_day": "[fil]Speed by hour of day[/fil]",
+  "normalize_time":       "[fil]Normalize time[/fil]",
+  "normalize_vehicles":   "[fil]Normalize Vehicles[/fil]",
+  "change":               "[fil]change[/fil]",
+  "vehicle_count":        "[fil]Vehicle count[/fil]",
+  "last_time_processed":  "[fil]Last time processed[/fil]",
+  "define_routing_instructions": "[fil]Click the map to define a start and end location for a journey.[/fil]",
+  "travel_time":          "[fil]Travel time[/fil]",
+  "average_speed":        "[fil]Average speed[/fil]",
+  "reset_route":          "[fil]Reset Route[/fil]",
+  "data_tab_title":       "[fil]Data[/fil]",
+  "routing_tab_title":    "[fil]Routing[/fil]",
+  "analysis_tab_title":   "[fil]Analysis[/fil]"
+}
