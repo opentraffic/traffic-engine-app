@@ -38,8 +38,8 @@ var Traffic = Traffic || {};
 
 		LMmap: null, // Leaflet map object
 
-		ENGLISH_TILE_LAYER: L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+		ENGLISH_TILE_LAYER: L.tileLayer('https://a.tiles.mapbox.com/v4/xdliu.ec1c6353/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoieGRsaXUiLCJhIjoiY2lpamVzdGxwMDExN3ZqbTVuOHMwaGVyYyJ9.P_agsd7B_e22deT1QRhiBQ', {
+					attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
 					maxZoom: 17
 				}),
 		LOCALIZED_TILE_LAYER: L.tileLayer('https://a.tiles.mapbox.com/v4/conveyal.gepida3i/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiY29udmV5YWwiLCJhIjoiMDliQURXOCJ9.9JWPsqJY7dGIdX777An7Pw', {
@@ -65,8 +65,8 @@ var Traffic = Traffic || {};
 
     addLayersControl: function() {
     	var baseMaps = {
-			  "English Basemap": this.ENGLISH_TILE_LAYER,
-			  "International Basemap": this.LOCALIZED_TILE_LAYER
+			  "English": this.ENGLISH_TILE_LAYER,
+			  "International": this.LOCALIZED_TILE_LAYER
 			};
 
 			if(this.LMmap) {
