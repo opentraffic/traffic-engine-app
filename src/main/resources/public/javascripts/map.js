@@ -1052,21 +1052,16 @@ var Traffic = Traffic || {};
 			var _this = this;
 
 			if(A.translations) {
-				this.$el = this.$el.children();
-
 				this.$("#localeList").empty();
 
 				var locales = A.translations.getAvailableLocales() || {};
 
-				_.each(locales, function(locale, name) {
+				_.each(locales, function(name, locale) {
 					_this.$("#localeList").append('<li><a href="#" id="localeItem" data-locale="' + locale + '">' + name + '</a></li>');
 				});
 
 				var currentLocale = locales[A.translations.getLocale()] || "";
 				this.$('#localeLabel').text(currentLocale);
-
-				this.$el.unwrap();
-				this.setElement(this.$el);
 			}
 		},
 
