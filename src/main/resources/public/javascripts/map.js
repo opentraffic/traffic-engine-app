@@ -1051,24 +1051,24 @@ var Traffic = Traffic || {};
 
 			var _this = this;
 
-			if(A.translations) {
+			if(translator) {
 				this.$("#localeList").empty();
 
-				var locales = A.translations.getAvailableLocales() || {};
+				var locales = translator.getAvailableLocales() || {};
 
 				_.each(locales, function(name, locale) {
 					_this.$("#localeList").append('<li><a href="#" id="localeItem" data-locale="' + locale + '">' + name + '</a></li>');
 				});
 
-				var currentLocale = locales[A.translations.getLocale()] || "";
+				var currentLocale = locales[translator.getLocale()] || "";
 				this.$('#localeLabel').text(currentLocale);
 			}
 		},
 
 		selectLocale : function(evt) {
 			var locale = $(evt.target).data('locale');
-			if(A.translations) {
-				A.translations.setLocale(locale);
+			if(translator) {
+				translator.setLocale(locale);
 				window.location.reload();
 			}
 		},
