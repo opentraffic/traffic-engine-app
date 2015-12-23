@@ -1009,10 +1009,10 @@ var Traffic = Traffic || {};
 		initLocationTypeahead: function() {
 			var _this = this;
 
-			var cities = new Bloodhound({
+			var citiesEngine = new Bloodhound({
 			  datumTokenizer: Bloodhound.tokenizers.obj.whitespace('city'),
 			  queryTokenizer: Bloodhound.tokenizers.whitespace,
-			  local: this.cities,
+			  local: _this.cities,
 			  limit: 10
 			});
 
@@ -1020,7 +1020,7 @@ var Traffic = Traffic || {};
 			{
 			  name: 'cities',
 			  display: 'city',
-			  source: cities,
+			  source: citiesEngine,
 			  templates: {
 			    empty: Handlebars.compile('<div class="empty-message">{{I18n "no_city_found"}}</div>'),
 			    suggestion: Handlebars.compile('<div><strong>{{country}}</strong>: {{city}}</div>')
@@ -1033,13 +1033,15 @@ var Traffic = Traffic || {};
 			});
 
 			var selectedCity = localStorage.getItem('traffic-engine-city');
-			if(selectedCity) {
-				this.$('#locationSearch').text(selectedCity);
-				var cityObj = _.find(this.cities, function(cityData) {
+			if(_this.cities && selectedCity) {
+				this.$('#locationSearch').val(selectedCity);
+				var cityObj = _.find(_this.cities, function(cityData) {
 					return cityData.city == selectedCity;
 				})
 
-				_this.zoomToLocation(cityObj.lat, cityObj.lon);
+				if(cityObj) {
+					_this.zoomToLocation(cityObj.lat, cityObj.lon);
+				}
 			}
 		},
 
