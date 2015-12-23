@@ -19,6 +19,7 @@ public class TrafficPathEdge {
     public String color;
     public double length;
     public double speed;
+    public double stdDev;
 
     public TrafficPathEdge(StreetSegment streetSegment, SummaryStatistics summaryStatistics) {
 
@@ -34,5 +35,6 @@ public class TrafficPathEdge {
 
         length = streetSegment.length;
         speed = summaryStatistics.getMean();
+        stdDev = summaryStatistics.getStdDev();
     }
 }
