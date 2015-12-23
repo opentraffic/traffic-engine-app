@@ -1,6 +1,6 @@
 var Traffic = Traffic || {};
 
-(function(A, $, L, C, dc) {
+(function(A, $, L, C, dc, translator) {
 
 	A.app = {};
 
@@ -142,17 +142,17 @@ var Traffic = Traffic || {};
 				_this.$("#week2FromList").empty();
 				_this.$("#week2ToList").empty();
 
-				_this.$("#week1FromList").append('<option value="-1">All Weeks</option>');
+				_this.$("#week1FromList").append('<option value="-1">' + translator.translate("all_weeks") + '</option>');
 				for(var i in A.app.sidebar.weekList) {
 					var weekDate = new Date( data[i].weekStartTime);
-					_this.$("#week1FromList").append('<option value="' + data[i].weekId + '">Week of ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
+					_this.$("#week1FromList").append('<option value="' + data[i].weekId + '">' + translator.translate("week_of") + ' ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
 				}
 
 				_this.$("#week2FromList").empty();
-				_this.$("#week2FromList").append('<option value="-1">All Weeks</option>');
+				_this.$("#week2FromList").append('<option value="-1">' + translator.translate("all_weeks") + '</option>');
 				for(var i in A.app.sidebar.weekList) {
 					var weekDate = new Date( data[i].weekStartTime);
-					_this.$("#week2FromList").append('<option value="' + data[i].weekId + '">Week of ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
+					_this.$("#week2FromList").append('<option value="' + data[i].weekId + '">' + translator.translate("week_of") + ' ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
 				}
 
 
@@ -177,7 +177,7 @@ var Traffic = Traffic || {};
 				for(var i in A.app.sidebar.weekList) {
 					if(A.app.sidebar.weekList[i].weekId >= this.$("#week1FromList").val()) {
 						var weekDate = new Date( A.app.sidebar.weekList[i].weekStartTime);
-						this.$("#week1ToList").append('<option value="' + A.app.sidebar.weekList[i].weekId + '">Week of ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
+						this.$("#week1ToList").append('<option value="' + A.app.sidebar.weekList[i].weekId + '">' + translator.translate("week_of") + ' ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
 					}
 					this.$("#week1To").show();
 				}
@@ -189,7 +189,7 @@ var Traffic = Traffic || {};
 				for(var i in A.app.sidebar.weekList) {
 					if(A.app.sidebar.weekList[i].weekId >= this.$("#week2FromList").val()) {
 						var weekDate = new Date( A.app.sidebar.weekList[i].weekStartTime);
-						this.$("#week2ToList").append('<option value="' + A.app.sidebar.weekList[i].weekId + '">Week of ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
+						this.$("#week2ToList").append('<option value="' + A.app.sidebar.weekList[i].weekId + '">' + translator.translate("week_of") + ' ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
 					}
 					this.$("#week2To").show();
 				}
@@ -541,17 +541,17 @@ var Traffic = Traffic || {};
 				_this.$("#week2FromList").empty();
 				_this.$("#week2ToList").empty();
 
-				_this.$("#week1FromList").append('<option value="-1">All Weeks</option>');
+				_this.$("#week1FromList").append('<option value="-1">' + translator.translate("all_weeks") + '</option>');
 				for(var i in A.app.sidebar.weekList) {
 					var weekDate = new Date( data[i].weekStartTime);
-					_this.$("#week1FromList").append('<option value="' + data[i].weekId + '">Week of ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
+					_this.$("#week1FromList").append('<option value="' + data[i].weekId + '">' + translator.translate("week_of") + ' ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
 				}
 
 				_this.$("#week2FromList").empty();
-				_this.$("#week2FromList").append('<option value="-1">All Weeks</option>');
+				_this.$("#week2FromList").append('<option value="-1">' + translator.translate("all_weeks") + '</option>');
 				for(var i in A.app.sidebar.weekList) {
 					var weekDate = new Date( data[i].weekStartTime);
-					_this.$("#week2FromList").append('<option value="' + data[i].weekId + '">Week of ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
+					_this.$("#week2FromList").append('<option value="' + data[i].weekId + '">' + translator.translate("week_of") + ' ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
 				}
 
 
@@ -600,7 +600,7 @@ var Traffic = Traffic || {};
 				for(var i in A.app.sidebar.weekList) {
 					if(A.app.sidebar.weekList[i].weekId >= this.$("#week1FromList").val()) {
 						var weekDate = new Date( A.app.sidebar.weekList[i].weekStartTime);
-						this.$("#week1ToList").append('<option value="' + A.app.sidebar.weekList[i].weekId + '">Week of ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
+						this.$("#week1ToList").append('<option value="' + A.app.sidebar.weekList[i].weekId + '">' + translator.translate("week_of") + ' ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
 					}
 					this.$("#week1To").show();
 				}
@@ -612,7 +612,7 @@ var Traffic = Traffic || {};
 				for(var i in A.app.sidebar.weekList) {
 					if(A.app.sidebar.weekList[i].weekId >= this.$("#week2FromList").val()) {
 						var weekDate = new Date( A.app.sidebar.weekList[i].weekStartTime);
-						this.$("#week2ToList").append('<option value="' + A.app.sidebar.weekList[i].weekId + '">Week of ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
+						this.$("#week2ToList").append('<option value="' + A.app.sidebar.weekList[i].weekId + '">' + translator.translate("week_of") + ' ' + (weekDate.getUTCMonth() + 1) + '/' + weekDate.getUTCDate() + '/' + weekDate.getUTCFullYear() + '</option>');
 					}
 					this.$("#week2To").show();
 				}
@@ -1249,7 +1249,7 @@ var Traffic = Traffic || {};
 	});
 
 
-})(Traffic, jQuery, L, crossfilter, dc);
+})(Traffic, jQuery, L, crossfilter, dc, Traffic.translations);
 
 
 $(document).ready(function() {
