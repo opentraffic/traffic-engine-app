@@ -74,3 +74,7 @@ body, div {
   width: 40px;
   margin: 0px 10px;
 }
+
+.location-search .twitter-typeahead {
+  margin: 5px;
+}

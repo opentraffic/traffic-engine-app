@@ -371,13 +371,13 @@ var Traffic = Traffic || {};
 				);
 
 				var dayLabel = new Array();
-				dayLabel[1] = "Mon";
-				dayLabel[2] = "Tue";
-				dayLabel[3] = "Wed";
-				dayLabel[4] = "Thu";
-				dayLabel[5] = "Fri";
-				dayLabel[6] = "Sat";
-				dayLabel[7] = "Sun";
+				dayLabel[1] = translator.translate("mon");
+				dayLabel[2] = translator.translate("tue");
+				dayLabel[3] = translator.translate("wed");
+				dayLabel[4] = translator.translate("thu");
+				dayLabel[5] = translator.translate("fri");
+				dayLabel[6] = translator.translate("sat");
+				dayLabel[7] = translator.translate("sun");
 
 				this.dailyChart = dc.barChart("#dailyChart");
 
@@ -803,13 +803,13 @@ var Traffic = Traffic || {};
 				);
 
 				var dayLabel = new Array();
-				dayLabel[1] = "Mon";
-				dayLabel[2] = "Tue";
-				dayLabel[3] = "Wed";
-				dayLabel[4] = "Thu";
-				dayLabel[5] = "Fri";
-				dayLabel[6] = "Sat";
-				dayLabel[7] = "Sun";
+				dayLabel[1] = translator.translate("mon");
+				dayLabel[2] = translator.translate("tue");
+				dayLabel[3] = translator.translate("wed");
+				dayLabel[4] = translator.translate("thu");
+				dayLabel[5] = translator.translate("fri");
+				dayLabel[6] = translator.translate("sat");
+				dayLabel[7] = translator.translate("sun");
 
 				this.dailyChart = dc.barChart("#dailyChart");
 
@@ -994,39 +994,61 @@ var Traffic = Traffic || {};
 		initialize : function() {
 			var _this = this;
 
-			$.getJSON('/clusters', function(data) {
-				var sortedClusters = _.sortBy(data.clusters, function(item){ return item.name});
-				_this.clusters = sortedClusters;
+			$.getJSON('/cityNames', function(data) {
+				_this.cities = data;
 				_this.render();
 			});
-
-			_.bindAll(this, 'clickLocation');
 		},
 
-		clickLocation : function(evt) {
-			var lat = $(evt.target).data('lat');
-			var lon = $(evt.target).data('lon');
-
-			A.app.map.setView([lat,lon], 13);
+		zoomToLocation : function(lat, lon) {
+			if(lat && lon) {
+				A.app.map.setView([lat,lon], 13);
+			}
 		},
 
-		onRender : function() {
-
+		initLocationTypeahead: function() {
 			var _this = this;
 
-			// Get rid of that pesky wrapping-div.
-			// Assumes 1 child element present in template.
-			this.$el = this.$el.children();
-
-			this.$("#locationList").empty();
-
-			_.each(this.clusters, function(cluster) {
-				_this.$("#locationList").append('<li><a href="#" id="location" data-lat="' + cluster.lat + '" data-lon="' + cluster.lon + '">' + cluster.name + '</a></li>');
+			var cities = new Bloodhound({
+			  datumTokenizer: Bloodhound.tokenizers.obj.whitespace('city'),
+			  queryTokenizer: Bloodhound.tokenizers.whitespace,
+			  local: this.cities,
+			  limit: 10
 			});
 
-			this.$el.unwrap();
-			this.setElement(this.$el);
+			this.$('#locationSearch').typeahead(null,
+			{
+			  name: 'cities',
+			  display: 'city',
+			  source: cities,
+			  templates: {
+			    empty: Handlebars.compile('<div class="empty-message">{{I18n "no_city_found"}}</div>'),
+			    suggestion: Handlebars.compile('<div><strong>{{country}}</strong>: {{city}}</div>')
+			  }
+			});
 
+			this.$('#locationSearch').bind('typeahead:select', function(obj, datum, name) { 
+				_this.zoomToLocation(datum.lat, datum.lon);
+				localStorage.setItem('traffic-engine-city', datum.city);
+			});
+
+			var selectedCity = localStorage.getItem('traffic-engine-city');
+			if(selectedCity) {
+				this.$('#locationSearch').text(selectedCity);
+				var cityObj = _.find(this.cities, function(cityData) {
+					return cityData.city == selectedCity;
+				})
+
+				_this.zoomToLocation(cityObj.lat, cityObj.lon);
+			}
+		},
+
+		onRender: function() {
+			this.$('.dropdown input, .dropdown label').click(function(e) {
+		    e.stopPropagation();
+		  });
+
+		  this.initLocationTypeahead();
 		}
 	});
 

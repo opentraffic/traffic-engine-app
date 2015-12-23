@@ -1,6 +1,8 @@
 {
   "site_title":           "[fil]Traffic Engine[/fil]",
   "location":             "[fil]Location[/fil]",
+  "enter_city_name":      "[fil]Enter city name[/fil]",
+  "no_city_found":        "[fil]No city found[/fil]",
   "compare":              "[fil]Compare[/fil]",
   "percent_change_in":    "[fil]Percent change in[/fil]",
   "speed_by_day_of_week": "[fil]Speed by day of week[/fil]",
@@ -18,5 +20,12 @@
   "routing_tab_title":    "[fil]Routing[/fil]",
   "analysis_tab_title":   "[fil]Analysis[/fil]",
   "all_weeks":            "[fil]All Weeks[/fil]",
-  "week_of":              "[fil]Week of[/fil]"
+  "week_of":              "[fil]Week of[/fil]",
+  "mon":                  "[fil]Mon[/fil]",
+  "tue":                  "[fil]Tue[/fil]",
+  "wed":                  "[fil]Wed[/fil]",
+  "thu":                  "[fil]Thu[/fil]",
+  "fri":                  "[fil]Fri[/fil]",
+  "sat":                  "[fil]Sat[/fil]",
+  "sun":                  "[fil]Sun[/fil]"
 }
