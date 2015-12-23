@@ -80,14 +80,30 @@ public class TrafficEngineApp {
 		});
 
 		get("/cityNames", (request, response) -> {
+
+            class City implements Comparable{
+                public String city;
+                public String country;
+                public Double lat;
+                public Double lon;
+
+                @Override
+                public int compareTo(Object o) {
+                    return city.compareTo(((City)o).city);
+                }
+            };
+
 			List<OSMCluster> clusters = engine.getTrafficEngine().osmData.getOSMClusters();
-            Map<String, Set<String>> cityNames = new TreeMap<>();
+            Set<City> cityNames = new TreeSet<>();
             for(OSMCluster osmCluster : clusters){
                 String countryName = osmCluster.name.split(" -- ")[0];
                 String cityName = osmCluster.name.split(" -- ")[1];
-                if(!cityNames.keySet().contains(countryName))
-                    cityNames.put(countryName, new TreeSet<>());
-                cityNames.get(countryName).add(cityName);
+                City city = new City();
+                city.city = cityName;
+                city.country = countryName;
+                city.lat = osmCluster.bounds.centre().y;
+                city.lon = osmCluster.bounds.centre().x;
+                cityNames.add(city);
             }
 			return mapper.writeValueAsString(cityNames);
 		});
