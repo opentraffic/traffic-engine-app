@@ -79,10 +79,23 @@ public class TrafficEngineApp {
 			return "Traffic tiles written.";
 		});
 
-		get("/clusters", (request, response) -> {
+		get("/cityNames", (request, response) -> {
 			List<OSMCluster> clusters = engine.getTrafficEngine().osmData.getOSMClusters();
-			return mapper.writeValueAsString(new ClusterList(clusters));
+            Map<String, Set<String>> cityNames = new TreeMap<>();
+            for(OSMCluster osmCluster : clusters){
+                String countryName = osmCluster.name.split(" -- ")[0];
+                String cityName = osmCluster.name.split(" -- ")[1];
+                if(!cityNames.keySet().contains(countryName))
+                    cityNames.put(countryName, new TreeSet<>());
+                cityNames.get(countryName).add(cityName);
+            }
+			return mapper.writeValueAsString(cityNames);
 		});
+
+        get("/clusters", (request, response) -> {
+            List<OSMCluster> clusters = engine.getTrafficEngine().osmData.getOSMClusters();
+            return mapper.writeValueAsString(new ClusterList(clusters));
+        });
 
 		get("/stats", (request, response) -> new StatsObject(), mapper::writeValueAsString);
 
@@ -217,7 +230,7 @@ public class TrafficEngineApp {
 	        LocalDateTime dt = LocalDateTime.now();
 	        rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
 
-			List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>(routing.route(rr));
+			List<Fun.Tuple3<Long, Long, Long>> edges    = new ArrayList<>(routing.route(rr));
 
 			TrafficPath trafficPath =new TrafficPath();
 
