@@ -1252,11 +1252,20 @@ var Traffic = Traffic || {};
                     if(!isNaN(edge.length) && !isNaN(edge.speed && edge.stdDev)){
                         segmentPopupContent =
                             '<h4>Segment Details<\/h4>' +
-                            '<p>Length: ' + new Number(edge.length).toFixed(2) + '<br \/>' +
-                            'Speed: ' + new Number(edge.speed).toFixed(2) + '<br \/>'+
-                            'Std Dev: ' + new Number(edge.stdDev).toFixed(2) + '<\/p>';
+                            '<p>Length: ' + new Number(edge.length).toFixed(2) + ' M<br \/>' +
+                            'Speed: ' + new Number(edge.speed).toFixed(2) + ' KPH<br \/>'+
+                            'Std Dev: ' + new Number(edge.stdDev).toFixed(2) + ' KPH<\/p>';
                     }
                     polyLine.bindPopup(segmentPopupContent);
+
+                    polyLine.on('mouseover', function(e) {
+                        e.target.openPopup();
+                    });
+
+                    polyLine.on('mouseout', function(e) {
+                        e.target.closePopup();
+                    });
+
                     lines.push(polyLine);
 
 					if(edge.speed > 0 && edge.length > 0) {
