@@ -1238,9 +1238,19 @@ var Traffic = Traffic || {};
 				for(i in data.pathEdges) {
 					var edge = data.pathEdges[i];
 
-					var polyLine = L.Polyline.fromEncoded(edge.geometry);
+                    var polyLine = L.Polyline.fromEncoded(edge.geometry);
+                    polyLine = L.polyline(polyLine.getLatLngs(), {opacity: 1.0, color: edge.color});
 
-					lines.push(L.polyline(polyLine.getLatLngs(), {opacity: 1.0, color: edge.color}));
+                    var segmentPopupContent = "Insufficient data for segment";
+                    if(!isNaN(edge.length) && !isNaN(edge.speed && edge.stdDev)){
+                        segmentPopupContent =
+                            '<h4>Segment Details<\/h4>' +
+                            '<p>Length: ' + new Number(edge.length).toFixed(2) + '<br \/>' +
+                            'Speed: ' + new Number(edge.speed).toFixed(2) + '<br \/>'+
+                            'Std Dev: ' + new Number(edge.stdDev).toFixed(2) + '<\/p>';
+                    }
+                    polyLine.bindPopup(segmentPopupContent);
+                    lines.push(polyLine);
 
 					if(edge.speed > 0 && edge.length > 0) {
 						distance += edge.length;
