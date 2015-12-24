@@ -70,8 +70,7 @@ body, div {
 }
 
 .footer-logo {
-  height: 40px;
-  width: 40px;
+  max-height: 40px;
   margin: 0px 10px;
 }
 
