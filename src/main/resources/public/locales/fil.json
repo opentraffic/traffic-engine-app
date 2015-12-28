@@ -27,5 +27,10 @@
   "thu":                  "[fil]Thu[/fil]",
   "fri":                  "[fil]Fri[/fil]",
   "sat":                  "[fil]Sat[/fil]",
-  "sun":                  "[fil]Sun[/fil]"
+  "sun":                  "[fil]Sun[/fil]",
+  "segment_details_title":"[fil]Segment Details[/fil]",
+  "segment_length_label": "[fil]Length[/fil]",
+  "segment_speed_label":  "[fil]Speed[/fil]",
+  "segment_std_dev_label":"[fil]Std Dev[/fil]",
+  "insufficient_data_warning": "[fil]Insufficient data for segment[/fil]"
 }

@@ -1242,19 +1242,21 @@ var Traffic = Traffic || {};
 				var time = 0;
 
 				var lines = new Array();
+				var insufficientDataWarning = translator.translate('insufficient_data_warning');
+				var routeInfoTemplate = Handlebars.getTemplate('app', 'route-popup');
 				for(i in data.pathEdges) {
 					var edge = data.pathEdges[i];
 
                     var polyLine = L.Polyline.fromEncoded(edge.geometry);
                     polyLine = L.polyline(polyLine.getLatLngs(), {opacity: 1.0, color: edge.color});
 
-                    var segmentPopupContent = "Insufficient data for segment";
+                    var segmentPopupContent = insufficientDataWarning;
                     if(!isNaN(edge.length) && !isNaN(edge.speed && edge.stdDev)){
-                        segmentPopupContent =
-                            '<h4>Segment Details<\/h4>' +
-                            '<p>Length: ' + new Number(edge.length).toFixed(2) + ' M<br \/>' +
-                            'Speed: ' + new Number(edge.speed).toFixed(2) + ' KPH<br \/>'+
-                            'Std Dev: ' + new Number(edge.stdDev).toFixed(2) + ' KPH<\/p>';
+                    	segmentPopupContent = routeInfoTemplate({
+                    		segment_length: new Number(edge.length).toFixed(2),
+                    		segment_speed: new Number(edge.speed).toFixed(2),
+                    		segment_std_dev: new Number(edge.stdDev).toFixed(2)
+                    	});
                     }
                     polyLine.bindPopup(segmentPopupContent);
 
