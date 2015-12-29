@@ -1,0 +1,76 @@
+var Traffic = Traffic || {};
+Traffic.views = Traffic.views || {};
+
+(function(A, views, translator) {
+  
+  views.Nav = Marionette.Layout.extend({
+
+    template: Handlebars.getTemplate('app', 'navbar'),
+
+    events : {
+      'click #location' : 'clickLocation'
+    },
+
+    initialize : function() {
+      var _this = this;
+
+      $.getJSON('/cityNames', function(data) {
+        _this.cities = data;
+        _this.render();
+      });
+    },
+
+    zoomToLocation : function(lat, lon) {
+      if(lat && lon) {
+        A.app.map.setView([lat,lon], 13);
+      }
+    },
+
+    initLocationTypeahead: function() {
+      var _this = this;
+
+      var citiesEngine = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('city'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        local: _this.cities,
+        limit: 10
+      });
+
+      this.$('#locationSearch').typeahead(null,
+      {
+        name: 'cities',
+        display: 'city',
+        source: citiesEngine,
+        templates: {
+          empty: Handlebars.compile('<div class="empty-message">{{I18n "no_city_found"}}</div>'),
+          suggestion: Handlebars.compile('<div><strong>{{country}}</strong>: {{city}}</div>')
+        }
+      });
+
+      this.$('#locationSearch').bind('typeahead:select', function(obj, datum, name) { 
+        _this.zoomToLocation(datum.lat, datum.lon);
+        localStorage.setItem('traffic-engine-city', datum.city);
+      });
+
+      var selectedCity = localStorage.getItem('traffic-engine-city');
+      if(_this.cities && selectedCity) {
+        this.$('#locationSearch').val(selectedCity);
+        var cityObj = _.find(_this.cities, function(cityData) {
+          return cityData.city == selectedCity;
+        })
+
+        if(cityObj) {
+          _this.zoomToLocation(cityObj.lat, cityObj.lon);
+        }
+      }
+    },
+
+    onRender: function() {
+      this.$('.dropdown input, .dropdown label').click(function(e) {
+        e.stopPropagation();
+      });
+
+      this.initLocationTypeahead();
+    }
+  });
+})(Traffic, Traffic.views, Traffic.translations);
