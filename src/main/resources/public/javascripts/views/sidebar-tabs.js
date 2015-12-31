@@ -139,6 +139,7 @@ Traffic.views = Traffic.views || {};
       else if(this.endPoint == false) {
         this.endPoint = L.circleMarker(evt.latlng, {fillColor: "#D00", color: '#fff', fillOpacity: 1.0,opacity: 1.0, radius: 5}).addTo(A.app.map);
         this.getRoute();
+        $('#routeButtons').show();
       }
 
     },

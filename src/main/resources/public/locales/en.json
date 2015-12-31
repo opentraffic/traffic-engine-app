@@ -32,5 +32,7 @@
   "segment_length_label": "Length",
   "segment_speed_label":  "Speed",
   "segment_std_dev_label": "Std Dev",
-  "insufficient_data_warning": "Insufficient data for segment"
+  "insufficient_data_warning": "Insufficient data for segment",
+  "filter_off":           "Enable chart filters",
+  "filter_on":            "Disable chart filters"
 }
