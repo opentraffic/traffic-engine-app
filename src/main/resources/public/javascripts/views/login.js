@@ -28,6 +28,10 @@ Traffic.views = Traffic.views || {};
       'change:stateDetails': 'render'
     },
 
+    initialize : function() {
+      _.bindAll(this, 'formSubmitted');
+    },
+
     formSubmitted: function(event) {
       // Stop the form from actually submitting to the server.
       event.stopPropagation();
@@ -79,12 +83,11 @@ Traffic.views = Traffic.views || {};
         default:
           break;
       }
-
-      this.$el.html(this.template(this.model.toJSON()));
     },
 
     onShow: function() {
-      if (this.model.notAuthState == this.model.get('state')) {
+      var loginState = this.model.get('state');
+      if (!loginState || this.model.notAuthState == loginState) {
         this.ui.usernameField.focus();
       }
     }

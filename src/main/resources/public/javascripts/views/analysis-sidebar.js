@@ -26,11 +26,7 @@ Traffic.views = Traffic.views || {};
     },
 
     initialize : function() {
-
-      var _this = this;
-
       _.bindAll(this, 'updateTrafficTiles', 'addTrafficOverlay', 'update', 'changeFromWeek', 'changeToWeek', 'clickCompare', 'changeConfidenceInterval', 'changeNormalizeBy');
-
     },
 
     onClose : function() {

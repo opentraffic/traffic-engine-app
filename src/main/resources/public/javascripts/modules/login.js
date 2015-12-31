@@ -2,7 +2,6 @@
   A.app.instance.module('Login', function(module, app, backbone, marionette, $, _) {
     module.addInitializer(function(options){
       module.userModel = new models.UserModel();
-      module.loginView = new views.Login({model: module.userModel});
     });
 
     module.loginSuccess = function(data) {
@@ -14,7 +13,7 @@
         module.userModel.set('state', module.userModel.authFailState);
       } else {
         module.userModel.set('state', module.userModel.authUnknownState);
-        module.userModel.set('stateDetails', 'Unexpected Server Response: ' +
+        module.userModel.set('stateDetails', translator.translate('unknown_server_response') + ': ' +
             response.status + ' ' + response.statusText);
       }
     };
@@ -28,17 +27,35 @@
       //   .fail(function(response) {
       //     module.loginFail(response);
       //   });
+      userModel.set('role', 'super_admin');
+      var credentials = userModel.toJSON();
 
-      module.loginSuccess({
-        username: 'test',
-        role: 'admin'
-      });
+      //TODO: remove
+      // for debugging only
+      if(credentials.username == 'superadmin' && credentials.password == "welcome1") {
+        module.loginSuccess(credentials);
+      } else {
+        if(!credentials.username) {
+          module.loginFail({
+            status: 402,
+            statusText: 'Something is wrong'
+          });
+        } else {
+          module.loginFail({
+            status: 404
+          });
+        }
+      }
+
     });
 
     app.vent.on('login:success', function(userModel) {
-      app.loginModal.close();
-      app.loginModal = null;
-      A.app.nav.userMenuContainer.show(new views.UserMenu());
+      setTimeout(function(){
+        if(app.loginModal) {
+          app.loginModal.close();
+        }
+        A.app.nav.userMenuContainer.show(new views.UserMenu());
+      }, 1000);
     });
 
     app.vent.on('logout:success', function() {

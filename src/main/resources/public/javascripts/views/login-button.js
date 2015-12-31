@@ -14,9 +14,15 @@ Traffic.views = Traffic.views || {};
     clickLogin: function() {
       A.app.instance.loginModal = new Backbone.BootstrapModal({
         animate: true, 
-        content: Traffic.app.instance.Login.loginView, 
+        content: new views.Login({model: A.app.instance.Login.userModel}), 
         title: translator.translate("login_dialog_title"),
-        showFooter: false
+        showFooter: false,
+        escape: false
+      });
+
+      A.app.instance.loginModal.on('cancel', function() {
+        this.options.content.remove(); //remove previous view
+        A.app.instance.loginModal = null;
       });
 
       A.app.instance.loginModal.open();
