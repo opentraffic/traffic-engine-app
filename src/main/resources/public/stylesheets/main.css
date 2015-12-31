@@ -77,3 +77,11 @@ body, div {
 .location-search .twitter-typeahead {
   margin: 5px;
 }
+
+#userMenuContainer {
+  display: inline-block;
+}
+
+#signIn {
+  margin-right: 5px;
+}

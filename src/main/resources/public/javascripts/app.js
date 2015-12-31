@@ -1,6 +1,6 @@
 var Traffic = Traffic || {};
 
-(function(A, $, translator, views, mapWrapper) {
+(function(A, $, translator, views, models, mapWrapper) {
 
 	A.app = {};
 
@@ -33,7 +33,7 @@ var Traffic = Traffic || {};
 
 	});
 
-})(Traffic, jQuery, Traffic.translations, Traffic.views, MapWrapper);
+})(Traffic, jQuery, Traffic.translations, Traffic.views, Traffic.models, MapWrapper);
 
 
 $(document).ready(function() {

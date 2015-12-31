@@ -7,8 +7,8 @@ Traffic.views = Traffic.views || {};
 
     template: Handlebars.getTemplate('app', 'navbar'),
 
-    events : {
-      'click #location' : 'clickLocation'
+    regions: {
+      userMenuContainer: "#userMenuContainer"
     },
 
     initialize : function() {
@@ -66,6 +66,8 @@ Traffic.views = Traffic.views || {};
     },
 
     onRender: function() {
+      this.userMenuContainer.show(new views.LoginButton());
+
       this.$('.dropdown input, .dropdown label').click(function(e) {
         e.stopPropagation();
       });
