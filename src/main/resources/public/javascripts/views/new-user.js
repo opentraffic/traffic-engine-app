@@ -3,18 +3,18 @@ Traffic.views = Traffic.views || {};
 
 (function(A, views, translator, C, dc) {
 
-  views.Login = Marionette.Layout.extend({
+  views.NewUser = Marionette.Layout.extend({
 
-    template: Handlebars.getTemplate('app', 'login'),
+    template: Handlebars.getTemplate('app', 'new-user'),
     tagName:   'div',
-    className: 'login-area',
+    className: 'new-user-area',
 
     ui: {
-      loginForm:           '#loginForm',
+      loginForm:           '#newUserForm',
       usernameField:       'input[name=username]',
       passwordField:       'input[name=password]',
+      roleField:           '#roleList',
       successMessage:      '.msg-success',
-      authErrorMessage:    '.error-bad-auth',
       generalErrorMessage: '.error-unknown'
     },
 
@@ -39,9 +39,10 @@ Traffic.views = Traffic.views || {};
 
       this.model.set('username', this.$('input[name=username]').val()); 
       this.model.set('password', this.$('input[name=password]').val());
+      this.model.set('role', this.$('#roleList').val());
 
       // Fire off the global event for the controller so that it handles the server communication.
-      A.app.instance.vent.trigger('login:submit', this.model)
+      A.app.instance.vent.trigger('new-user:submit', this.model)
     },
 
     onRender : function () {
@@ -51,41 +52,32 @@ Traffic.views = Traffic.views || {};
       // initial content specified in the Underscore template.
 
       switch(this.model.get('state')) {
-        case this.model.pendingAuthState:
+        case this.model.pendingSignupState:
           // Disable all the form controls and change the button text to show
           // the user that a request is pending.
           this.ui.loginForm.find('input, select, textarea').prop('disabled', true);
-          this.ui.loginForm.find('input[type=submit]').val(translator.translate('logging_in'));
+          this.ui.loginForm.find('input[type=submit]').val(translator.translate('processing'));
           break;
 
-        case this.model.authFailState:
-          // When the user submits invalid credentials, show them an
-          // appropriate error message and focus the password field for their convenience.
-          this.ui.authErrorMessage.show();
-          this.ui.passwordField.focus();
-          break;
-
-        case this.model.authUnknownState:
+        case this.model.signupFailState:
           this.ui.generalErrorMessage.show();
           break;
 
-       case this.model.authSuccessState:
+       case this.model.signupSuccessState:
           this.ui.successMessage.show();
-          A.app.instance.vent.trigger('login:success')
+          A.app.instance.vent.trigger('new-user:success')
          
           break;
 
         default:
           this.ui.usernameField.focus();
+
           break;
       }
     },
 
     onShow: function() {
-      var loginState = this.model.get('state');
-      if (!loginState || this.model.notAuthState == loginState) {
-        this.ui.usernameField.focus();
-      }
+      this.ui.usernameField.focus();
     }
   });
 })(Traffic, Traffic.views, Traffic.translations, crossfilter, dc);

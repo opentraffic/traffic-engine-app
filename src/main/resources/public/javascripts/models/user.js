@@ -5,6 +5,10 @@ Traffic.models = Traffic.models || {};
 Traffic.models.UserModel = Backbone.Model.extend({
   // Define constants to represent the various states and give them descriptive
   // values to help with debugging.
+  pendingSignupState:  'sign_pending',
+  singupSuccessState: 'signup_success',
+  signupFailState:    'signup_fail',
+
   notAuthState:     'not_auth',
   pendingAuthState: 'auth_pending',
   authSuccessState: 'auth_success',

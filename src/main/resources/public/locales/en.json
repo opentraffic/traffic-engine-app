@@ -38,8 +38,8 @@
   "login_button_label":   "Log In",
   "you_logged_in":        "You have successfully logged in.",
   "username_or_password_incorrect": "Either username or password is incorrect.",
-  "username_label":       "Username",
-  "password_label":       "Password",
+  "username_label":       "Username(*)",
+  "password_label":       "Password(*)",
   "login_label":          "Log In",
   "welcome_label":        "Welcome",
   "sign_in_as":           "Sign in as",
@@ -52,5 +52,15 @@
   "logging_in":           "Logging in...",
   "new_user_dialog_title": "New User",
   "users_dialog_title":   "Users",
-  "data_dialog_title":    "Data Management"
+  "data_dialog_title":    "Data Management",
+  "new_user_dialog_title": "New User",
+  "user_role":            "User",
+  "admin_role":           "Admin",
+  "super_admin_role":     "Super admin",
+  "processing":           "Processing...",
+  "ok_label":             "OK",
+  "cancel_label":         "Cancel",
+  "new_user_created":     "New user has been successfully created.",
+  "create_new_user_failed": "Failed to create user.",
+  "role_label":           "Role(*)"
 }

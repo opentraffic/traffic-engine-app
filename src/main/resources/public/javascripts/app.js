@@ -13,6 +13,7 @@ var Traffic = Traffic || {};
 	});
 
 	A.app.instance.addInitializer(function(options){
+		this.user = new models.UserModel();
 
 		A.app.nav = new views.Nav();
 		A.app.instance.navbar.show(A.app.nav);

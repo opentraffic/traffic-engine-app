@@ -1,7 +1,7 @@
 (function(A, views, models, translator) {
   A.app.instance.module('Login', function(module, app, backbone, marionette, $, _) {
     module.addInitializer(function(options){
-      module.userModel = new models.UserModel();
+      module.userModel = app.user;
     });
 
     module.loginSuccess = function(data) {

@@ -1,29 +1,33 @@
 var Traffic = Traffic || {};
 Traffic.views = Traffic.views || {};
 
-(function(A, views, translator) {
+(function(A, views, models, translator) {
   
   views.UserMenu = Marionette.Layout.extend({
 
     template: Handlebars.getTemplate('app', 'user-menu'),
 
     events : {
-      'click #signup' : 'clickSignup',
+      'click #newUser' : 'clickNewUser',
       'click #logout' : 'clickLogout',
       'click #usersLink' : 'clickUsersLink',
       'click #dataManagementLink' : 'clickDataLink'
     },
 
-    clickSignup: function() {
-      if(!A.app.instance.signupModal) {
-        A.app.instance.signupModal = new Backbone.BootstrapModal({
-          animate: true, 
-          content: Traffic.app.instance.UserMenu.signupView, 
-          title: translator.translate("new_user_dialog_title"),
-          showFooter: false
-        });
-      }
-      A.app.instance.signupModal.open();
+    clickNewUser: function() {
+      A.app.instance.newUserModal = new Backbone.BootstrapModal({
+        animate: true, 
+        content: new views.NewUser({model: new models.UserModel()}), 
+        title: translator.translate("new_user_dialog_title"),
+        showFooter: false
+      });
+      
+      A.app.instance.newUserModal.on('cancel', function() {
+        this.options.content.remove(); //remove previous view
+        A.app.instance.newUserModal = null;
+      });
+
+      A.app.instance.newUserModal.open();
     },
 
     clickLogout: function() {
@@ -31,31 +35,16 @@ Traffic.views = Traffic.views || {};
     },
 
     clickUsersLink: function() {
-      if(!A.app.instance.usersModal) {
-        A.app.instance.usersModal = new Backbone.BootstrapModal({
-          animate: true, 
-          content: Traffic.app.instance.UserMenu.usersView, 
-          title: translator.translate("users_dialog_title"),
-          showFooter: false
-        });
-      }
-      A.app.instance.usersModal.open();
+      console.log('Users dialog: TODO');
     },
 
     clickDataLink: function() {
-      if(!A.app.instance.dataModal) {
-        A.app.instance.dataModal = new Backbone.BootstrapModal({
-          animate: true, 
-          content: Traffic.app.instance.UserMenu.dataView, 
-          title: translator.translate("data_dialog_title"),
-          showFooter: false
-        });
-      }
-      A.app.instance.dataModal.open();
+      
+      console.log('Data management dialog: TODO');
     },
 
     onRender: function() {
       this.$el.html(this.template(A.app.instance.Login.userModel.toJSON()));
     }
   });
-})(Traffic, Traffic.views, Traffic.translations);
+})(Traffic, Traffic.views, Traffic.models, Traffic.translations);

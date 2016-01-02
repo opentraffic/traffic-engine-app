@@ -38,8 +38,8 @@
   "login_button_label":   "[fil]Log In[/fil]",
   "you_logged_in":        "[fil]You have successfully logged in.[/fil]",
   "username_or_password_incorrect": "[fil]Either username or password is incorrect.[/fil]",
-  "username_label":       "[fil]Username[/fil]",
-  "password_label":       "[fil]Password[/fil]",
+  "username_label":       "[fil]Username(*)[/fil]",
+  "password_label":       "[fil]Password(*)[/fil]",
   "login_label":          "[fil]Log In[/fil]",
   "welcome_label":        "[fil]Welcome[/fil]",
   "sign_in_as":           "[fil]Sign in as[/fil]",
@@ -52,5 +52,15 @@
   "logging_in":           "[fil]Logging in...[/fil]",
   "new_user_dialog_title": "[fil]New User[/fil]",
   "users_dialog_title":   "[fil]Users[/fil]",
-  "data_dialog_title":    "[fil]Data Management[/fil]"
+  "data_dialog_title":    "[fil]Data Management[/fil]",
+  "new_user_dialog_title": "[fil]New User[/fil]",
+  "user_role":            "[fil]User[/fil]",
+  "admin_role":           "[fil]Admin[/fil]",
+  "super_admin_role":     "[fil]Super admin[/fil]",
+  "processing":           "[fil]Processing...[/fil]",
+  "ok_label":             "[fil]OK[/fil]",
+  "cancel_label":         "[fil]Cancel[/fil]",
+  "new_user_created":     "[fil]New user has been successfully created.[/fil]",
+  "create_new_user_failed": "[fil]Failed to create user.[/fil]",
+  "role_label":           "[fil]Role(*)[/fil]"
 }
