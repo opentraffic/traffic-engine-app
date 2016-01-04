@@ -39,6 +39,7 @@ Traffic.views = Traffic.views || {};
 
       this.model.set('username', this.$('input[name=username]').val()); 
       this.model.set('password', this.$('input[name=password]').val());
+      this.model.set('confirm_password', this.$('input[name=confirm_password]').val());
       this.model.set('role', this.$('#roleList').val());
 
       // Fire off the global event for the controller so that it handles the server communication.

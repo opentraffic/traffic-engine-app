@@ -18,6 +18,7 @@ Traffic.models.UserModel = Backbone.Model.extend({
   defaults: {
     username: '',
     password: '',
+    confirm_password: '',
     state: '',
     stateDetails: '',
     role: ''

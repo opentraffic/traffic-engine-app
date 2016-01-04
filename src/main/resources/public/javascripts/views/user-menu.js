@@ -35,7 +35,19 @@ Traffic.views = Traffic.views || {};
     },
 
     clickUsersLink: function() {
-      console.log('Users dialog: TODO');
+      A.app.instance.usersModal = new Backbone.BootstrapModal({
+        animate: true, 
+        content: new views.UsersList(), 
+        title: translator.translate("users_dialog_title"),
+        showFooter: false
+      });
+      
+      A.app.instance.usersModal.on('cancel', function() {
+        this.options.content.remove(); //remove previous view
+        A.app.instance.usersModal = null;
+      });
+
+      A.app.instance.usersModal.open();
     },
 
     clickDataLink: function() {

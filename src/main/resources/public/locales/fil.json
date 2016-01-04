@@ -40,6 +40,7 @@
   "username_or_password_incorrect": "[fil]Either username or password is incorrect.[/fil]",
   "username_label":       "[fil]Username(*)[/fil]",
   "password_label":       "[fil]Password(*)[/fil]",
+  "confirm_password_label": "[fil]Confirm Password(*)[/fil]",
   "login_label":          "[fil]Log In[/fil]",
   "welcome_label":        "[fil]Welcome[/fil]",
   "sign_in_as":           "[fil]Sign in as[/fil]",
@@ -61,6 +62,8 @@
   "ok_label":             "[fil]OK[/fil]",
   "cancel_label":         "[fil]Cancel[/fil]",
   "new_user_created":     "[fil]New user has been successfully created.[/fil]",
-  "create_new_user_failed": "[fil]Failed to create user.[/fil]",
-  "role_label":           "[fil]Role(*)[/fil]"
+  "create_new_user_failed": "[fil]Failed to create user[/fil]",
+  "role_label":           "[fil]Role(*)[/fil]",
+  "username_title":       "[fil]Username[/fil]",
+  "role_title":           "[fil]Role[/fil]"
 }

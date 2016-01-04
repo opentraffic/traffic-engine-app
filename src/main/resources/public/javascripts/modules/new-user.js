@@ -4,7 +4,10 @@
     });
 
     module.signupSuccess = function(user, data) {
-      user.set('state', user.signupSuccessState)
+      user.set('state', user.signupSuccessState);
+      if(app.usersCollection) {
+        app.usersCollection.push(user.toJSON());
+      };
     };
 
     module.signupFail= function(user, response) {
@@ -36,6 +39,11 @@
         module.signupFail(user, {
           status: 402,
           statusText: 'Username and password are required.'
+        });
+      } else if(credentials.password != credentials.confirm_password) {
+        module.signupFail(user, {
+          status: 402,
+          statusText: 'Confirmed password does not match.'
         });
       } else {
         module.signupSuccess(user, credentials);

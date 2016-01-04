@@ -40,6 +40,7 @@
   "username_or_password_incorrect": "Either username or password is incorrect.",
   "username_label":       "Username(*)",
   "password_label":       "Password(*)",
+  "confirm_password_label": "Confirm Password(*)",
   "login_label":          "Log In",
   "welcome_label":        "Welcome",
   "sign_in_as":           "Sign in as",
@@ -61,6 +62,8 @@
   "ok_label":             "OK",
   "cancel_label":         "Cancel",
   "new_user_created":     "New user has been successfully created.",
-  "create_new_user_failed": "Failed to create user.",
-  "role_label":           "Role(*)"
+  "create_new_user_failed": "Failed to create user",
+  "role_label":           "Role(*)",
+  "username_title":       "Username",
+  "role_title":           "Role"
 }
