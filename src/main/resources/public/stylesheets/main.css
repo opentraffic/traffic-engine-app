@@ -71,7 +71,7 @@ body, div {
 
 .footer-logo {
   max-height: 40px;
-  margin: 0px 10px;
+  max-width: 150px;
 }
 
 .location-search .twitter-typeahead {
