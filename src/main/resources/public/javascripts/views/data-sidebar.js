@@ -11,13 +11,17 @@ Traffic.views = Traffic.views || {};
 
       var _this = this;
 
-      setInterval(function(){
+      this.statsAPIInterval = setInterval(function(){
         $.getJSON('/stats', function(data){
           _this.$('#vehicleCount').text(data.vehicleCount);
           _this.$('#lastTime').text(new Date(data.lastUpdate).toString());
         });
       }, 3000);
 
+    },
+
+    onClose: function() {
+      clearInterval(this.statsAPIInterval);
     }
   });
   
