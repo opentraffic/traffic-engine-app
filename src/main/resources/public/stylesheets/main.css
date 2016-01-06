@@ -85,3 +85,7 @@ body, div {
 #signIn {
   margin-right: 5px;
 }
+
+#localeList {
+  min-width: 0px !important;
+}

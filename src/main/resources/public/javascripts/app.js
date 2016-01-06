@@ -34,7 +34,7 @@ var Traffic = Traffic || {};
 
 	});
 
-})(Traffic, jQuery, Traffic.translations, Traffic.views, Traffic.models, MapWrapper);
+})(Traffic, jQuery, Traffic.translations, Traffic.views, Traffic.models, Traffic.MapWrapper);
 
 
 $(document).ready(function() {

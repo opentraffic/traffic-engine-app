@@ -65,5 +65,9 @@
   "create_new_user_failed": "Failed to create user",
   "role_label":           "Role(*)",
   "username_title":       "Username",
-  "role_title":           "Role"
+  "role_title":           "Role",
+  "english_basemap":      "English",
+  "international_basemap":"International",
+  "zoom_in":              "Zoom In",
+  "zoom_out":             "Zoom Out"
 }
