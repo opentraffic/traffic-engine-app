@@ -69,5 +69,6 @@
   "english_basemap":      "English",
   "international_basemap":"International",
   "zoom_in":              "Zoom In",
-  "zoom_out":             "Zoom Out"
+  "zoom_out":             "Zoom Out",
+  "to":                   "to"
 }
