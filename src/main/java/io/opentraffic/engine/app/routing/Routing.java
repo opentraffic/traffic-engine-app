@@ -223,4 +223,8 @@ public class Routing {
             log.log(Level.INFO, "graph built");
         }
     }
+
+    public boolean isReady(){
+        return graph != null;
+    }
 }

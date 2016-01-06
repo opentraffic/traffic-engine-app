@@ -246,7 +246,12 @@ public class TrafficEngineApp {
 	        LocalDateTime dt = LocalDateTime.now();
 	        rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
 
-			List<Fun.Tuple3<Long, Long, Long>> edges    = new ArrayList<>(routing.route(rr));
+            while(!routing.isReady()){
+                log.info("Graph not ready, waiting 1 second");
+                Thread.sleep(1000);
+            }
+
+			List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>(routing.route(rr));
 
 			TrafficPath trafficPath =new TrafficPath();
 
