@@ -38,6 +38,13 @@ Traffic.views = Traffic.views || {};
       }
     },
 
+    mapMove: function() {
+      if(A.app.sidebar) {
+        A.app.sidebar.filterChanged = false;
+        A.app.sidebar.update();
+      }
+    },
+
     selectLocale : function(evt) {
       var locale = $(evt.target).data('locale');
       if(translator) {

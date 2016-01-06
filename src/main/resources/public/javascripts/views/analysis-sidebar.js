@@ -30,14 +30,14 @@ Traffic.views = Traffic.views || {};
     },
 
     onClose : function() {
-      A.app.map.off("moveend", A.app.sidebar.mapMove);
+      A.app.map.off("moveend", A.app.sidebarTabs.mapMove);
     },
 
     onShow : function() {
 
       var _this = this;
 
-      A.app.map.on("moveend", A.app.sidebar.mapMove);
+      A.app.map.on("moveend", A.app.sidebarTabs.mapMove);
 
       this.$("#week1To").hide();
       this.$("#week2To").hide();
@@ -203,11 +203,6 @@ Traffic.views = Traffic.views || {};
       }
 
       return wList;
-    },
-
-    mapMove : function() {
-      A.app.sidebar.filterChanged = false;
-      A.app.sidebar.update();
     },
 
     update : function() {
