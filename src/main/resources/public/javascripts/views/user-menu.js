@@ -34,29 +34,18 @@ Traffic.views = Traffic.views || {};
       A.app.instance.vent.trigger('logout:success')
     },
 
-    clickUsersLink: function() {
-      var getUsers = function(callback) {
-        //TODO: API to get /users
-        var usersArray = [];
-        usersArray.push({username: 'superadmin', role: 'super_admin'});
-        usersArray.push({username: 'admin', role: 'admin'});
-        usersArray.push({username: 'user', role: 'user'});
+    getUsers: function(callback) {
+      //TODO: API to get /users
+      var usersArray = [];
+      usersArray.push({username: 'superadmin', role: 'super_admin'});
+      usersArray.push({username: 'admin', role: 'admin'});
+      usersArray.push({username: 'user', role: 'user'});
 
-        A.app.instance.usersCollection = new A.collections.Users(usersArray);
-      };
+      A.app.instance.usersCollection = new A.collections.Users(usersArray);
+    },
 
-      var initializeUsersCollection = function(){ 
-        if(!A.app.instance.usersCollection) {
-          getUsers();
-        }
-
-        return A.app.instance.usersCollection;
-      };
-
-      var usersCollection = initializeUsersCollection();
-
-      var usersList = new Backgrid.Grid({
-        columns: [{
+    getUserGridColumns: function() {
+      return [{
           name: 'username',
           cell: 'string',
           editable: false,
@@ -66,7 +55,18 @@ Traffic.views = Traffic.views || {};
           cell: 'string',
           editable: false,
           label: translator.translate('role_title')
-        }],
+        }];
+    },
+
+    clickUsersLink: function() {
+      if(!A.app.instance.usersCollection) {
+        this.getUsers();
+      }
+
+      var usersCollection = A.app.instance.usersCollection;
+
+      var usersList = new Backgrid.Grid({
+        columns: this.getUserGridColumns(),
         collection: usersCollection
       });
 
