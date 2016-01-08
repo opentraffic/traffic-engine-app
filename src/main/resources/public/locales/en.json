@@ -78,5 +78,8 @@
   "move_to_previous":     "Previous",
   "move_to_next":         "Next",
   "delete_user":            "X",
-  "edit_user":            "Edit"
+  "edit_user":            "Edit",
+  "deletion_confirmation_message": "Are you sure to delete this record?",
+  "deletion_confirmation_title": "Deletion Confirmation",
+  "id_title":             "ID"
 }

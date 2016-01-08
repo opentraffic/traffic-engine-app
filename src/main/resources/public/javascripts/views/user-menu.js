@@ -37,15 +37,20 @@ Traffic.views = Traffic.views || {};
     getUsers: function(callback) {
       //TODO: API to get /users
       var usersArray = [];
-      usersArray.push({username: 'superadmin', role: 'super_admin'});
-      usersArray.push({username: 'admin', role: 'admin'});
-      usersArray.push({username: 'user', role: 'user'});
+      usersArray.push({id: 1, username: 'superadmin', role: 'super_admin'});
+      usersArray.push({id: 2, username: 'admin', role: 'admin'});
+      usersArray.push({id: 3, username: 'user', role: 'user'});
 
       A.app.instance.usersCollection = new A.collections.Users(usersArray);
     },
 
     getUserGridColumns: function() {
       return [{
+          name: 'id',
+          cell: 'integer',
+          editable: false,
+          label: translator.translate('id_title')
+        },{
           name: 'username',
           cell: 'string',
           editable: false,
@@ -61,9 +66,18 @@ Traffic.views = Traffic.views || {};
           editable: false,
           label: '',
           formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-              fromRaw: function (rawValue) {
-                  return '<div class="user-actions"><button class="btn btn-xs delete-user">' + translator.translate('delete_user') + '</button>' +
-                  '<button class="btn btn-xs edit-user">' + translator.translate('edit_user') + '</button></div>';
+              fromRaw: function (rawValue, obj) {
+                var html = '';
+                var currentUser = A.app.instance.user;
+                if(currentUser.isSuperAdmin()) {
+                  html = '<div class="user-actions">';
+                  if(currentUser && !obj.isSelf(currentUser.get('username'))) {
+                    html += '<button class="btn btn-xs delete-user">' + translator.translate('delete_user') + '</button>';
+                  }
+                  html += '<button class="btn btn-xs edit-user">' + translator.translate('edit_user') + '</button></div>';
+                }
+
+                return html;
               }
           })
         }];
@@ -156,9 +170,12 @@ Traffic.views = Traffic.views || {};
       confirmDialog.open();
       var button = this;
       confirmDialog.on('ok', function() {
-        var username = $(button).parents('tr').find('td:first').text();
-        var users = A.app.instance.usersCollection;
-        users.remove(users.where({username: username}) );
+        var userId = $(button).parents('tr').find('td:first').text();
+        var userToDelete = A.app.instance.usersCollection.get(userId);
+        if(userToDelete)
+          userToDelete.destroy();
+
+        A.app.instance.usersCollection.remove(userToDelete);
       }); 
     },
 

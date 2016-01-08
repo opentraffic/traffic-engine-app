@@ -78,5 +78,8 @@
   "move_to_previous":     "[fil]Previous[/fil]",
   "move_to_next":         "[fil]Next[/fil]",
   "delete_user":          "[fil]X[/fil]",
-  "edit_user":            "[fil]Edit[/fil]"
+  "edit_user":            "[fil]Edit[/fil]",
+  "deletion_confirmation_message": "[fil]Are you sure to delete this record?[/fil]",
+  "deletion_confirmation_title": "[fil]Deletion Confirmation[/fil]",
+  "id_title":             "[fil]ID[/fil]"
 }
