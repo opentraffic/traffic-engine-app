@@ -55,6 +55,17 @@ Traffic.views = Traffic.views || {};
           cell: 'string',
           editable: false,
           label: translator.translate('role_title')
+        }, {
+          name: '',
+          cell: 'html',
+          editable: false,
+          label: '',
+          formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+              fromRaw: function (rawValue) {
+                  return '<div class="user-actions"><button class="btn btn-xs delete-user">' + translator.translate('delete_user') + '</button>' +
+                  '<button class="btn btn-xs edit-user">' + translator.translate('edit_user') + '</button></div>';
+              }
+          })
         }];
     },
 
@@ -72,57 +83,87 @@ Traffic.views = Traffic.views || {};
 
       A.app.instance.usersModal = new Backbone.BootstrapModal({
         animate: true, 
-        content: usersList, 
+        content: "<div class='users-table'></div>", 
         title: translator.translate("users_dialog_title"),
         showFooter: false
       });
       
       A.app.instance.usersModal.on('cancel', function() {
-        this.options.content.remove(); //remove previous view
+        $('.users-table').remove(); //remove previous view
         A.app.instance.usersModal = null;
       });
 
-      A.app.instance.usersModal.open();
+      var _this = this;
+      var renderGrid = function() {
+        $('.users-table').append(usersList.render().el)
 
-      // Initialize the paginator
-      var paginator = new Backgrid.Extension.Paginator({
-        collection: usersCollection,
-        controls: {
-          rewind: {
-            label: " <<",
-            title: translator.translate('move_to_first')
-          },
-          back: {
-            label: " <",
-            title: translator.translate('move_to_previous')
-          },
-          forward: {
-            label: "> ",
-            title: translator.translate('move_to_next')
-          },
-          fastForward: {
-            label: ">> ",
-            title: translator.translate('move_to_last')
+        $('.users-table').on('click', '.delete-user', _this.clickDeleteUser);
+        $('.users-table').on('click', '.edit-user', _this.clickEditUser);
+
+        // Initialize the paginator
+        var paginator = new Backgrid.Extension.Paginator({
+          collection: usersCollection,
+          controls: {
+            rewind: {
+              label: " <<",
+              title: translator.translate('move_to_first')
+            },
+            back: {
+              label: " <",
+              title: translator.translate('move_to_previous')
+            },
+            forward: {
+              label: "> ",
+              title: translator.translate('move_to_next')
+            },
+            fastForward: {
+              label: ">> ",
+              title: translator.translate('move_to_last')
+            }
           }
-        }
+        });
+
+        // Render the paginator
+        $(usersList.el).after(paginator.render().el);
+
+        // Initialize a client-side filter to filter on the client
+        // mode pageable collection's cache.
+        var filter = new Backgrid.Extension.ClientSideFilter({
+          collection: usersCollection,
+          fields: ['username', 'role']
+        });
+
+        // Render the filter
+        $(usersList.el).before(filter.render().el);
+
+        // Add some space to the filter and move it to the right
+        $(filter.el).css({float: "right", margin: "5px 0px"});
+      };
+      A.app.instance.usersModal.on('shown', renderGrid);
+
+      A.app.instance.usersModal.open();
+    },
+
+    clickDeleteUser: function() {
+      //TODO
+      console.log('deleting user');
+      var confirmDialog = new Backbone.BootstrapModal({
+        animate: true, 
+        content: translator.translate('deletion_confirmation_message'),
+        title: translator.translate('deletion_confirmation_title')
       });
+      
+      confirmDialog.open();
+      var button = this;
+      confirmDialog.on('ok', function() {
+        var username = $(button).parents('tr').find('td:first').text();
+        var users = A.app.instance.usersCollection;
+        users.remove(users.where({username: username}) );
+      }); 
+    },
 
-      // Render the paginator
-      $(usersList.el).after(paginator.render().el);
-
-      // Initialize a client-side filter to filter on the client
-      // mode pageable collection's cache.
-      var filter = new Backgrid.Extension.ClientSideFilter({
-        collection: usersCollection,
-        fields: ['username', 'role']
-      });
-
-      // Render the filter
-      $(usersList.el).before(filter.render().el);
-
-      // Add some space to the filter and move it to the right
-      $(filter.el).css({float: "right", margin: "5px 0px"});
-
+    clickEditUser: function() {
+      console.log('editing user');
     },
 
     clickDataLink: function() {

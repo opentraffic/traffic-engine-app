@@ -64,8 +64,30 @@ var overrideBackboneSync = function() {
 	}
 };
 
+var createHtmlCustomCell = function() {
+	var HtmlCell = Backgrid.HtmlCell = Backgrid.Cell.extend({
+
+    /** @property */
+    className: "html-cell",
+    
+    initialize: function () {
+        Backgrid.Cell.prototype.initialize.apply(this, arguments);
+    },
+
+    render: function () {
+        this.$el.empty();
+        var rawValue = this.model.get(this.column.get("name"));
+        var formattedValue = this.formatter.fromRaw(rawValue, this.model);
+        this.$el.append(formattedValue);
+        this.delegateEvents();
+        return this;
+    }
+	});
+};
+
 $(document).ready(function() {
 	overrideBackboneSync();
+	createHtmlCustomCell();
 	if(Traffic.translations != undefined) {
 		Traffic.translations.init();
 	}

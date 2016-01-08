@@ -89,3 +89,11 @@ body, div {
 #localeList {
   min-width: 0px !important;
 }
+
+.user-actions {
+  float: right;
+}
+
+.delete-user {
+  margin-right: 5px;
+}

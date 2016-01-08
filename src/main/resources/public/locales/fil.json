@@ -72,5 +72,11 @@
   "zoom_out":             "[fil]Zoom Out[/fil]",
   "to":                   "[fil]to[/fil]",
   "avg_speed":            "[fil]Average Speed[/fil]",
-  "std_dev":              "[fil]Std Dev[/fil]"
+  "std_dev":              "[fil]Std Dev[/fil]",
+  "move_to_first":        "[fil]First[/fil]",
+  "move_to_last":         "[fil]Last[/fil]",
+  "move_to_previous":     "[fil]Previous[/fil]",
+  "move_to_next":         "[fil]Next[/fil]",
+  "delete_user":          "[fil]X[/fil]",
+  "edit_user":            "[fil]Edit[/fil]"
 }

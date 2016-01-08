@@ -72,5 +72,11 @@
   "zoom_out":             "Zoom Out",
   "to":                   "to",
   "avg_speed":            "Average Speed",
-  "std_dev":              "Std Dev"
+  "std_dev":              "Std Dev",
+  "move_to_first":        "First",
+  "move_to_last":         "Last",
+  "move_to_previous":     "Previous",
+  "move_to_next":         "Next",
+  "delete_user":            "X",
+  "edit_user":            "Edit"
 }
