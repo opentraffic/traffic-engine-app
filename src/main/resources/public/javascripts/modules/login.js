@@ -5,10 +5,12 @@
     });
 
     module.loginSuccess = function(data) {
-      module.userModel.set('state', module.userModel.authSuccessState)
+      module.userModel.set('token', data.token);
+      module.userModel.set('state', module.userModel.authSuccessState);
     };
 
     module.loginFail= function(response) {
+      module.userModel.reset();
       if(404 == response.status) {
         module.userModel.set('state', module.userModel.authFailState);
       } else {
@@ -33,6 +35,7 @@
       //TODO: remove
       // for debugging only
       if(credentials.username == 'superadmin' && credentials.password == "welcome1") {
+        credentials.token = 'sample-token';
         module.loginSuccess(credentials);
       } else {
         if(!credentials.username) {

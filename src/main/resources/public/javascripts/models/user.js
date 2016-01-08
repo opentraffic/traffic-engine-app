@@ -21,7 +21,8 @@ Traffic.models.UserModel = Backbone.Model.extend({
     confirm_password: '',
     state: '',
     stateDetails: '',
-    role: ''
+    role: '',
+    token: ''
   },
 
   isLoggedIn: function() {

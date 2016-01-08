@@ -37,11 +37,38 @@ var Traffic = Traffic || {};
 })(Traffic, jQuery, Traffic.translations, Traffic.views, Traffic.models, Traffic.MapWrapper);
 
 
+// Override Backbone.sync to include user auth params into each API call
+var overrideBackboneSync = function() {
+	var _sync = Backbone.sync;
+	Backbone.sync = function(method, model, options) {
+		options = options || {};
+		options.data = options.data || {};
+		var user = Traffic.app.instance.user;
+		if(user) {
+			options.data.username = Traffic.app.instance.user.get('username');
+
+			options = $.extend({
+	      // In case the request is cross domain, keep these next 4 lines
+	      //crossDomain: true,
+	      //xhrFields: {
+	      //    withCredentials: true
+	      //},
+	      // Add the token to the request header
+	      beforeSend: function(xhr){
+	          xhr.setRequestHeader('X-AUTH-TOKEN', user.get('token'));
+	      }
+	    }, options);
+		}
+
+	  return _sync.call( this, method, model, options );
+	}
+};
+
 $(document).ready(function() {
+	overrideBackboneSync();
 	if(Traffic.translations != undefined) {
 		Traffic.translations.init();
 	}
-
 	Traffic.app.instance.start();
 
 });

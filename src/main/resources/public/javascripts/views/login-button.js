@@ -19,7 +19,9 @@ Traffic.views = Traffic.views || {};
         showFooter: false,
         escape: false
       });
-
+      A.app.instance.loginModal.on('shown', function() {
+        $('#loginForm input[name=username]').focus();
+      });
       A.app.instance.loginModal.on('cancel', function() {
         this.options.content.remove(); //remove previous view
         A.app.instance.loginModal = null;

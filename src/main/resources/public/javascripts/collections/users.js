@@ -2,7 +2,13 @@ var Traffic = Traffic || {};
 
 Traffic.collections = Traffic.collections || {};
 
-Traffic.collections.Users = Backbone.Collection.extend({
+Traffic.collections.Users = Backbone.PageableCollection.extend({
   model: Traffic.models.UserModel,
-  comparator: 'username'
+  url: '/users',
+  state: {
+    pageSize: 15,
+    sortKey: "username",
+    order: 1
+  },
+  mode: 'client'
 });
