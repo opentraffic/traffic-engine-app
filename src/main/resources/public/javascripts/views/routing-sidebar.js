@@ -24,19 +24,20 @@ Traffic.views = Traffic.views || {};
             //reset the filter state
             this.hourlyChart.filterAll();
             this.dailyChart.filterAll();
-            dc.redrawAll();
+            dc.renderAll();
 
             //flip the filter on/off
             var brushOn = !this.dailyChart.brushOn();
             this.dailyChart.brushOn(brushOn);
             this.hourlyChart.brushOn(brushOn);
-            dc.renderAll();
             if(brushOn){
                 $("#toggleFilters").html(translator.translate("filter_on"))
             }else{
                 $("#toggleFilters").html(translator.translate("filter_off"))
-                A.app.sidebar.updateTrafficTiles;
+                A.app.sidebarTabs.getRoute();
             }
+            dc.renderAll();
+            this.update();
 
         },
 
