@@ -35,6 +35,7 @@ Traffic.views = Traffic.views || {};
                 $("#toggleFilters").html(translator.translate("filter_on"))
             }else{
                 $("#toggleFilters").html(translator.translate("filter_off"))
+                A.app.sidebar.updateTrafficTiles;
             }
 
         },
@@ -42,6 +43,14 @@ Traffic.views = Traffic.views || {};
         resetRoute : function() {
             $('#routeButtons').hide();
             A.app.sidebarTabs.resetRoute();
+
+            //reset the filter state
+            $("#toggleFilters").html(translator.translate("filter_off"))
+            this.hourlyChart.filterAll();
+            this.dailyChart.filterAll();
+            this.dailyChart.brushOn(false);
+            this.hourlyChart.brushOn(false);
+            dc.redrawAll();
         },
 
         getRoute : function() {
@@ -227,6 +236,8 @@ Traffic.views = Traffic.views || {};
                 d.s = d.s * 3.6; // convert from m/s km/h
             });
 
+            var hourlyData = data.hours;
+
             if(!this.chartData) {
                 this.chartData = C(data.hours);
 
@@ -335,9 +346,13 @@ Traffic.views = Traffic.views || {};
                     .xAxis().tickFormat(function (d) {
                         return dayLabel[d]
                     });
+                this.hourlyData = data.hours;
+                var that = this;
                 this.dailyChart.title(function (d) {
-                    if(!isNaN(d.value.avg)){
-                        return Math.round(d.value.avg) + ' KPH';
+                    if(!isNaN(d.value.avg) && d.value.avg > 0){
+                        var wsd = that.wsd(d.key, that.hourlyData, 'dayOfWeek');
+                        return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
+                            + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
                     }
                     return null;
                 });
@@ -374,8 +389,10 @@ Traffic.views = Traffic.views || {};
                     .xAxis().tickFormat();
 
                 this.hourlyChart.title(function (d) {
-                    if(!isNaN(d.value.avg)){
-                        return Math.round(d.value.avg) + ' KPH';
+                    if(!isNaN(d.value.avg) && d.value.avg > 0){
+                        var wsd = that.wsd(d.key, that.hourlyData, 'hourOfDay');
+                        return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
+                            + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
                     }
                     return null;
                 });
@@ -398,7 +415,6 @@ Traffic.views = Traffic.views || {};
                 this.dailyChart.filterAll();
                 this.chartData.remove();
 
-
                 this.chartData.add(data.hours);
 
                 if(A.app.sidebar.hourExtent && ( A.app.sidebar.hourExtent[0] >= 1.0 ||  A.app.sidebar.hourExtent[1] >= 1.0)) {
@@ -410,9 +426,39 @@ Traffic.views = Traffic.views || {};
 
                 this.hourlyChart.brush().on("brushend.custom", A.app.sidebar.update);
                 this.dailyChart.brush().on("brushend.custom", A.app.sidebar.update);
+
+                this.hourlyData = data.hours;
+                var that = this;
+                this.dailyChart.title(function (d) {
+                    if(!isNaN(d.value.avg) && d.value.avg > 0){
+                        var wsd = that.wsd(d.key, that.hourlyData, 'dayOfWeek');
+                        return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
+                            + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
+                    }
+                    return null;
+                });
             }
 
             dc.renderAll();
+        },
+
+        wsd: function(key, hourlyData, keyParam){
+            var hours = [];
+            hourlyData.forEach(function (d) {
+                if(d[keyParam] == key  && d.c > 0){
+                    hours.push(d);
+                }
+            });
+
+            var WSD = 0;  //Weighted std dev
+            var totalCount = 0;
+            hours.forEach(function (d) {
+                WSD += d.c * d.std;
+                totalCount += d.c;
+            });
+            WSD /= totalCount;
+            WSD = Math.round(WSD * 100) / 100;
+            return WSD;
         },
 
         initialize : function() {

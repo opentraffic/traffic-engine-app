@@ -70,5 +70,7 @@
   "international_basemap":"International",
   "zoom_in":              "Zoom In",
   "zoom_out":             "Zoom Out",
-  "to":                   "to"
+  "to":                   "to",
+  "avg_speed":            "Average Speed",
+  "std_dev":              "Std Dev"
 }
