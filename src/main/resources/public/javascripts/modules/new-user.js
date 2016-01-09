@@ -5,9 +5,6 @@
 
     module.signupSuccess = function(user, data) {
       user.set('state', user.signupSuccessState);
-      if(app.usersCollection) {
-        app.usersCollection.push(user.toJSON());
-      };
     };
 
     module.signupFail= function(user, response) {

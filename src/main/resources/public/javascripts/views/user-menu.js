@@ -152,6 +152,9 @@ Traffic.views = Traffic.views || {};
 
         // Add some space to the filter and move it to the right
         $(filter.el).css({float: "right", margin: "5px 0px"});
+
+        //TODO: Fetch some data
+        //usersCollection.fetch({reset: true});
       };
       A.app.instance.usersModal.on('shown', renderGrid);
 
