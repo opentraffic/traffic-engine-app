@@ -20,23 +20,26 @@ Traffic.views = Traffic.views || {};
 
         toggleFilters : function() {
 
+
+            var hourlyChart = A.app.sidebar.hourlyChart;
+            var dailyChart = A.app.sidebar.dailyChart;
+
             //reset the filter state
-            this.hourlyChart.filterAll();
-            this.dailyChart.filterAll();
+            hourlyChart.filterAll();
+            dailyChart.filterAll();
             dc.renderAll();
 
             //flip the filter on/off
             var brushOn = !this.dailyChart.brushOn();
-            this.dailyChart.brushOn(brushOn);
-            this.hourlyChart.brushOn(brushOn);
+            dailyChart.brushOn(brushOn);
+            hourlyChart.brushOn(brushOn);
             if(brushOn){
                 $("#toggleFilters").html(translator.translate("filter_on"))
             }else{
                 $("#toggleFilters").html(translator.translate("filter_off"))
-                A.app.sidebarTabs.getRoute();
             }
             dc.renderAll();
-            this.update();
+            this.addTrafficOverlay();
         },
 
         resetRoute : function() {
@@ -48,6 +51,21 @@ Traffic.views = Traffic.views || {};
         },
 
         initialize : function() {
+            $.getJSON('/colors', function(data) {
+                var binWidth = 240 / data.colorStrings.length;
+                $('#maxSpeedInKph').html(data.maxSpeedInKph);
+                var parent = $('#speedLegend').children('svg');
+                for(var i in data.colorStrings) {
+                    var colorString = data.colorStrings[i];
+                    var bin = $(document.createElementNS("http://www.w3.org/2000/svg", "rect")).attr({
+                        fill: colorString,
+                        x: i * binWidth,
+                        width: binWidth,
+                        height: 24
+                    });
+                    parent.append(bin);
+                }
+            });
             _.bindAll(this, 'updateTrafficTiles', 'addTrafficOverlay', 'update', 'changeFromWeek', 'changeToWeek', 'clickCompare', 'changeConfidenceInterval', 'changeNormalizeBy');
         },
 

@@ -15,6 +15,7 @@ import io.opentraffic.engine.geom.GPSPoint;
 import io.opentraffic.engine.geom.StreetSegment;
 import io.opentraffic.engine.osm.OSMCluster;
 import org.apache.commons.cli.*;
+import org.jcolorbrewer.ColorBrewer;
 import org.mapdb.Fun;
 import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.routing.core.RoutingRequest;
@@ -127,6 +128,20 @@ public class TrafficEngineApp {
 			}
 			return weekObjects;
 		}, mapper::writeValueAsString);
+
+        get("/colors", (request, response) ->  {
+            int numberOfBins = Integer.parseInt(appProps.getProperty("application.numberOfBins"));
+            double maxSpeedInKph = Double.parseDouble(TrafficEngineApp.appProps.getProperty("application.maxSpeedInKph"));
+            Color[] colors = ColorBrewer.RdYlBu.getColorPalette(numberOfBins);
+            String[] colorStrings = new String[numberOfBins];
+            for(int i = 0; i < colors.length; i++){
+                colorStrings[i] = "rgb(" + colors[i].getRed() + "," + colors[i].getGreen() + "," + colors[i].getBlue() + ")";
+            }
+            Map colorMap = new HashMap();
+            colorMap.put("colorStrings", colorStrings);
+            colorMap.put("maxSpeedInKph", maxSpeedInKph);
+            return colorMap;
+        }, mapper::writeValueAsString);
 
 		get("/weeklyStats", (request, response) -> {
 

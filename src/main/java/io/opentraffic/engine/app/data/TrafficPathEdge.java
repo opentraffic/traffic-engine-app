@@ -1,5 +1,6 @@
 package io.opentraffic.engine.app.data;
 
+import io.opentraffic.engine.app.TrafficEngineApp;
 import io.opentraffic.engine.data.stats.SummaryStatistics;
 import io.opentraffic.engine.geom.StreetSegment;
 import org.jcolorbrewer.ColorBrewer;
@@ -13,7 +14,7 @@ import java.awt.*;
  */
 public class TrafficPathEdge {
 
-    static Color[] colors = ColorBrewer.RdYlBu.getColorPalette(11);
+    private Color[] colors;
 
     public String geometry;
     public String color;
@@ -21,17 +22,23 @@ public class TrafficPathEdge {
     public double speed;
     public double stdDev;
 
-    public TrafficPathEdge(StreetSegment streetSegment, SummaryStatistics summaryStatistics) {
+    private static int numberOfBins = Integer.parseInt(TrafficEngineApp.appProps.getProperty("application.numberOfBins"));
+    private static double maxSpeedInKph = Double.parseDouble(TrafficEngineApp.appProps.getProperty("application.maxSpeedInKph"));
 
+    public TrafficPathEdge(StreetSegment streetSegment, SummaryStatistics summaryStatistics) {
+        colors = ColorBrewer.RdYlBu.getColorPalette(numberOfBins + 1);
 
         EncodedPolylineBean encodedPolyline = PolylineEncoder.createEncodings(streetSegment.getGeometry());
         geometry = encodedPolyline.getPoints();
 
-        int colorNum = (int) (10 / (50.0 / (summaryStatistics.getMean() * 3.6)));
-        if(colorNum > 10)
-            colorNum = 10;
-
-        color = String.format("#%02x%02x%02x", colors[colorNum].getRed(), colors[colorNum].getGreen(), colors[colorNum].getBlue());
+        if(summaryStatistics.count < 1){
+            color = "#808080";
+        }else{
+            int colorNum = (int) (numberOfBins / (maxSpeedInKph / (summaryStatistics.getMean() * 3.6)));
+            if(colorNum > numberOfBins)
+                colorNum = numberOfBins;
+            color = String.format("#%02x%02x%02x", colors[colorNum].getRed(), colors[colorNum].getGreen(), colors[colorNum].getBlue());
+        }
 
         length = streetSegment.length;
         speed = summaryStatistics.getMean();

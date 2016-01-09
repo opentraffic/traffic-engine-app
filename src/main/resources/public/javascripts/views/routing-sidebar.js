@@ -463,7 +463,21 @@ Traffic.views = Traffic.views || {};
         },
 
         initialize : function() {
-
+            $.getJSON('/colors', function(data) {
+                var binWidth = 240 / data.colorStrings.length;
+                $('#maxSpeedInKph').html(data.maxSpeedInKph);
+                var parent = $('#speedLegend').children('svg');
+                for(var i in data.colorStrings) {
+                    var colorString = data.colorStrings[i];
+                    var bin = $(document.createElementNS("http://www.w3.org/2000/svg", "rect")).attr({
+                        fill: colorString,
+                        x: i * binWidth,
+                        width: binWidth,
+                        height: 24
+                    });
+                    parent.append(bin);
+                }
+            });
             _.bindAll(this, 'update', 'changeFromWeek', 'changeToWeek');
         },
 

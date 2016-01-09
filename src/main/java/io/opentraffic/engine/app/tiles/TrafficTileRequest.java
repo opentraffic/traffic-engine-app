@@ -29,11 +29,14 @@ import java.util.Set;
 public abstract class TrafficTileRequest {
 
 	public static final double MS_TO_KMS = 3.6d;
+    private static final int numberOfBins = Integer.parseInt(TrafficEngineApp.appProps.getProperty("application.numberOfBins"));
+    private static final double maxSpeedInKph = Double.parseDouble(TrafficEngineApp.appProps.getProperty("application.maxSpeedInKph"));
 
 	final public String type;
 	final public Integer x, y, z;
-	
-	public TrafficTileRequest(Integer x, Integer y, Integer z, String type) {
+
+
+    public TrafficTileRequest(Integer x, Integer y, Integer z, String type) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -167,7 +170,7 @@ public abstract class TrafficTileRequest {
 
 			List<Long> segmentIds = TrafficEngineApp.engine.getTrafficEngine().getStreetSegmentIds(tile.envelope);
 
-			Color[] colors = ColorBrewer.RdYlBu.getColorPalette(11);
+			Color[] colors = ColorBrewer.RdYlBu.getColorPalette(numberOfBins + 1);
 
 			for(Long id : segmentIds) {
 
@@ -194,10 +197,9 @@ public abstract class TrafficTileRequest {
 
 					if(baselineStats.getMean() > 0) {
 						averageSpeed = baselineStats.getMean() * MS_TO_KMS;
-						colorNum = (int) (10 / (50.0 / averageSpeed));
-						if(colorNum > 10)
-							colorNum = 10;
-
+                        colorNum = (int) (numberOfBins / (maxSpeedInKph / averageSpeed));
+                        if(colorNum > numberOfBins)
+                            colorNum = numberOfBins;
 						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 6);
 					}
 
