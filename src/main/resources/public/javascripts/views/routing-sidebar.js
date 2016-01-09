@@ -37,7 +37,10 @@ Traffic.views = Traffic.views || {};
                 A.app.sidebarTabs.getRoute();
             }
             dc.renderAll();
-            this.update();
+
+            //reset the cached filter handle positions
+            A.app.sidebar.hourExtent = A.app.sidebar.hourlyChart.brush().extent();
+            A.app.sidebar.dayExtent = A.app.sidebar.dailyChart.brush().extent();
 
         },
 
