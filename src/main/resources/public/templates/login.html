@@ -19,15 +19,15 @@
   <div class="form-group col-sm-12">
     <label class="col-sm-3 control-label">{{I18n "remember_me_label"}}</label>
     <div class="col-sm-9">
-      <input type="checkbox" value="remember_me" name="remember_me"> 
+      {{#if remember_me }}
+        <input type="checkbox" value="remember_me" name="remember_me" checked> 
+      {{else}}
+        <input type="checkbox" value="remember_me" name="remember_me"> 
+      {{/if}}
     </div>
   </div>
   <div style="text-align: center;">
-    {{#if_eq remember_me true }}
-      <input type="submit" class="btn btn-lg btn-primary" value='{{I18n "login_label"}}' checked>
-    {{else}}
-      <input type="submit" class="btn btn-lg btn-primary" value='{{I18n "login_label"}}'>
-    {{/if_eq}}
+    <input type="submit" class="btn btn-lg btn-primary" value='{{I18n "login_label"}}'>
   </div>
 
 </form>
