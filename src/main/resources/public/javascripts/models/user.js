@@ -22,7 +22,8 @@ Traffic.models.UserModel = Backbone.Model.extend({
     state: '',
     stateDetails: '',
     role: '',
-    token: ''
+    token: '',
+    remember_me: false
   },
 
   isLoggedIn: function() {
@@ -31,5 +32,18 @@ Traffic.models.UserModel = Backbone.Model.extend({
 
   reset: function() {
     this.clear().set(this.defaults);
+  },
+
+  isSuperAdmin: function() {
+    return this.get('role') == 'super_admin';
+  },
+
+  isSelf: function(username) {
+    return this.get('username').toLowerCase() == (username || '').toLowerCase();
+  },
+
+  clearPasswords: function() {
+    this.set('password', '');
+    this.set('confirm_password', '');
   }
 });

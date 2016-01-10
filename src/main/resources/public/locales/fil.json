@@ -40,6 +40,7 @@
   "username_or_password_incorrect": "[fil]Either username or password is incorrect.[/fil]",
   "username_label":       "[fil]Username(*)[/fil]",
   "password_label":       "[fil]Password(*)[/fil]",
+  "remember_me_label":    "[fil]Remember me[/fil]",
   "confirm_password_label": "[fil]Confirm Password(*)[/fil]",
   "login_label":          "[fil]Log In[/fil]",
   "welcome_label":        "[fil]Welcome[/fil]",

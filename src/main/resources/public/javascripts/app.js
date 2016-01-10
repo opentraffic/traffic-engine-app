@@ -93,4 +93,5 @@ $(document).ready(function() {
 	}
 	Traffic.app.instance.start();
 
+	Traffic.app.instance.vent.trigger('login:auto_auth');
 });

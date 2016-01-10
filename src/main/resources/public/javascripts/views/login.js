@@ -13,6 +13,7 @@ Traffic.views = Traffic.views || {};
       loginForm:           '#loginForm',
       usernameField:       'input[name=username]',
       passwordField:       'input[name=password]',
+      rememberMeField:       'input[name=remember_me]',
       successMessage:      '.msg-success',
       authErrorMessage:    '.error-bad-auth',
       generalErrorMessage: '.error-unknown'
@@ -39,6 +40,7 @@ Traffic.views = Traffic.views || {};
 
       this.model.set('username', this.$('input[name=username]').val()); 
       this.model.set('password', this.$('input[name=password]').val());
+      this.model.set('remember_me', this.$('input[name=remember_me]').prop('checked'));
 
       // Fire off the global event for the controller so that it handles the server communication.
       A.app.instance.vent.trigger('login:submit', this.model)

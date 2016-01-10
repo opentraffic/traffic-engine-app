@@ -20,8 +20,21 @@
       }
     };
 
+    app.vent.on('login:auto_auth', function() {
+      var username = Cookies.get('login_username');
+      var token = Cookies.get('login_token');
+      app.user.set('username', username);
+      app.user.set('token', token);
+      //TODO: real login api
+      if(username == 'superadmin' && token == 'sample-token') {
+        app.user.set('role', 'super_admin');
+        A.app.nav.userMenuContainer.show(new views.UserMenu());
+      }
+    });
+
     app.vent.on('login:submit', function(userModel) {
       userModel.set('state', userModel.pendingAuthState)
+      //TODO: real login api
       // $.post('/login', userModel.toJSON())
       //   .done(function(data) {
       //     module.loginSuccess(data);
@@ -52,16 +65,25 @@
 
     });
 
-    app.vent.on('login:success', function(userModel) {
+    app.vent.on('login:success', function() {
+      var user = app.user;
+      if(user.get('remember_me')) {
+        Cookies.set('login_username', user.get('username'), { expires: 30 });
+        Cookies.set('login_token', user.get('token'), { expires: 30 });
+      }
+      
       setTimeout(function(){
         if(app.loginModal) {
           app.loginModal.close();
         }
+        user.clearPasswords();
         A.app.nav.userMenuContainer.show(new views.UserMenu());
       }, 1000);
     });
 
     app.vent.on('logout:success', function() {
+      Cookies.remove('login_username');
+      Cookies.remove('login_token');
       app.Login.userModel.reset();
       A.app.nav.userMenuContainer.show(new views.LoginButton());
     });

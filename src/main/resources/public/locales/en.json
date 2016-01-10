@@ -40,6 +40,7 @@
   "username_or_password_incorrect": "Either username or password is incorrect.",
   "username_label":       "Username(*)",
   "password_label":       "Password(*)",
+  "remember_me_label":    "Remember me",
   "confirm_password_label": "Confirm Password(*)",
   "login_label":          "Log In",
   "welcome_label":        "Welcome",

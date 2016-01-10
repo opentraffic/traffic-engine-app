@@ -16,7 +16,7 @@ Traffic.views = Traffic.views || {};
 
       $.getJSON('/cityNames', function(data) {
         _this.cities = data;
-        _this.render();
+        _this.initLocationTypeahead();
       });
     },
 
@@ -66,13 +66,14 @@ Traffic.views = Traffic.views || {};
     },
 
     onRender: function() {
-      this.userMenuContainer.show(new views.LoginButton());
+      var user = A.app.instance.user;
+      if( !(user && user.isLoggedIn()) ){
+        this.userMenuContainer.show(new views.LoginButton());
+      }
 
       this.$('.dropdown input, .dropdown label').click(function(e) {
         e.stopPropagation();
       });
-
-      this.initLocationTypeahead();
     }
   });
 })(Traffic, Traffic.views, Traffic.translations);
