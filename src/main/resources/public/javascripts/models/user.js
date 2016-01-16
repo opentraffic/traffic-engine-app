@@ -9,6 +9,10 @@ Traffic.models.UserModel = Backbone.Model.extend({
   singupSuccessState: 'signup_success',
   signupFailState:    'signup_fail',
 
+  pendingUpdateState:  'update_pending',
+  updateSuccessState: 'update_success',
+  updateFailState:    'update_fail',
+
   notAuthState:     'not_auth',
   pendingAuthState: 'auth_pending',
   authSuccessState: 'auth_success',
@@ -32,6 +36,10 @@ Traffic.models.UserModel = Backbone.Model.extend({
 
   reset: function() {
     this.clear().set(this.defaults);
+  },
+
+  clearState: function() {
+    this.set('state', '');
   },
 
   isSuperAdmin: function() {
