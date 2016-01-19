@@ -374,7 +374,7 @@ Traffic.views = Traffic.views || {};
                     A.app.sidebar.percentChange = false;
 
                 this.dailyChart.width(430)
-                    .height(75)
+                    .height(150)
                     .margins({top: 5, right: 10, bottom: 20, left: 40})
                     .dimension(this.dayCount)
                     .group(this.dayCountGroup)
@@ -418,7 +418,7 @@ Traffic.views = Traffic.views || {};
                 this.hourlyChart = dc.barChart("#hourlyChart");
 
                 this.hourlyChart.width(430)
-                    .height(100)
+                    .height(150)
                     .margins({top: 5, right: 10, bottom: 20, left: 40})
                     .dimension(this.hourCount)
                     .group(this.hourCountGroup)
