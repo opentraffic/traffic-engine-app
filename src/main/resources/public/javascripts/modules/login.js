@@ -5,9 +5,13 @@
     });
 
     module.loginSuccess = function(data) {
-      data = JSON.parse(data);
-      module.userModel.set('token', data.cookie);
-      module.userModel.set('state', module.userModel.authSuccessState);
+      var userObj = JSON.parse(data);
+      var userModel = module.userModel;
+      for(var attr in userObj) {
+        userModel.set(attr, userObj[attr]);  
+      }
+      
+      userModel.set('state', userModel.authSuccessState);
     };
 
     module.loginFail= function(response) {

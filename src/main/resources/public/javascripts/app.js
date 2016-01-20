@@ -46,18 +46,6 @@ var overrideBackboneSync = function() {
 		var user = Traffic.app.instance.user;
 		if(user) {
 			options.data.username = Traffic.app.instance.user.get('username');
-
-			options = $.extend({
-	      // In case the request is cross domain, keep these next 4 lines
-	      //crossDomain: true,
-	      //xhrFields: {
-	      //    withCredentials: true
-	      //},
-	      // Add the token to the request header
-	      beforeSend: function(xhr){
-	          xhr.setRequestHeader('X-AUTH-TOKEN', user.get('token'));
-	      }
-	    }, options);
 		}
 
 	  return _sync.call( this, method, model, options );
