@@ -15,24 +15,18 @@
 
     app.vent.on('new-user:submit', function(user) {
       user.set('state', user.pendingSignupState)
-      // $.post('/signup', user.toJSON())
-      //   .done(function(data) {
-      //     module.signupSuccess(user, data);
-      //   })
-      //   .fail(function(response) {
-      //     module.signupFail(user, response);
-      //   });
+        user.set('state', user.pendingSignupState)
+        $.post('/createUser', user.toJSON())
+            .done(function(data) {
+                module.signupSuccess(user, data);
+            })
+            .fail(function(response) {
+                module.signupFail(user, response);
+            });
 
       var credentials = user.toJSON();
 
-      //TODO: remove
-      // for debugging only
-      if(credentials.username == 'superadmin') {
-        module.signupFail(user, {
-          status: 402,
-          statusText: 'This user is registered.'
-        });
-      } else if(!credentials.username || !credentials.password) {
+      if(!credentials.username || !credentials.password) {
         module.signupFail(user, {
           status: 402,
           statusText: 'Username and password are required.'

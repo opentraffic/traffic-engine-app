@@ -2,219 +2,189 @@ var Traffic = Traffic || {};
 Traffic.views = Traffic.views || {};
 
 (function(A, views, models, translator) {
-  
-  views.UserMenu = Marionette.Layout.extend({
 
-    template: Handlebars.getTemplate('app', 'user-menu'),
+    views.UserMenu = Marionette.Layout.extend({
 
-    events : {
-      'click #newUser' : 'clickNewUser',
-      'click #logout' : 'clickLogout',
-      'click #usersLink' : 'clickUsersLink',
-      'click #dataManagementLink' : 'clickDataLink'
-    },
+        template: Handlebars.getTemplate('app', 'user-menu'),
 
-    clickNewUser: function() {
-      A.app.instance.newUserModal = new Backbone.BootstrapModal({
-        animate: true, 
-        content: new views.NewUser({model: new models.UserModel()}), 
-        title: translator.translate("new_user_dialog_title"),
-        showFooter: false
-      });
-      
-      A.app.instance.newUserModal.on('cancel', function() {
-        this.options.content.remove(); //remove previous view
-        A.app.instance.newUserModal = null;
-      });
+        events : {
+            'click #newUser' : 'clickNewUser',
+            'click #logout' : 'clickLogout',
+            'click #usersLink' : 'clickUsersLink',
+            'click #dataManagementLink' : 'clickDataLink'
+        },
 
-      A.app.instance.newUserModal.open();
-    },
+        clickNewUser: function() {
+            A.app.instance.newUserModal = new Backbone.BootstrapModal({
+                animate: true,
+                content: new views.NewUser({model: new models.UserModel()}),
+                title: translator.translate("new_user_dialog_title"),
+                showFooter: false
+            });
 
-    clickLogout: function() {
-      A.app.instance.vent.trigger('logout:success')
-    },
+            A.app.instance.newUserModal.on('cancel', function() {
+                this.options.content.remove(); //remove previous view
+                A.app.instance.newUserModal = null;
+            });
 
-    getUsers: function(callback) {
-      //TODO: API to get /users
-      var usersArray = [];
-      usersArray.push({id: 1, username: 'superadmin', role: 'super_admin'});
-      usersArray.push({id: 2, username: 'admin', role: 'admin'});
-      usersArray.push({id: 3, username: 'user', role: 'user'});
+            A.app.instance.newUserModal.open();
+        },
 
-      A.app.instance.usersCollection = new A.collections.Users(usersArray);
-    },
+        clickLogout: function() {
+            A.app.instance.vent.trigger('logout:success')
+        },
 
-    getUserGridColumns: function() {
-      return [{
-          name: 'id',
-          cell: 'integer',
-          editable: false,
-          label: translator.translate('id_title')
-        },{
-          name: 'username',
-          cell: 'string',
-          editable: false,
-          label: translator.translate('username_title')
-        }, {
-          name: 'role',
-          cell: 'string',
-          editable: false,
-          label: translator.translate('role_title')
-        }, {
-          name: '',
-          cell: 'html',
-          editable: false,
-          label: '',
-          formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-              fromRaw: function (rawValue, obj) {
-                var html = '';
-                var currentUser = A.app.instance.user;
-                if(currentUser.isSuperAdmin()) {
-                  html = '<div class="user-actions">';
-                  if(currentUser && !obj.isSelf(currentUser.get('username'))) {
-                    html += '<button class="btn btn-xs delete-user">' + translator.translate('delete_user') + '</button>';
-                  }
-                  html += '<button class="btn btn-xs edit-user">' + translator.translate('edit_user') + '</button></div>';
-                }
+        getUserGridColumns: function() {
+            return [{
+                name: 'id',
+                cell: 'integer',
+                editable: false,
+                label: translator.translate('id_title')
+            },{
+                name: 'username',
+                cell: 'string',
+                editable: false,
+                label: translator.translate('username_title')
+            }, {
+                name: 'role',
+                cell: 'string',
+                editable: false,
+                label: translator.translate('role_title')
+            }, {
+                name: '',
+                cell: 'html',
+                editable: false,
+                label: '',
+                formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+                    fromRaw: function (rawValue, obj) {
+                        var html = '';
+                        var currentUser = A.app.instance.user;
+                        if(currentUser.isSuperAdmin()) {
+                            html = '<div class="user-actions">';
+                            if(currentUser && !obj.isSelf(currentUser.get('username'))) {
+                                html += '<button class="btn btn-xs delete-user">' + translator.translate('delete_user') + '</button>';
+                            }
+                            html += '<button class="btn btn-xs edit-user">' + translator.translate('edit_user') + '</button></div>';
+                        }
 
-                return html;
-              }
-          })
-        }];
-    },
+                        return html;
+                    }
+                })
+            }];
+        },
 
-    clickUsersLink: function() {
-      if(!A.app.instance.usersCollection) {
-        this.getUsers();
-      }
+        clickUsersLink: function() {
 
-      var usersCollection = A.app.instance.usersCollection;
+            var _this = this;
 
-      var usersList = new Backgrid.Grid({
-        columns: this.getUserGridColumns(),
-        collection: usersCollection
-      });
+            $.getJSON('/users', function(data) {
+                A.app.instance.usersCollection = new A.collections.Users(data);
 
-      A.app.instance.usersModal = new Backbone.BootstrapModal({
-        animate: true, 
-        content: "<div class='users-table'></div>", 
-        title: translator.translate("users_dialog_title"),
-        showFooter: false
-      });
-      
-      A.app.instance.usersModal.on('cancel', function() {
-        $('.users-table').remove(); //remove previous view
-        A.app.instance.usersModal = null;
-      });
+                var usersCollection = A.app.instance.usersCollection;
 
-      var _this = this;
-      var renderGrid = function() {
-        $('.users-table').append(usersList.render().el)
+                var usersList = new Backgrid.Grid({
+                    columns: _this.getUserGridColumns(),
+                    collection: usersCollection
+                });
 
-        $('.users-table').on('click', '.delete-user', _this.clickDeleteUser);
-        $('.users-table').on('click', '.edit-user', _this.clickEditUser);
+                A.app.instance.usersModal = new Backbone.BootstrapModal({
+                    animate: true,
+                    content: "<div class='users-table'></div>",
+                    title: translator.translate("users_dialog_title"),
+                    showFooter: false
+                });
 
-        // Initialize the paginator
-        var paginator = new Backgrid.Extension.Paginator({
-          collection: usersCollection,
-          controls: {
-            rewind: {
-              label: " <<",
-              title: translator.translate('move_to_first')
-            },
-            back: {
-              label: " <",
-              title: translator.translate('move_to_previous')
-            },
-            forward: {
-              label: "> ",
-              title: translator.translate('move_to_next')
-            },
-            fastForward: {
-              label: ">> ",
-              title: translator.translate('move_to_last')
-            }
-          }
-        });
+                A.app.instance.usersModal.on('cancel', function() {
+                    $('.users-table').remove(); //remove previous view
+                    A.app.instance.usersModal = null;
+                });
 
-        // Render the paginator
-        $(usersList.el).after(paginator.render().el);
+                var renderGrid = function() {
+                    $('.users-table').append(usersList.render().el)
 
-        // Initialize a client-side filter to filter on the client
-        // mode pageable collection's cache.
-        var filter = new Backgrid.Extension.ClientSideFilter({
-          collection: usersCollection,
-          fields: ['username', 'role']
-        });
+                    $('.users-table').on('click', '.delete-user', _this.clickDeleteUser);
+                    $('.users-table').on('click', '.edit-user', _this.clickEditUser);
 
-        // Render the filter
-        $(usersList.el).before(filter.render().el);
+                    // Initialize the paginator
+                    var paginator = new Backgrid.Extension.Paginator({
+                        collection: usersCollection,
+                        controls: {
+                            rewind: {
+                                label: " <<",
+                                title: translator.translate('move_to_first')
+                            },
+                            back: {
+                                label: " <",
+                                title: translator.translate('move_to_previous')
+                            },
+                            forward: {
+                                label: "> ",
+                                title: translator.translate('move_to_next')
+                            },
+                            fastForward: {
+                                label: ">> ",
+                                title: translator.translate('move_to_last')
+                            }
+                        }
+                    });
 
-        // Add some space to the filter and move it to the right
-        $(filter.el).css({float: "right", margin: "5px 0px"});
+                    // Render the paginator
+                    $(usersList.el).after(paginator.render().el);
 
-        //TODO: Fetch some data
-        //usersCollection.fetch({reset: true});
-      };
-      A.app.instance.usersModal.on('shown', renderGrid);
+                    // Initialize a client-side filter to filter on the client
+                    // mode pageable collection's cache.
+                    var filter = new Backgrid.Extension.ClientSideFilter({
+                        collection: usersCollection,
+                        fields: ['username', 'role']
+                    });
 
-      A.app.instance.usersModal.open();
-    },
+                    // Render the filter
+                    $(usersList.el).before(filter.render().el);
 
-    clickDeleteUser: function() {
-      //TODO
-      console.log('deleting user');
-      var confirmDialog = new Backbone.BootstrapModal({
-        animate: true, 
-        content: translator.translate('deletion_confirmation_message'),
-        title: translator.translate('deletion_confirmation_title')
-      });
-      
-      confirmDialog.open();
-      var button = this;
-      confirmDialog.on('ok', function() {
-        var userId = $(button).parents('tr').find('td:first').text();
-        var userToDelete = A.app.instance.usersCollection.get(userId);
-        if(userToDelete)
-          userToDelete.destroy();
+                    // Add some space to the filter and move it to the right
+                    $(filter.el).css({float: "right", margin: "5px 0px"});
 
-        A.app.instance.usersCollection.remove(userToDelete);
-      }); 
-    },
+                    //TODO: Fetch some data
+                    //usersCollection.fetch({reset: true});
+                };
+                A.app.instance.usersModal.on('shown', renderGrid);
 
-    clickEditUser: function() {
-      var userId = $(this).parents('tr').find('td:first').text();
-      var userToEdit = A.app.instance.usersCollection.get(userId);
+                A.app.instance.usersModal.open();
+            });
+        },
 
-      if(userToEdit) {
-        userToEdit.clearState();
-        userToEdit.clearPasswords();
-      }
+        clickDeleteUser: function() {
+            //TODO
+            console.log('deleting user');
+            var confirmDialog = new Backbone.BootstrapModal({
+                animate: true,
+                content: translator.translate('deletion_confirmation_message'),
+                title: translator.translate('deletion_confirmation_title')
+            });
 
-      A.app.instance.editUserModal = new Backbone.BootstrapModal({
-        animate: true, 
-        content: new views.EditUser({model: userToEdit}), 
-        title: translator.translate("edit_user_dialog_title"),
-        showFooter: false
-      });
-      
-      A.app.instance.editUserModal.on('cancel', function() {
-        this.options.content.remove(); //remove previous view
-        A.app.instance.editUserModal = null;
-      });
+            confirmDialog.open();
+            var button = this;
+            confirmDialog.on('ok', function() {
+                var userId = $(button).parents('tr').find('td:first').text();
+                var userToDelete = A.app.instance.usersCollection.get(userId);
+                if(userToDelete)
+                    userToDelete.destroy();
 
-      A.app.instance.editUserModal.open();
+                A.app.instance.usersCollection.remove(userToDelete);
+            });
+        },
 
-      A.app.instance.editUserModal.$('#roleList').val(userToEdit.get('role'));
-    },
+        clickEditUser: function() {
+            console.log('editing user');
+        },
 
-    clickDataLink: function() {
-      
-      console.log('Data management dialog: TODO');
-    },
+        clickDataLink: function() {
 
-    onRender: function() {
-      this.$el.html(this.template(A.app.instance.Login.userModel.toJSON()));
-    }
-  });
+            console.log('Data management dialog: TODO');
+        },
+
+        onRender: function() {
+            this.$el.html(this.template(A.app.instance.Login.userModel.toJSON()));
+        }
+    });
 })(Traffic, Traffic.views, Traffic.models, Traffic.translations);

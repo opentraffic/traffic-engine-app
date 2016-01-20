@@ -5,13 +5,14 @@
     });
 
     module.loginSuccess = function(data) {
-      module.userModel.set('token', data.token);
+      data = JSON.parse(data);
+      module.userModel.set('token', data.cookie);
       module.userModel.set('state', module.userModel.authSuccessState);
     };
 
     module.loginFail= function(response) {
       module.userModel.reset();
-      if(404 == response.status) {
+      if(403 == response.status || 404 == response.status) {
         module.userModel.set('state', module.userModel.authFailState);
       } else {
         module.userModel.set('state', module.userModel.authUnknownState);
@@ -20,49 +21,35 @@
       }
     };
 
-    app.vent.on('login:auto_auth', function() {
+    app.vent.on('login:auto_auth', function(userModel) {
       var username = Cookies.get('login_username');
       var token = Cookies.get('login_token');
-      app.user.set('username', username);
-      app.user.set('token', token);
-      //TODO: real login api
-      if(username == 'superadmin' && token == 'sample-token') {
-        app.user.set('role', 'super_admin');
-        A.app.nav.userMenuContainer.show(new views.UserMenu());
+      if(username && token){
+          var user = {};
+          user.username = username;
+          user.token = token;
+          $.post('/login', user)
+              .done(function(data) {
+                  module.loginSuccess(data);
+              })
+              .fail(function(response) {
+                  //cookie based login failed, silently reset state
+                  Cookies.remove('login_username');
+                  Cookies.remove('login_token');
+                  app.Login.userModel.reset();
+              });
       }
     });
 
     app.vent.on('login:submit', function(userModel) {
       userModel.set('state', userModel.pendingAuthState)
-      //TODO: real login api
-      // $.post('/login', userModel.toJSON())
-      //   .done(function(data) {
-      //     module.loginSuccess(data);
-      //   })
-      //   .fail(function(response) {
-      //     module.loginFail(response);
-      //   });
-      userModel.set('role', 'super_admin');
-      var credentials = userModel.toJSON();
-
-      //TODO: remove
-      // for debugging only
-      if(credentials.username == 'superadmin' && credentials.password == "welcome1") {
-        credentials.token = 'sample-token';
-        module.loginSuccess(credentials);
-      } else {
-        if(!credentials.username) {
-          module.loginFail({
-            status: 402,
-            statusText: 'Something is wrong'
-          });
-        } else {
-          module.loginFail({
-            status: 404
-          });
-        }
-      }
-
+      $.post('/login', userModel.toJSON())
+         .done(function(data) {
+           module.loginSuccess(data);
+         })
+         .fail(function(response) {
+           module.loginFail(response);
+      });
     });
 
     app.vent.on('login:success', function() {

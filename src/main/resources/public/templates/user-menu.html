@@ -10,12 +10,12 @@
       <strong>{{username}}</strong>
     </a></li>
     <li class="divider"/> 
-    {{#if_eq role "super_admin" }}
+    {{#if_eq role "Super Admin" }}
       <li><a id="newUser" href="#">{{I18n "new_user_label"}}</a></li>
       <li><a id="usersLink" href="#">{{I18n "users_label"}}</a></li>
       <!--<li><a id="dataManagementLink" href="#">{{I18n "data_management_label"}}</a></li>-->
     {{else}}
-      {{#if_eq role "admin" }}
+      {{#if_eq role "Admin" }}
         <li><a id="usersLink" href="#">{{I18n "users_label"}}</a></li>
         <!--<li><a id="dataManagementLink" href="#">{{I18n "data_management_label"}}</a></li>-->
       {{/if_eq}}

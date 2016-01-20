@@ -43,7 +43,7 @@ Traffic.models.UserModel = Backbone.Model.extend({
   },
 
   isSuperAdmin: function() {
-    return this.get('role') == 'super_admin';
+    return this.get('role') == 'Super Admin';
   },
 
   isSelf: function(username) {

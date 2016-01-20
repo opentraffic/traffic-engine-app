@@ -6,6 +6,8 @@ import io.opentraffic.engine.app.data.*;
 import io.opentraffic.engine.app.engine.Engine;
 import io.opentraffic.engine.app.routing.Routing;
 import io.opentraffic.engine.app.tiles.TrafficTileRequest;
+import io.opentraffic.engine.app.util.HibernateUtil;
+import io.opentraffic.engine.app.util.PasswordUtil;
 import io.opentraffic.engine.data.SpatialDataItem;
 import io.opentraffic.engine.data.pbf.ExchangeFormat;
 import io.opentraffic.engine.data.stats.SegmentStatistics;
@@ -15,12 +17,14 @@ import io.opentraffic.engine.geom.GPSPoint;
 import io.opentraffic.engine.geom.StreetSegment;
 import io.opentraffic.engine.osm.OSMCluster;
 import org.apache.commons.cli.*;
+import org.hibernate.SessionFactory;
 import org.jcolorbrewer.ColorBrewer;
 import org.mapdb.Fun;
 import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
+import spark.Request;
 
 import java.awt.*;
 import java.io.FileInputStream;
@@ -40,7 +44,9 @@ import java.util.stream.Collectors;
 import static spark.Spark.*;
 
 public class TrafficEngineApp {
-	
+
+    private static SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+
 	private static final Logger log = Logger.getLogger( TrafficEngineApp.class.getName());
 	
 	private static final ObjectMapper mapper = new ObjectMapper();
@@ -328,49 +334,124 @@ public class TrafficEngineApp {
 		});
 		
 		get("/tile/traffic", (request, response) -> {
-			
-			int x = request.queryMap("x").integerValue();
-			int y = request.queryMap("y").integerValue();
-			int z = request.queryMap("z").integerValue();
 
-			boolean normalizeByTime = request.queryMap("normalizeByTime").booleanValue();
-			int confidenceInterval = request.queryMap("confidenceInterval").integerValue();
+            int x = request.queryMap("x").integerValue();
+            int y = request.queryMap("y").integerValue();
+            int z = request.queryMap("z").integerValue();
 
-			List<Integer> hours = new ArrayList<>();
+            boolean normalizeByTime = request.queryMap("normalizeByTime").booleanValue();
+            int confidenceInterval = request.queryMap("confidenceInterval").integerValue();
 
-			if(request.queryMap("h").value() != null && !request.queryMap("h").value().trim().isEmpty()) {
-				String valueStr[] = request.queryMap("h").value().trim().split(",");
-				List<String> values = new ArrayList(Arrays.asList(valueStr));
-				values.forEach(v -> hours.add(Integer.parseInt(v.trim())));
-			}
+            List<Integer> hours = new ArrayList<>();
 
-			List<Integer> w1 = new ArrayList<>();
-			List<Integer> w2 = new ArrayList<>();
+            if (request.queryMap("h").value() != null && !request.queryMap("h").value().trim().isEmpty()) {
+                String valueStr[] = request.queryMap("h").value().trim().split(",");
+                List<String> values = new ArrayList(Arrays.asList(valueStr));
+                values.forEach(v -> hours.add(Integer.parseInt(v.trim())));
+            }
 
-			if(request.queryMap("w1").value() != null && !request.queryMap("w1").value().trim().isEmpty()) {
-				String valueStr[] = request.queryMap("w1").value().trim().split(",");
-				List<String> values = new ArrayList(Arrays.asList(valueStr));
-				values.forEach(v -> w1.add(Integer.parseInt(v.trim())));
-			}
+            List<Integer> w1 = new ArrayList<>();
+            List<Integer> w2 = new ArrayList<>();
 
-			if(request.queryMap("w2").value() != null && !request.queryMap("w2").value().trim().isEmpty()) {
-				String valueStr[] = request.queryMap("w2").value().trim().split(",");
-				List<String> values = new ArrayList(Arrays.asList(valueStr));
-				values.forEach(v -> w2.add(Integer.parseInt(v.trim())));
-			}
+            if (request.queryMap("w1").value() != null && !request.queryMap("w1").value().trim().isEmpty()) {
+                String valueStr[] = request.queryMap("w1").value().trim().split(",");
+                List<String> values = new ArrayList(Arrays.asList(valueStr));
+                values.forEach(v -> w1.add(Integer.parseInt(v.trim())));
+            }
 
-			response.raw().setHeader("CACHE_CONTROL", "no-cache, no-store, must-revalidate");
-			response.raw().setHeader("PRAGMA", "no-cache");
-			response.raw().setHeader("EXPIRES", "0");
-			response.raw().setContentType("image/png");
-			
-			TrafficTileRequest.SegmentTile dataTile = new TrafficTileRequest.SegmentTile(x, y, z, normalizeByTime, confidenceInterval, w1, w2, hours);
-			
-			byte[] imageData = dataTile.render();
-			
-			response.raw().getOutputStream().write(imageData);			
-			return response;
-		});
+            if (request.queryMap("w2").value() != null && !request.queryMap("w2").value().trim().isEmpty()) {
+                String valueStr[] = request.queryMap("w2").value().trim().split(",");
+                List<String> values = new ArrayList(Arrays.asList(valueStr));
+                values.forEach(v -> w2.add(Integer.parseInt(v.trim())));
+            }
+
+            response.raw().setHeader("CACHE_CONTROL", "no-cache, no-store, must-revalidate");
+            response.raw().setHeader("PRAGMA", "no-cache");
+            response.raw().setHeader("EXPIRES", "0");
+            response.raw().setContentType("image/png");
+
+            TrafficTileRequest.SegmentTile dataTile = new TrafficTileRequest.SegmentTile(x, y, z, normalizeByTime, confidenceInterval, w1, w2, hours);
+
+            byte[] imageData = dataTile.render();
+
+            response.raw().getOutputStream().write(imageData);
+            return response;
+        });
+
+        post("/login", (request, response) -> {
+            Map<String, String> params = getPostParams(request);
+            String username = params.get("username");
+            String password = params.get("password");
+            String cookie = params.get("token");
+            if(password != null)
+                password = PasswordUtil.hash(password);
+
+            User user = HibernateUtil.login(username, password, cookie);
+
+            if(user != null){
+                return mapper.writeValueAsString(user);
+            }
+            response.status(403);
+            return "Authentication failed";
+        });
+
+        post("/createUser", (request, response) -> {
+            Map<String, String> params = getPostParams(request);
+            String username = params.get("username");
+            String password = params.get("password");
+            String role = params.get("role");
+            User u = new User();
+            u.setUsername(username);
+            u.setPasswordHash(PasswordUtil.hash(password));
+            u.setRole(role);
+            HibernateUtil.persistUser(u);
+            response.status(200);
+            return response;
+        });
+
+        post("/updateUser", (request, response) -> {
+            Map<String, String> params = getPostParams(request);
+            String username = params.get("username");
+            String password = params.get("password");
+            String role = params.get("role");
+            String id = params.get("id");
+            User u = new User();
+            u.setUsername(username);
+            u.setPasswordHash(PasswordUtil.hash(password));
+            u.setRole(role);
+            u.setId(new Integer(id));
+            HibernateUtil.updateUser(u);
+            response.status(200);
+            return response;
+        });
+
+        post("/deleteUser", (request, response) -> {
+            Map<String, String> params = getPostParams(request);
+            Integer id = new Integer(params.get("id"));
+            HibernateUtil.deleteUser(id);
+            response.status(200);
+            return response;
+        });
+
+
+        get("/users", (request, response) -> {
+            return mapper.writeValueAsString(HibernateUtil.getUsers());
+        });
+
+
+
+    }
+
+    static Map<String, String> getPostParams(Request request){
+        String body = request.body();
+        String[] elements = body.split("\\&");
+        Map<String, String> values = new HashMap<>();
+        for(int i = 0; i < elements.length; i++){
+            String[] kv = elements[i].split("\\=");
+            if(kv.length == 2)
+                values.put(kv[0], kv[1]);
+        }
+        return values;
     }
 
 	
