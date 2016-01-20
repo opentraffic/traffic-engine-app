@@ -84,5 +84,8 @@
   "edit_user":            "Edit",
   "deletion_confirmation_message": "Are you sure to delete this record?",
   "deletion_confirmation_title": "Deletion Confirmation",
-  "id_title":             "ID"
+  "id_title":             "ID",
+  "username_password_required": "Username and password are required.",
+  "username_required": "Username is required.",
+  "passwords_not_match":   "Passwords don't match."
 }

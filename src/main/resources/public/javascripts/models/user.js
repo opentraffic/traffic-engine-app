@@ -26,7 +26,7 @@ Traffic.models.UserModel = Backbone.Model.extend({
     state: '',
     stateDetails: '',
     role: '',
-    token: '',
+    cookie: '',
     remember_me: false
   },
 

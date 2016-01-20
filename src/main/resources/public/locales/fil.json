@@ -84,5 +84,8 @@
   "edit_user":            "[fil]Edit[/fil]",
   "deletion_confirmation_message": "[fil]Are you sure to delete this record?[/fil]",
   "deletion_confirmation_title": "[fil]Deletion Confirmation[/fil]",
-  "id_title":             "[fil]ID[/fil]"
+  "id_title":             "[fil]ID[/fil]",
+  "username_password_required": "[fil]Username and password are required.[/fil]",
+  "username_required":    "[fil]Username is required.[/fil]",
+  "passwords_not_match":   "[fil]Passwords don't match.[/fil]"
 }

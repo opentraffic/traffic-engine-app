@@ -414,12 +414,14 @@ public class TrafficEngineApp {
             String username = params.get("username");
             String password = params.get("password");
             String role = params.get("role");
-            String id = request.params(":id");
-            User u = new User();
+            Integer id = new Integer(request.params(":id"));
+
+            User u = HibernateUtil.getUser(id);
             u.setUsername(username);
-            u.setPasswordHash(PasswordUtil.hash(password));
+            if(password != null && !password.isEmpty()) {
+              u.setPasswordHash(PasswordUtil.hash(password));
+            }
             u.setRole(role);
-            u.setId(new Integer(id));
             HibernateUtil.updateUser(u);
             response.status(200);
             return response;

@@ -35,6 +35,7 @@
           $.post('/login', user)
               .done(function(data) {
                   module.loginSuccess(data);
+                  app.vent.trigger('login:success');
               })
               .fail(function(response) {
                   //cookie based login failed, silently reset state
@@ -60,7 +61,7 @@
       var user = app.user;
       if(user.get('remember_me')) {
         Cookies.set('login_username', user.get('username'), { expires: 30 });
-        Cookies.set('login_token', user.get('token'), { expires: 30 });
+        Cookies.set('login_token', user.get('cookie'), { expires: 30 });
       }
       
       setTimeout(function(){

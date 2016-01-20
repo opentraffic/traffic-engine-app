@@ -4,6 +4,10 @@
     });
 
     module.updateSuccess = function(user, data) {
+      var userObj = JSON.parse(data);
+      for(var attr in userObj) {
+        user.set(attr, userObj[attr]);  
+      }
       user.set('state', user.updateSuccessState);
     };
 
@@ -14,42 +18,31 @@
     };
 
     app.vent.on('edit-user:submit', function(user) {
-      user.set('state', user.pendingUpdateState)
-      // $.ajax({
-          //url:'/users/', 
-          //method: 'patch',
-          //data: user.toJSON()
-        //})
-      //   .done(function(data) {
-      //     module.updateSuccess(user, data);
-      //   })
-      //   .fail(function(response) {
-      //     module.updateFail(user, response);
-      //   });
-
-      var credentials = user.toJSON();
-
-      //TODO: remove
-      // for debugging only
-      if(credentials.username == 'superadmin') {
+      var inputData = user.toJSON();
+      if(!inputData.username) {
         module.updateFail(user, {
           status: 402,
-          statusText: 'This user is registered.'
+          statusText: translator.translate('username_required')
         });
-      } else if(!credentials.username) {
+      } else if(inputData.password != inputData.confirm_password) {
         module.updateFail(user, {
           status: 402,
-          statusText: 'Username is required.'
-        });
-      } else if((credentials.password || credentials.confirm_password) && credentials.password != credentials.confirm_password) {
-        module.updateFail(user, {
-          status: 402,
-          statusText: 'Confirmed password does not match.'
+          statusText: translator.translate('passwords_not_match')
         });
       } else {
-        module.updateSuccess(user, credentials);
+        user.set('state', user.pendingUpdateState)
+        $.ajax({
+            url:'/users/' + user.get('id'), 
+            method: 'put',
+            data: inputData
+          })
+          .done(function(data) {
+            module.updateSuccess(user, data);
+          })
+          .fail(function(response) {
+            module.updateFail(user, response);
+          });
       }
-
     });
 
     app.vent.on('edit-user:success', function(user) {

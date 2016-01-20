@@ -67,6 +67,11 @@ public class HibernateUtil {
         return q.list();
     }
 
+    public static User getUser(Integer id) {
+        Session session = sessionFactory.openSession();
+        return (User) session.get(User.class, id);
+    }
+
     public static void deleteUser(Integer id){
         Session session = sessionFactory.openSession();
         Transaction tx;

@@ -14,8 +14,20 @@
     };
 
     app.vent.on('new-user:submit', function(user) {
-      user.set('state', user.pendingSignupState)
-        user.set('state', user.pendingSignupState)
+      var credentials = user.toJSON();
+
+      if(!credentials.username || !credentials.password) {
+        module.signupFail(user, {
+          status: 402,
+          statusText: translator.translate('username_password_required')
+        });
+      } else if(credentials.password != credentials.confirm_password) {
+        module.signupFail(user, {
+          status: 402,
+          statusText: translator.translate('passwords_not_match')
+        });
+      } else {
+        user.set('state', user.pendingSignupState);
         $.post('/users', user.toJSON())
             .done(function(data) {
                 module.signupSuccess(user, data);
@@ -23,21 +35,6 @@
             .fail(function(response) {
                 module.signupFail(user, response);
             });
-
-      var credentials = user.toJSON();
-
-      if(!credentials.username || !credentials.password) {
-        module.signupFail(user, {
-          status: 402,
-          statusText: 'Username and password are required.'
-        });
-      } else if(credentials.password != credentials.confirm_password) {
-        module.signupFail(user, {
-          status: 402,
-          statusText: 'Confirmed password does not match.'
-        });
-      } else {
-        module.signupSuccess(user, credentials);
       }
 
     });
