@@ -175,7 +175,29 @@ Traffic.views = Traffic.views || {};
         },
 
         clickEditUser: function() {
-            console.log('editing user');
+            var userId = $(this).parents('tr').find('td:first').text();
+            var userToEdit = A.app.instance.usersCollection.get(userId);
+
+            if(userToEdit) {
+                userToEdit.clearState();
+                userToEdit.clearPasswords();
+            }
+
+            A.app.instance.editUserModal = new Backbone.BootstrapModal({
+                animate: true,
+                content: new views.EditUser({model: userToEdit}),
+                title: translator.translate("edit_user_dialog_title"),
+                showFooter: false
+            });
+
+            A.app.instance.editUserModal.on('cancel', function() {
+                this.options.content.remove(); //remove previous view
+                A.app.instance.editUserModal = null;
+            });
+
+            A.app.instance.editUserModal.open();
+
+            A.app.instance.editUserModal.$('#roleList').val(userToEdit.get('role'));
         },
 
         clickDataLink: function() {
