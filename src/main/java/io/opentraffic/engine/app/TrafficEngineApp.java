@@ -432,6 +432,10 @@ public class TrafficEngineApp {
             return response;
         });
 
+        get("/users", (request, response) -> {
+            return mapper.writeValueAsString(HibernateUtil.getUsers());
+        });
+
     }
 
     static User checkCookie(String username, String token){
