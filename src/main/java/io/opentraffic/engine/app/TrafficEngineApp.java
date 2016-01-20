@@ -424,7 +424,7 @@ public class TrafficEngineApp {
             u.setRole(role);
             HibernateUtil.updateUser(u);
             response.status(200);
-            return response;
+            return mapper.writeValueAsString(u);
         });
 
         delete("/users/:id", (request, response) -> {
