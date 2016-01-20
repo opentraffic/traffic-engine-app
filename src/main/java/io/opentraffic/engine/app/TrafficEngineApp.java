@@ -395,7 +395,7 @@ public class TrafficEngineApp {
             return "Authentication failed";
         });
 
-        post("/createUser", (request, response) -> {
+        post("/user", (request, response) -> {
             Map<String, String> params = getPostParams(request);
             String username = params.get("username");
             String password = params.get("password");
@@ -409,12 +409,12 @@ public class TrafficEngineApp {
             return response;
         });
 
-        post("/updateUser", (request, response) -> {
+        put("/user/:id", (request, response) -> {
             Map<String, String> params = getPostParams(request);
             String username = params.get("username");
             String password = params.get("password");
             String role = params.get("role");
-            String id = params.get("id");
+            String id = request.params(":id");
             User u = new User();
             u.setUsername(username);
             u.setPasswordHash(PasswordUtil.hash(password));
@@ -425,21 +425,17 @@ public class TrafficEngineApp {
             return response;
         });
 
-        post("/deleteUser", (request, response) -> {
-            Map<String, String> params = getPostParams(request);
-            Integer id = new Integer(params.get("id"));
+        delete("/user/:id", (request, response) -> {
+            Integer id = new Integer(request.params(":id"));
             HibernateUtil.deleteUser(id);
             response.status(200);
             return response;
         });
 
+    }
 
-        get("/users", (request, response) -> {
-            return mapper.writeValueAsString(HibernateUtil.getUsers());
-        });
-
-
-
+    static User checkCookie(String username, String token){
+        return HibernateUtil.login(username, null, token);
     }
 
     static Map<String, String> getPostParams(Request request){
