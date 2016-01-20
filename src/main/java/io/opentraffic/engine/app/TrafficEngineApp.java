@@ -395,7 +395,7 @@ public class TrafficEngineApp {
             return "Authentication failed";
         });
 
-        post("/user", (request, response) -> {
+        post("/users", (request, response) -> {
             Map<String, String> params = getPostParams(request);
             String username = params.get("username");
             String password = params.get("password");
@@ -409,7 +409,7 @@ public class TrafficEngineApp {
             return response;
         });
 
-        put("/user/:id", (request, response) -> {
+        put("/users/:id", (request, response) -> {
             Map<String, String> params = getPostParams(request);
             String username = params.get("username");
             String password = params.get("password");
@@ -425,7 +425,7 @@ public class TrafficEngineApp {
             return response;
         });
 
-        delete("/user/:id", (request, response) -> {
+        delete("/users/:id", (request, response) -> {
             Integer id = new Integer(request.params(":id"));
             HibernateUtil.deleteUser(id);
             response.status(200);

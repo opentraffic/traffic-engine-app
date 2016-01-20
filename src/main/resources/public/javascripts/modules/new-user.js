@@ -16,7 +16,7 @@
     app.vent.on('new-user:submit', function(user) {
       user.set('state', user.pendingSignupState)
         user.set('state', user.pendingSignupState)
-        $.post('/createUser', user.toJSON())
+        $.post('/users', user.toJSON())
             .done(function(data) {
                 module.signupSuccess(user, data);
             })
