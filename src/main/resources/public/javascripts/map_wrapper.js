@@ -4,12 +4,12 @@ var Traffic = Traffic || {};
 
     LMmap: null, // Leaflet map object
 
-    ENGLISH_TILE_LAYER: L.tileLayer('https://a.tiles.mapbox.com/v4/xdliu.ec1c6353/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoieGRsaXUiLCJhIjoiY2lpamVzdGxwMDExN3ZqbTVuOHMwaGVyYyJ9.P_agsd7B_e22deT1QRhiBQ', {
+    ENGLISH_TILE_LAYER: L.tileLayer('https://a.tiles.mapbox.com/v4/wbopentraffic.886af412/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoid2JvcGVudHJhZmZpYyIsImEiOiJjaWpvcXEwb3YwMHozdTRtNXloN3RlbWRiIn0.zGRqKvcOEoNOFMcZ-WIQDQ', {
           attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
           maxZoom: 17,
           zIndex: 0
         }),
-    LOCALIZED_TILE_LAYER: L.tileLayer('https://a.tiles.mapbox.com/v4/conveyal.gepida3i/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoiY29udmV5YWwiLCJhIjoiMDliQURXOCJ9.9JWPsqJY7dGIdX777An7Pw', {
+    LOCALIZED_TILE_LAYER: L.tileLayer('https://a.tiles.mapbox.com/v4/wbopentraffic.f21486d8/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoid2JvcGVudHJhZmZpYyIsImEiOiJjaWpvcXEwb3YwMHozdTRtNXloN3RlbWRiIn0.zGRqKvcOEoNOFMcZ-WIQDQ', {
           attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
           maxZoom: 17,
           zIndex: 0
