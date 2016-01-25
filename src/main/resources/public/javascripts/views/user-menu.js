@@ -79,6 +79,8 @@ Traffic.views = Traffic.views || {};
 
             $.getJSON('/users', function(data) {
                 A.app.instance.usersCollection = new A.collections.Users(data);
+                A.app.instance.usersCollection.setSorting("id", {mode: 'client'});
+                A.app.instance.usersCollection.fullCollection.sort();
 
                 var usersCollection = A.app.instance.usersCollection;
 
@@ -135,7 +137,7 @@ Traffic.views = Traffic.views || {};
                     // mode pageable collection's cache.
                     var filter = new Backgrid.Extension.ClientSideFilter({
                         collection: usersCollection,
-                        fields: ['id', 'username', 'role']
+                        fields: ['username', 'role']
                     });
 
                     // Render the filter

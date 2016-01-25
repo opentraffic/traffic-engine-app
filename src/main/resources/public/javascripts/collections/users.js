@@ -7,7 +7,7 @@ Traffic.collections.Users = Backbone.PageableCollection.extend({
   url: '/users',
   state: {
     pageSize: 15,
-    sortKey: "username",
+    sortKey: "id",
     order: 1
   },
   mode: 'client'
