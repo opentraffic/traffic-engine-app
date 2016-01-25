@@ -7,12 +7,12 @@
         <property name="connection.driver_class">org.postgresql.Driver</property>
         <property name="connection.url">jdbc:postgresql://localhost/opentraffic</property>
         <property name="connection.username">postgres</property>
-        <property name="connection.password"></property>
+        <property name="connection.password">password</property>
         <property name="connection.pool_size">1</property>
         <property name="dialect">org.hibernate.dialect.PostgreSQL9Dialect</property>
         <property name="cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</property>
         <property name="show_sql">true</property>
-        <property name="hbm2ddl.auto">create</property>
+        <property name="hbm2ddl.auto">update</property>
         <mapping class="io.opentraffic.engine.app.data.User"/>
     </session-factory>
 </hibernate-configuration>
