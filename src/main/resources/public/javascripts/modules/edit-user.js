@@ -8,6 +8,7 @@
       if(user.get('id') == app.user.get('id')) {
         app.user.set('username', userObj['username']);
         app.user.set('role', userObj['role']);
+        $('#username').text(app.user.get('username'));
       }
       for(var attr in userObj) {
         user.set(attr, userObj[attr]);  
