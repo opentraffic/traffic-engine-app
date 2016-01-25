@@ -135,7 +135,7 @@ Traffic.views = Traffic.views || {};
                     // mode pageable collection's cache.
                     var filter = new Backgrid.Extension.ClientSideFilter({
                         collection: usersCollection,
-                        fields: ['username', 'role']
+                        fields: ['id', 'username', 'role']
                     });
 
                     // Render the filter
