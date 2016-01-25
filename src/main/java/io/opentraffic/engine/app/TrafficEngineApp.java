@@ -411,14 +411,15 @@ public class TrafficEngineApp {
 
         put("/users/:id", (request, response) -> {
             Map<String, String> params = getPostParams(request);
-            String username = params.get("username");
+            String username = java.net.URLDecoder.decode(params.get("username"), "UTF-8");
             String password = params.get("password");
-            String role = params.get("role");
+            String role = java.net.URLDecoder.decode(params.get("role"), "UTF-8");
             Integer id = new Integer(request.params(":id"));
 
             User u = HibernateUtil.getUser(id);
             u.setUsername(username);
             if(password != null && !password.isEmpty()) {
+              password = java.net.URLDecoder.decode(password, "UTF-8");
               u.setPasswordHash(PasswordUtil.hash(password));
             }
             u.setRole(role);

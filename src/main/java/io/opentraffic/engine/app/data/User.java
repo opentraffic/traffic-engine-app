@@ -13,6 +13,7 @@ public class User {
     @GeneratedValue(strategy= GenerationType.AUTO)
     @Column(name = "id")
     private int id;
+    @Column(unique = true)
     private String username;
     @Column(length = 1000)
     private String passwordHash;
