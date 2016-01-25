@@ -63,7 +63,7 @@
   "ok_label":             "OK",
   "cancel_label":         "Cancel",
   "new_user_created":     "New user has been successfully created.",
-  "create_new_user_failed": "Failed to create user",
+  "create_new_user_failed": "Failed to create user.  Username must be unique.",
   "user_updated":         "User has been successfully updated.",
   "update_user_failed":   "Failed to update user",
   "role_label":           "Role(*)",
