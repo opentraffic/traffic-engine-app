@@ -397,9 +397,9 @@ public class TrafficEngineApp {
 
         post("/users", (request, response) -> {
             Map<String, String> params = getPostParams(request);
-            String username = params.get("username");
+            String username = java.net.URLDecoder.decode(params.get("username"), "UTF-8");
             String password = params.get("password");
-            String role = params.get("role");
+            String role = java.net.URLDecoder.decode(params.get("role"), "UTF-8");
             User u = new User();
             u.setUsername(username);
             u.setPasswordHash(PasswordUtil.hash(password));
