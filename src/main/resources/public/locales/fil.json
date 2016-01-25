@@ -63,7 +63,7 @@
   "ok_label":             "[fil]OK[/fil]",
   "cancel_label":         "[fil]Cancel[/fil]",
   "new_user_created":     "[fil]New user has been successfully created.[/fil]",
-  "create_new_user_failed": "[fil]Failed to create user[/fil]",
+  "create_new_user_failed": "[fil]Failed to create user.  Username must be unique.[/fil]",
   "user_updated":         "[fil]User has been successfully updated.[/fil]",
   "update_user_failed":   "[fil]Failed to update user[/fil]",
   "role_label":           "[fil]Role(*)[/fil]",
