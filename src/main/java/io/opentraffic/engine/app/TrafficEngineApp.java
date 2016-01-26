@@ -1,6 +1,7 @@
 package io.opentraffic.engine.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import io.opentraffic.engine.app.data.*;
 import io.opentraffic.engine.app.engine.Engine;
@@ -17,15 +18,20 @@ import io.opentraffic.engine.geom.GPSPoint;
 import io.opentraffic.engine.geom.StreetSegment;
 import io.opentraffic.engine.osm.OSMCluster;
 import org.apache.commons.cli.*;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
 import org.hibernate.SessionFactory;
 import org.jcolorbrewer.ColorBrewer;
 import org.mapdb.Fun;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import spark.Request;
 
+import javax.measure.Measure;
+import javax.measure.unit.SI;
 import java.awt.*;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -58,7 +64,7 @@ public class TrafficEngineApp {
     public static Engine engine;
 
 	public static HashMap<String,Long> vehicleIdMap = new HashMap<>();
-  	
+
 	public static void main(String[] args) throws ParseException {
 
         Options options = new Options();
@@ -220,6 +226,10 @@ public class TrafficEngineApp {
 		// routing requests 
 		
 		get("/route", (request, response) -> {
+
+            Integer missingStatsSearchEnvelopeInMeters = Integer.parseInt(appProps.getProperty("application.missingStatsSearchEnvelopeInMeters"));
+
+            Integer missingStatsMaxSamples = Integer.parseInt(appProps.getProperty("application.missingStatsMaxSamples"));
 			
 			response.header("Access-Control-Allow-Origin", "*");
 			
@@ -294,8 +304,66 @@ public class TrafficEngineApp {
 							lastUnmatchedEdgeId = null;
 							edgeIds.add(streetSegment.id);
 							SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
-							if(summaryStatistics != null)
-								trafficPath.addSegment(streetSegment, summaryStatistics);
+							if(summaryStatistics != null){
+                                if(summaryStatistics.count == 0){
+
+                                    //no data for this segment, find nearby segments of the same road type and average those stats
+
+                                    Envelope env = streetSegment.getGeometry().getEnvelopeInternal();
+                                    Coordinate center = env.centre();
+                                    final double mPerDegreeLat=111111.111111;
+                                    double lat = center.y;
+                                    double lonScale = Math.cos(Math.PI * lat / 180);
+                                    double latExpand = missingStatsSearchEnvelopeInMeters / mPerDegreeLat;
+                                    double lonExpand = latExpand / lonScale;
+                                    env.expandBy(lonExpand,latExpand);
+                                    List<SpatialDataItem> spatialDataItems = TrafficEngineApp.engine.getTrafficEngine().osmData.getStreetSegments(env);
+
+                                    Map<Double, Long> distanceTosegmentIdMapMatchingType = new TreeMap<>(); //stats for same road type
+                                    Map<Double, Long> distanceTosegmentIdMapDifferentType = new TreeMap<>(); //stats for any road type, fallback if no matching road types
+                                    for(SpatialDataItem item : spatialDataItems) {
+                                        if (item instanceof StreetSegment) {
+                                            CoordinateReferenceSystem sourceCRS = CRS.decode("EPSG:4326");
+                                            com.vividsolutions.jts.geom.Point c1 = streetSegment.getGeometry().getCentroid();
+                                            com.vividsolutions.jts.geom.Point c2 = item.getGeometry().getCentroid();
+                                            Double distance = JTS.orthodromicDistance(new Coordinate(c1.getY(), c1.getX()), new Coordinate(c2.getY(), c2.getX()), sourceCRS);
+                                            distance = Measure.valueOf(distance, SI.METER).doubleValue(SI.METER);
+                                            SummaryStatistics nearbySummaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore
+                                                    .collectSummaryStatistics(item.id, true, w1, hours);
+                                            if(nearbySummaryStatistics.count > 0){
+                                                if(distance > missingStatsSearchEnvelopeInMeters)
+                                                    continue;
+
+                                                StreetSegment nearbyStreetSegment = (StreetSegment) item;
+                                                if(nearbyStreetSegment.streetType == streetSegment.streetType){
+                                                    while(distanceTosegmentIdMapMatchingType.keySet().contains(distance)){
+                                                        distance += .0000000001d;
+                                                    }
+                                                    distanceTosegmentIdMapMatchingType.put(distance, item.id);
+                                                    if(distanceTosegmentIdMapMatchingType.keySet().size() == missingStatsMaxSamples)
+                                                        break;
+                                                }else{
+                                                    while(distanceTosegmentIdMapDifferentType.keySet().contains(distance)){
+                                                        distance += .0000000001d;
+                                                    }
+                                                    distanceTosegmentIdMapDifferentType.put(distance, item.id);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Set<Long> segmentIds = new HashSet<>();
+                                    if(distanceTosegmentIdMapMatchingType.keySet().size() > 0){
+                                        segmentIds.addAll(distanceTosegmentIdMapMatchingType.values());
+                                    }else{
+                                        segmentIds.addAll(distanceTosegmentIdMapDifferentType.values());
+                                    }
+
+                                    summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(segmentIds, true, w1, hours);
+                                    summaryStatistics.inferred = true;
+                                }
+                                trafficPath.addSegment(streetSegment, summaryStatistics);
+                            }
 						}
 						else {
 							lastUnmatchedEdgeId = edgeId;
@@ -311,9 +379,10 @@ public class TrafficEngineApp {
 			SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, true, w1, null);
 			trafficPath.setWeeklyStats(summaryStatistics);
 
-	        return mapper.writeValueAsString(trafficPath);
+            return mapper.writeValueAsString(trafficPath);
 		});
-		
+
+
 		get("/tile/data", (request, response) -> {
 			
 			int x = request.queryMap("x").integerValue();

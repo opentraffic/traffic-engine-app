@@ -21,6 +21,7 @@ public class TrafficPathEdge {
     public double length;
     public double speed;
     public double stdDev;
+    public boolean inferred;
 
     private static int numberOfBins = Integer.parseInt(TrafficEngineApp.appProps.getProperty("application.numberOfBins"));
     private static double maxSpeedInKph = Double.parseDouble(TrafficEngineApp.appProps.getProperty("application.maxSpeedInKph"));
@@ -43,5 +44,6 @@ public class TrafficPathEdge {
         length = streetSegment.length;
         speed = summaryStatistics.getMean();
         stdDev = summaryStatistics.getStdDev();
+        inferred = summaryStatistics.inferred;
     }
 }

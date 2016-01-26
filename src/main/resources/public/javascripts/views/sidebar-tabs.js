@@ -193,6 +193,7 @@ Traffic.views = Traffic.views || {};
 
         var lines = new Array();
         var insufficientDataWarning = translator.translate('insufficient_data_warning');
+        var inferredDataNotification = translator.translate('inferred_data_notification');
         var routeInfoTemplate = Handlebars.getTemplate('app', 'route-popup');
         for(i in data.pathEdges) {
           var edge = data.pathEdges[i];
@@ -207,6 +208,9 @@ Traffic.views = Traffic.views || {};
                         segment_speed: new Number(edge.speed).toFixed(2),
                         segment_std_dev: new Number(edge.stdDev).toFixed(2)
                       });
+                      if(edge.inferred == true){
+                          segmentPopupContent = inferredDataNotification + " " + segmentPopupContent;
+                      }
                     }
                     polyLine.bindPopup(segmentPopupContent);
 

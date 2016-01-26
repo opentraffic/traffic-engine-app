@@ -54,7 +54,7 @@ public class HibernateUtil {
         }
         catch (Exception e) {
             log.warning(e.getMessage());
-            throw new RuntimeException("database error");
+            throw new RuntimeException(e.getMessage());
         }
         finally {
             session.close();

@@ -87,5 +87,6 @@
   "id_title":             "[fil]ID[/fil]",
   "username_password_required": "[fil]Username and password are required.[/fil]",
   "username_required":    "[fil]Username is required.[/fil]",
-  "passwords_not_match":   "[fil]Passwords don't match.[/fil]"
+  "passwords_not_match":   "[fil]Passwords don't match.[/fil]",
+  "inferred_data_notification":   "[fil]Data for this segment are not available.  Statistics below are derived from nearby segments.[/fil]"
 }

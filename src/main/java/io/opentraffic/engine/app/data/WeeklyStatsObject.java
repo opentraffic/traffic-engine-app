@@ -7,10 +7,13 @@ public class WeeklyStatsObject {
 
 	public static double MS_TO_KMH = 3.6d;
 	public static int HOURS_IN_WEEK = 24 * 7;
+    public static boolean inferred;
 
 	public HourStats[] hours = new HourStats[HOURS_IN_WEEK];
 
 	public WeeklyStatsObject(SummaryStatistics stats) {
+
+        inferred = stats.inferred;
 
 		for(int hour = 0; hour < (HOURS_IN_WEEK); hour++) {
 
