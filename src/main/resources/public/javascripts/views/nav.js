@@ -13,9 +13,11 @@ Traffic.views = Traffic.views || {};
 
     initialize : function() {
       var _this = this;
-
+      _this.cities = [];
+      
       $.getJSON('/cityNames', function(data) {
         _this.cities = data;
+      }).always(function() {
         _this.initLocationTypeahead();
       });
     },
