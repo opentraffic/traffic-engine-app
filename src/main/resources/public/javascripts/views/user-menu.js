@@ -79,6 +79,8 @@ Traffic.views = Traffic.views || {};
 
             $.getJSON('/users', function(data) {
                 A.app.instance.usersCollection = new A.collections.Users(data);
+                A.app.instance.usersCollection.setSorting("id", {mode: 'client'});
+                A.app.instance.usersCollection.fullCollection.sort();
 
                 var usersCollection = A.app.instance.usersCollection;
 
