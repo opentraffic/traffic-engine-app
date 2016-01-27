@@ -109,13 +109,22 @@ Traffic.views = Traffic.views || {};
         A.app.sidebar.$("#routeData").hide();
       }
 
-      this.routePoints = [];
-      if(this.routePointsLayer) {
-        A.app.map.removeLayer(this.routePointsLayer);
+      if(this.startPoint != false) {
+        if(A.app.map.hasLayer(this.startPoint))
+          A.app.map.removeLayer(this.startPoint);
+      }
+
+      if(this.endPoint != false) {
+        if(A.app.map.hasLayer(this.endPoint))
+          A.app.map.removeLayer(this.endPoint);
       }
 
       if(A.app.map.hasLayer(A.app.pathOverlay))
         A.app.map.removeLayer(A.app.pathOverlay);
+
+      this.startPoint = false;
+      this.endPoint = false;
+
 
     },
 
@@ -129,56 +138,13 @@ Traffic.views = Traffic.views || {};
       this.resetRoute();
     },
 
-    initializeRoutePoints: function() {
-      if(!this.routePoints) {
-        this.routePoints = [];
-      }
-
-      if(!this.routePointsLayer) {
-        this.routePointsLayer = L.featureGroup([]).addTo(A.app.map);
-        var _this = this;
-        this.routePointsLayer.on('click', function(evt) {
-          var layer = evt.layer;
-          var layerLatlng = layer.getLatLng();
-
-          this.removeLayer(layer);
-          for(var i=0, pointCount=_this.routePoints.length; i<pointCount; i++) {
-            var point = _this.routePoints[i];
-            if(point.lat == layerLatlng.lat && point.lng == layerLatlng.lng) {
-              _this.routePoints.splice(i, 1);
-              break;
-            }
-          }
-          var layers = this.getLayers();
-          if(layers.length > 0) {
-            layers[0].setStyle({fillColor: '#0D0'});
-            if(layers.length > 1) {
-              layers[layers.length -1].setStyle({fillColor: '#D00'});
-            }
-          }
-          _this.getRoute();
-        });
-      }
-    },
-
     onMapClick : function(evt) {
-      this.initializeRoutePoints();
 
-      this.routePoints.push({
-        lat: evt.latlng.lat,
-        lng: evt.latlng.lng
-      });
-
-      if(this.routePoints.length == 1) {
-        this.routePointsLayer.addLayer(L.circleMarker(evt.latlng, {fillColor: "#0D0", color: '#fff', fillOpacity: 1.0,opacity: 1.0, radius: 5}).addTo(A.app.map));
+      if(this.startPoint == false) {
+        this.startPoint = L.circleMarker(evt.latlng, {fillColor: "#0D0", color: '#fff', fillOpacity: 1.0,opacity: 1.0, radius: 5}).addTo(A.app.map);
       }
-      else {
-        var existingLayers = this.routePointsLayer.getLayers();
-        if(existingLayers.length > 1) {
-          existingLayers[existingLayers.length -1].setStyle({fillColor: '#00D'});
-        }
-
-        this.routePointsLayer.addLayer(L.circleMarker(evt.latlng, {fillColor: "#D00", color: '#fff', fillOpacity: 1.0,opacity: 1.0, radius: 5}).addTo(A.app.map));
+      else if(this.endPoint == false) {
+        this.endPoint = L.circleMarker(evt.latlng, {fillColor: "#D00", color: '#fff', fillOpacity: 1.0,opacity: 1.0, radius: 5}).addTo(A.app.map);
         this.getRoute();
         $('#routeButtons').show();
       }
@@ -190,12 +156,11 @@ Traffic.views = Traffic.views || {};
       if(A.app.map.hasLayer(A.app.pathOverlay))
         A.app.map.removeLayer(A.app.pathOverlay);
 
-      var routePoints = this.routePoints;
-      if(!routePoints || routePoints.length < 2)
+      if(!this.startPoint || !this.endPoint)
         return;
 
-      var startLatLng = routePoints[0];
-      var endLatLng = routePoints[routePoints.length - 1];
+      var startLatLng = this.startPoint.getLatLng();
+      var endLatLng = this.endPoint.getLatLng();
 
       var hoursStr;
 
