@@ -264,8 +264,6 @@ public class TrafficEngineApp {
 				values.forEach(v -> w2.add(Integer.parseInt(v.trim())));
 			}
 
-	        routing.buildIfUnbuilt();
-
 	        RoutingRequest rr = new RoutingRequest();
 
 	        rr.useTraffic = useTraffic;
@@ -508,10 +506,8 @@ public class TrafficEngineApp {
             return mapper.writeValueAsString(HibernateUtil.getUsers());
         });
 
-    }
+        routing.buildIfUnbuilt();
 
-    static User checkCookie(String username, String token){
-        return HibernateUtil.login(username, null, token);
     }
 
     static Map<String, String> getPostParams(Request request){
