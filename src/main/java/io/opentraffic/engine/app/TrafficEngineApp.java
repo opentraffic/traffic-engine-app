@@ -204,6 +204,8 @@ public class TrafficEngineApp {
 		
 		post("/locationUpdate", (request, response) -> {
 
+            log.info("received locationUpdate");
+
 			ExchangeFormat.VehicleMessageEnvelope vmEnvelope = ExchangeFormat.VehicleMessageEnvelope.parseFrom(request.bodyAsBytes());
 
 			long sourceId = vmEnvelope.getSourceId();
