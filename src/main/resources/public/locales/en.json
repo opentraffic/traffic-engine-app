@@ -89,4 +89,5 @@
   "username_required": "Username is required.",
   "passwords_not_match":   "Passwords don't match.",
   "inferred_data_notification":   "Data for this segment are not available.  Statistics below are derived from nearby segments."
+  "inferred_data_banner":   "Data for some segments of this route are not available.  Statistics for those segments are estimated based on the statistics of nearby segments."
 }

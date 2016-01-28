@@ -89,4 +89,5 @@
   "username_required":    "[fil]Username is required.[/fil]",
   "passwords_not_match":   "[fil]Passwords don't match.[/fil]",
   "inferred_data_notification":   "[fil]Data for this segment are not available.  Statistics below are derived from nearby segments.[/fil]"
+  "inferred_data_banner":   "[fil]Data for some segments of this route are not available.  Statistics for those segments are estimated based on the statistics of nearby segments.[/fil]"
 }

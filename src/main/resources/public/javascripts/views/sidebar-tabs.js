@@ -194,6 +194,8 @@ Traffic.views = Traffic.views || {};
         var lines = new Array();
         var insufficientDataWarning = translator.translate('insufficient_data_warning');
         var inferredDataNotification = translator.translate('inferred_data_notification');
+        var inferredDataBanner = translator.translate('inferred_data_banner');
+        var hasInferredData = false;
         var routeInfoTemplate = Handlebars.getTemplate('app', 'route-popup');
         for(i in data.pathEdges) {
           var edge = data.pathEdges[i];
@@ -209,6 +211,7 @@ Traffic.views = Traffic.views || {};
                         segment_std_dev: new Number(edge.stdDev).toFixed(2)
                       });
                       if(edge.inferred == true){
+                          hasInferredData = true;
                           segmentPopupContent = inferredDataNotification + " " + segmentPopupContent;
                       }
                     }
