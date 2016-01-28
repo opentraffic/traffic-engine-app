@@ -145,13 +145,13 @@ Traffic.views = Traffic.views || {};
       }
       else if(this.endPoint == false) {
         this.endPoint = L.circleMarker(evt.latlng, {fillColor: "#D00", color: '#fff', fillOpacity: 1.0,opacity: 1.0, radius: 5}).addTo(A.app.map);
-        this.getRoute();
+        this.getRoute(null, true);
         $('#routeButtons').show();
       }
 
     },
 
-    getRoute : function(hours) {
+    getRoute : function(hours, showInsufficientDataNotification) {
 
       if(A.app.map.hasLayer(A.app.pathOverlay))
         A.app.map.removeLayer(A.app.pathOverlay);
@@ -234,7 +234,8 @@ Traffic.views = Traffic.views || {};
           }
         }
 
-        if(hasInferredData) {
+        if(showInsufficientDataNotification && hasInferredData) {
+          $('#jqueryGrowlDock .panel').remove(); // remove previous sign
           $.growl({
             title: inferredDataNotificationTitle,
             message: inferredDataBanner,
