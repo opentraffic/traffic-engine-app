@@ -194,6 +194,7 @@ Traffic.views = Traffic.views || {};
         var lines = new Array();
         var insufficientDataWarning = translator.translate('insufficient_data_warning');
         var inferredDataNotification = translator.translate('inferred_data_notification');
+        var inferredDataNotificationTitle = translator.translate('inferred_data_notification_title');
         var inferredDataBanner = translator.translate('inferred_data_banner');
         var hasInferredData = false;
         var routeInfoTemplate = Handlebars.getTemplate('app', 'route-popup');
@@ -214,8 +215,8 @@ Traffic.views = Traffic.views || {};
                           hasInferredData = true;
                           segmentPopupContent = inferredDataNotification + " " + segmentPopupContent;
                           $.growl({
-                            title: translator.translate('use_average_notification_title'),
-                            message: translator.translate('use_average_notification_message'),
+                            title: inferredDataNotificationTitle,
+                            message: inferredDataBanner,
                             priority: 'primary'
                           });
                       }

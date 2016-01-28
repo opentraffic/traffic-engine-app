@@ -90,7 +90,6 @@
   "passwords_not_match":   "[fil]Passwords don't match.[/fil]",
   "inferred_data_notification":   "[fil]Data for this segment are not available.  Statistics below are derived from nearby segments.[/fil]",
   "inferred_data_banner":   "[fil]Data for some segments of this route are not available.  Statistics for those segments are estimated based on the statistics of nearby segments.[/fil]",
-  "remove_last_route_point":     "[fil]Remove last added point[/fil]",
-  "use_average_notification_title": "[fil]Information[/fil]",
-  "use_average_notification_message": "[fil]The averages are used.[/fil]"
+  "inferred_data_notification_title": "[fil]Notification[/fil]",
+  "remove_last_route_point":     "[fil]Remove last added point[/fil]"
 }
