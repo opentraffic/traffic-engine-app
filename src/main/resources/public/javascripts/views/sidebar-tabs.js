@@ -214,11 +214,6 @@ Traffic.views = Traffic.views || {};
                       if(edge.inferred == true){
                           hasInferredData = true;
                           segmentPopupContent = inferredDataNotification + " " + segmentPopupContent;
-                          $.growl({
-                            title: inferredDataNotificationTitle,
-                            message: inferredDataBanner,
-                            priority: 'primary'
-                          });
                       }
                     }
                     polyLine.bindPopup(segmentPopupContent);
@@ -237,6 +232,14 @@ Traffic.views = Traffic.views || {};
             distance += edge.length;
             time += edge.length * (1 /edge.speed);
           }
+        }
+
+        if(hasInferredData) {
+          $.growl({
+            title: inferredDataNotificationTitle,
+            message: inferredDataBanner,
+            priority: 'primary'
+          });
         }
 
         A.app.pathOverlay = L.featureGroup(lines);
