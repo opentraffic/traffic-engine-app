@@ -111,7 +111,7 @@ Traffic.views = Traffic.views || {};
 
       this.routePoints = [];
       if(this.routePointsLayer) {
-        A.app.map.removeLayer(this.routePointsLayer);
+        this.routePointsLayer.clearLayers();
       }
 
       if(A.app.map.hasLayer(A.app.pathOverlay))
@@ -120,13 +120,57 @@ Traffic.views = Traffic.views || {};
     },
 
     startRouting : function() {
+      this.initializeRouteUndoButton();
       A.app.map.on("click", this.onMapClick);
       this.resetRoute();
     },
 
     endRouting : function() {
+      if(this.undoRouteButton) {
+        this.undoRouteButton.removeFrom(A.app.map);
+      }
+
       A.app.map.off("click", this.onMapClick);
       this.resetRoute();
+    },
+
+    removeLastRoutePoint: function() {
+      if(this.routePoints.length > 0) {
+        this.routePoints.splice(this.routePoints.length - 1, 1);
+      }
+
+      if(this.routePointsLayer) {
+        var layers = this.routePointsLayer.getLayers();
+        if(layers.length > 0) {
+          this.routePointsLayer.removeLayer(layers[layers.length - 1]);
+        }
+
+        layers = this.routePointsLayer.getLayers();
+        if(layers.length > 1) {
+          var lastPoint = layers[layers.length - 1];
+          lastPoint.setStyle({fillColor: '#D00'});
+        }
+      }
+
+      this.getRoute();
+    },
+
+    initializeRouteUndoButton: function() {
+      if(!this.undoRouteButton) {
+        var _this = this;
+        var button = new L.Control.CustomButton('Undo', {
+              title: translator.translate('remove_last_route_point'),
+              iconCls: 'remove-last-route-point',
+              position: 'topright',
+              clickCallback: function() {
+                _this.removeLastRoutePoint();
+              }
+          });
+
+        this.undoRouteButton = button;
+      }
+
+      this.undoRouteButton.addTo(A.app.map);
     },
 
     initializeRoutePoints: function() {
@@ -274,7 +318,7 @@ Traffic.views = Traffic.views || {};
 
         if(hasInferredData) {
           if($('.inferred-data-warning').length == 0) {
-            var tags = "<span class='glyphicon glyphicon-info-sign' title='" + inferredDataBanner + "'></span>"
+            var tags = "<span class='glyphicon glyphicon-info-sign inferred-data-warning' title='" + inferredDataBanner + "'></span>"
             $('#avgSpeed').after(tags);
           } 
         } else {

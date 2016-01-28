@@ -98,6 +98,7 @@ body, div {
   margin-right: 5px;
 }
 
+<<<<<<< HEAD
 .compare-notes {
   margin-top: 10px;
   background-color: #DCE6F5;
@@ -107,4 +108,9 @@ body, div {
 
 .inferred-data-warning {
   width: 16px;
+=======
+.remove-last-route-point {
+  background-image: url(/images/undo.png);
+  background-size: 20px 20px;
+>>>>>>> d1ecb68... Add a Undo button to remove last added route point [WBOT-23]
 }
