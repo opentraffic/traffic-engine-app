@@ -213,6 +213,11 @@ Traffic.views = Traffic.views || {};
                       if(edge.inferred == true){
                           hasInferredData = true;
                           segmentPopupContent = inferredDataNotification + " " + segmentPopupContent;
+                          $.growl({
+                            title: translator.translate('use_average_notification_title'),
+                            message: translator.translate('use_average_notification_message'),
+                            priority: 'primary'
+                          });
                       }
                     }
                     polyLine.bindPopup(segmentPopupContent);
