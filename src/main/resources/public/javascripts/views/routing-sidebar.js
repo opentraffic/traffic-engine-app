@@ -15,8 +15,10 @@ Traffic.views = Traffic.views || {};
             'change #week2ToList' : 'changeToWeek',
             'change #week1FromList' : 'changeFromWeek',
             'change #week2FromList' : 'changeFromWeek',
+            'click #toggleFilters' : 'toggleFilters',
             'click #compare' : 'clickCompare',
-            'click #toggleFilters' : 'toggleFilters'
+            'change #confidenceInterval' : 'changeConfidenceInterval',
+            'change #normalizeByTime' : 'changeNormalizeBy',
         },
 
         toggleFilters : function() {
@@ -143,9 +145,48 @@ Traffic.views = Traffic.views || {};
             this.update();
         },
 
+
+        changeNormalizeBy: function() {
+
+            A.app.sidebar.filterChanged = true;
+            this.update();
+        },
+
+        changeConfidenceInterval : function() {
+
+            A.app.sidebar.filterChanged = true;
+            this.update();
+        },
+
         changeToWeek : function() {
 
             A.app.sidebar.filterChanged = true;
+
+            this.update();
+        },
+
+
+        clickCompare : function() {
+
+            A.app.sidebar.filterChanged = true;
+
+            if(this.$("#compare").prop( "checked" )) {
+                this.$("#compareWeekSelector").show();
+                this.$("#percentChangeTitle1").show();
+                this.$("#percentChangeTitle2").show();
+                this.$("#percentChangeLegend").show();
+                this.$("#speedLegend").hide();
+
+                A.app.sidebar.percentChange = true;
+            }
+            else {
+                this.$("#compareWeekSelector").hide();
+                this.$("#percentChangeTitle1").hide();
+                this.$("#percentChangeTitle2").hide();
+                this.$("#percentChangeLegend").hide();
+                this.$("#speedLegend").show();
+                A.app.sidebar.percentChange = false;
+            }
 
             this.update();
         },
@@ -161,7 +202,7 @@ Traffic.views = Traffic.views || {};
 
             var minHour, maxHour, minDay, maxDay;
 
-            if(A.app.sidebar.hourExtent[0] < 1 && A.app.sidebar.hourExtent[1] < 1) {
+            if(!A.app.sidebar.hourExtent || (A.app.sidebar.hourExtent[0] < 1 && A.app.sidebar.hourExtent[1] < 1)) {
                 minHour = 1
                 maxHour = 24;
             }
@@ -170,7 +211,7 @@ Traffic.views = Traffic.views || {};
                 maxHour = Math.floor(A.app.sidebar.hourExtent[1]);
             }
 
-            if(A.app.sidebar.dayExtent[0] < 1 && A.app.sidebar.dayExtent[1] < 1) {
+            if(!A.app.sidebar.dayExtent || (A.app.sidebar.dayExtent[0] < 1 && A.app.sidebar.dayExtent[1] < 1)) {
                 minDay = 1
                 maxDay = 7;
             }
@@ -481,7 +522,7 @@ Traffic.views = Traffic.views || {};
                     parent.append(bin);
                 }
             });
-            _.bindAll(this, 'update', 'changeFromWeek', 'changeToWeek');
+            _.bindAll(this, 'update', 'changeFromWeek', 'changeToWeek', 'clickCompare', 'changeConfidenceInterval', 'changeNormalizeBy');
         },
 
         onRender : function () {
