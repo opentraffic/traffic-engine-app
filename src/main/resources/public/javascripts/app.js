@@ -30,7 +30,7 @@ var Traffic = Traffic || {};
 		A.app.map = mapWrapperObject.LMmap;
 
 		// Click Data in sidebar
-		$('#data').click();
+		$('#routing').click();
 
 	});
 
