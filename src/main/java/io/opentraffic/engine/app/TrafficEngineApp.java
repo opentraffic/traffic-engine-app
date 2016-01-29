@@ -110,7 +110,6 @@ public class TrafficEngineApp {
             Set<City> cityNames = new TreeSet<>();
             for(OSMCluster osmCluster : clusters){
                 if(osmCluster != null){
-                    System.out.println(osmCluster.name);
                     if(osmCluster.name != null && osmCluster.name.indexOf(" -- ") > -1){
                         String countryName = osmCluster.name.split(" -- ")[0];
                         String cityName = osmCluster.name.split(" -- ")[1];
