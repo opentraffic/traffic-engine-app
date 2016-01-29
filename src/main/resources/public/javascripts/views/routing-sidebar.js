@@ -274,6 +274,7 @@ Traffic.views = Traffic.views || {};
         },
 
         loadChartData : function(data) {
+            var isComparing = this.$('#compare').prop('checked');
 
             data.hours.forEach(function (d) {
                 d.hourOfDay = (d.h % 24) + 1;
@@ -393,14 +394,16 @@ Traffic.views = Traffic.views || {};
                     });
                 this.hourlyData = data.hours;
                 var that = this;
-                this.dailyChart.title(function (d) {
-                    if(!isNaN(d.value.avg) && d.value.avg > 0){
-                        var wsd = that.wsd(d.key, that.hourlyData, 'dayOfWeek');
-                        return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
-                            + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
-                    }
-                    return null;
-                });
+                if(!isComparing) {
+                    this.dailyChart.title(function (d) {
+                        if(!isNaN(d.value.avg) && d.value.avg > 0){
+                            var wsd = that.wsd(d.key, that.hourlyData, 'dayOfWeek');
+                            return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
+                                + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
+                        }
+                        return null;
+                    });
+                }
 
                 this.dailyChart.yAxis().ticks(4);
 
@@ -433,14 +436,16 @@ Traffic.views = Traffic.views || {};
                     .elasticY(true)
                     .xAxis().tickFormat();
 
-                this.hourlyChart.title(function (d) {
-                    if(!isNaN(d.value.avg) && d.value.avg > 0){
-                        var wsd = that.wsd(d.key, that.hourlyData, 'hourOfDay');
-                        return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
-                            + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
-                    }
-                    return null;
-                });
+                if(!isComparing) {
+                    this.hourlyChart.title(function (d) {
+                        if(!isNaN(d.value.avg) && d.value.avg > 0){
+                            var wsd = that.wsd(d.key, that.hourlyData, 'hourOfDay');
+                            return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
+                                + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
+                        }
+                        return null;
+                    });
+                }
 
                 this.hourlyChart.yAxis().ticks(6);
 
@@ -474,14 +479,16 @@ Traffic.views = Traffic.views || {};
 
                 this.hourlyData = data.hours;
                 var that = this;
-                this.dailyChart.title(function (d) {
-                    if(!isNaN(d.value.avg) && d.value.avg > 0){
-                        var wsd = that.wsd(d.key, that.hourlyData, 'dayOfWeek');
-                        return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
-                            + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
-                    }
-                    return null;
-                });
+                if(!isComparing) {
+                    this.dailyChart.title(function (d) {
+                        if(!isNaN(d.value.avg) && d.value.avg > 0){
+                            var wsd = that.wsd(d.key, that.hourlyData, 'dayOfWeek');
+                            return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
+                                + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
+                        }
+                        return null;
+                    });
+                }
             }
 
             dc.renderAll();
