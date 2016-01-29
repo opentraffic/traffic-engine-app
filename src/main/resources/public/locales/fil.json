@@ -92,5 +92,6 @@
   "inferred_data_banner":   "[fil]Data for some segments of this route are not available.  Statistics for those segments are estimated based on the statistics of nearby segments.[/fil]",
   "inferred_data_notification_title": "[fil]Notification[/fil]",
   "unable_estimate_travel_time":  "[fil]We were unable to estimate travel times for one or more of the segments along your route, no travel times for this route are available.[/fil]",
-  "remove_last_route_point":     "[fil]Remove last added point[/fil]"
+  "remove_last_route_point":     "[fil]Remove last added point[/fil]",
+  "compare_notes":        "[fil]The comparison tool allows for comparison of traffic speeds from two time sets. <br><br>1. Choose the time ranges for comparison.<br>2. Set the confidence interval to remove reports outside the acceptable bounds.<br>3. Normalize the comparison by time for vehicle count.[/fil]"
 }

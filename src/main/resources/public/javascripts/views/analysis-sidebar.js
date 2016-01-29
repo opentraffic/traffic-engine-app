@@ -133,6 +133,7 @@ Traffic.views = Traffic.views || {};
                 this.$("#speedLegend").hide();
 
                 A.app.sidebar.percentChange = true;
+                this.$('#analysisCompareNotes').show();
             }
             else {
                 this.$("#compareWeekSelector").hide();
@@ -141,6 +142,7 @@ Traffic.views = Traffic.views || {};
                 this.$("#percentChangeLegend").hide();
                 this.$("#speedLegend").show();
                 A.app.sidebar.percentChange = false;
+                this.$('#analysisCompareNotes').hide();
             }
 
             this.update();
