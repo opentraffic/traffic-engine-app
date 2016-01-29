@@ -109,14 +109,19 @@ public class TrafficEngineApp {
 			List<OSMCluster> clusters = engine.getTrafficEngine().osmData.getOSMClusters();
             Set<City> cityNames = new TreeSet<>();
             for(OSMCluster osmCluster : clusters){
-                String countryName = osmCluster.name.split(" -- ")[0];
-                String cityName = osmCluster.name.split(" -- ")[1];
-                City city = new City();
-                city.city = cityName;
-                city.country = countryName;
-                city.lat = osmCluster.bounds.centre().y;
-                city.lon = osmCluster.bounds.centre().x;
-                cityNames.add(city);
+                if(osmCluster != null){
+                    System.out.println(osmCluster.name);
+                    if(osmCluster.name != null && osmCluster.name.indexOf(" -- ") > -1){
+                        String countryName = osmCluster.name.split(" -- ")[0];
+                        String cityName = osmCluster.name.split(" -- ")[1];
+                        City city = new City();
+                        city.city = cityName;
+                        city.country = countryName;
+                        city.lat = osmCluster.bounds.centre().y;
+                        city.lon = osmCluster.bounds.centre().x;
+                        cityNames.add(city);
+                    }
+                }
             }
 			return mapper.writeValueAsString(cityNames);
 		});
