@@ -74,8 +74,8 @@ body, div {
   max-width: 150px;
 }
 
-.location-search .twitter-typeahead {
-  margin: 5px;
+.location-search {
+  margin-top: 5px;
 }
 
 #userMenuContainer {

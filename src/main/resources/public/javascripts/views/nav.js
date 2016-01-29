@@ -14,7 +14,7 @@ Traffic.views = Traffic.views || {};
     initialize : function() {
       var _this = this;
       _this.cities = [];
-      
+
       $.getJSON('/cityNames', function(data) {
         _this.cities = data;
       }).always(function() {
@@ -76,6 +76,8 @@ Traffic.views = Traffic.views || {};
       this.$('.dropdown input, .dropdown label').click(function(e) {
         e.stopPropagation();
       });
+
+      this.$('#locationSearch').typeahead();
     }
   });
 })(Traffic, Traffic.views, Traffic.translations);
