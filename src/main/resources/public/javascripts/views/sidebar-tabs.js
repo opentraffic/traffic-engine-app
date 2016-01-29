@@ -145,13 +145,13 @@ Traffic.views = Traffic.views || {};
       }
       else if(this.endPoint == false) {
         this.endPoint = L.circleMarker(evt.latlng, {fillColor: "#D00", color: '#fff', fillOpacity: 1.0,opacity: 1.0, radius: 5}).addTo(A.app.map);
-        this.getRoute(null, true);
+        this.getRoute();
         $('#routeButtons').show();
       }
 
     },
 
-    getRoute : function(hours, showInsufficientDataNotification) {
+    getRoute : function(hours) {
 
       if(A.app.map.hasLayer(A.app.pathOverlay))
         A.app.map.removeLayer(A.app.pathOverlay);
@@ -196,6 +196,7 @@ Traffic.views = Traffic.views || {};
         var inferredDataNotification = translator.translate('inferred_data_notification');
         var inferredDataNotificationTitle = translator.translate('inferred_data_notification_title');
         var inferredDataBanner = translator.translate('inferred_data_banner');
+        var unableEstimateTravelTimeMessage = translator.translate('unable_estimate_travel_time');
         var hasInferredData = false;
         var routeInfoTemplate = Handlebars.getTemplate('app', 'route-popup');
         for(i in data.pathEdges) {
@@ -234,11 +235,12 @@ Traffic.views = Traffic.views || {};
           }
         }
 
-        if(showInsufficientDataNotification && hasInferredData) {
+        if(hasInferredData) {
+          $('.travel-time-span').hide();
           $('#jqueryGrowlDock .panel').remove(); // remove previous sign
           $.growl({
             title: inferredDataNotificationTitle,
-            message: inferredDataBanner,
+            message: unableEstimateTravelTimeMessage,
             priority: 'primary'
           });
         }
@@ -255,7 +257,10 @@ Traffic.views = Traffic.views || {};
 
         var speed =  (distance / time) * 3.6;
 
-        A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
+        if(!hasInferredData) {
+          $('.travel-time-span').show();
+          A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
+        }
         A.app.sidebar.$("#avgSpeed").text(speed.toPrecision(2) + "KPH");
 
         A.app.sidebar.loadChartData(data.weeklyStats);

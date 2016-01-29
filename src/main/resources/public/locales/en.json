@@ -91,5 +91,6 @@
   "inferred_data_notification":   "Data for this segment are not available.  Statistics below are derived from nearby segments.",
   "inferred_data_banner":   "Data for some segments of this route are not available.  Statistics for those segments are estimated based on the statistics of nearby segments.",
   "inferred_data_notification_title": "Notification",
+  "unable_estimate_travel_time":  "We were unable to estimate travel times for one or more of the segments along your route, no travel times for this route are available.",
   "remove_last_route_point":     "Remove last added point"
 }
