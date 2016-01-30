@@ -133,6 +133,7 @@ Traffic.views = Traffic.views || {};
                 this.$("#speedLegend").hide();
 
                 A.app.sidebar.percentChange = true;
+                this.$('#analysisCompareNotes').show();
             }
             else {
                 this.$("#compareWeekSelector").hide();
@@ -141,6 +142,7 @@ Traffic.views = Traffic.views || {};
                 this.$("#percentChangeLegend").hide();
                 this.$("#speedLegend").show();
                 A.app.sidebar.percentChange = false;
+                this.$('#analysisCompareNotes').hide();
             }
 
             this.update();
@@ -276,6 +278,7 @@ Traffic.views = Traffic.views || {};
         },
 
         loadChartData : function(data) {
+            var isComparing = this.$('#compare').prop('checked');
 
             data.hours.forEach(function (d) {
                 d.hourOfDay = (d.h % 24) + 1;
@@ -406,14 +409,16 @@ Traffic.views = Traffic.views || {};
 
                 this.hourlyData = data.hours;
                 var that = this;
-                this.dailyChart.title(function (d) {
-                    if(!isNaN(d.value.avg) && d.value.avg > 0){
-                        var wsd = that.wsd(d.key, that.hourlyData, 'dayOfWeek');
-                        return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
-                            + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
-                    }
-                    return null;
-                });
+                if(!isComparing) {
+                    this.dailyChart.title(function (d) {
+                        if(!isNaN(d.value.avg) && d.value.avg > 0){
+                            var wsd = that.wsd(d.key, that.hourlyData, 'dayOfWeek');
+                            return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
+                                + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
+                        }
+                        return null;
+                    });
+                }
 
                 this.hourlyChart = dc.barChart("#hourlyChart");
 
@@ -445,14 +450,16 @@ Traffic.views = Traffic.views || {};
 
                 this.hourlyChart.brush().on("brushend.custom", A.app.sidebar.updateTrafficTiles);
 
-                this.hourlyChart.title(function (d) {
-                    if(!isNaN(d.value.avg) && d.value.avg > 0){
-                        var wsd = that.wsd(d.key, that.hourlyData, 'hourOfDay');
-                        return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
-                            + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
-                    }
-                    return null;
-                });
+                if(!isComparing) {
+                    this.hourlyChart.title(function (d) {
+                        if(!isNaN(d.value.avg) && d.value.avg > 0){
+                            var wsd = that.wsd(d.key, that.hourlyData, 'hourOfDay');
+                            return translator.translate("avg_speed") + ' ' + Math.round(d.value.avg)
+                                + ' KPH, ' + translator.translate("std_dev") + ': ' + wsd;
+                        }
+                        return null;
+                    });
+                }
 
             }
             else {
