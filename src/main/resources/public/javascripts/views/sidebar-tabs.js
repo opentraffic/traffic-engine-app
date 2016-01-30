@@ -259,10 +259,8 @@ Traffic.views = Traffic.views || {};
 
         var speed =  (distance / time) * 3.6;
 
-        if(!hasInferredData) {
         $('.travel-time-span').show();
         A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
-        }
         A.app.sidebar.$("#avgSpeed").text(speed.toPrecision(2) + "KPH");
 
         A.app.sidebar.loadChartData(data.weeklyStats);

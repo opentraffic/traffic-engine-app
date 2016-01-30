@@ -316,7 +316,7 @@ public class TrafficEngineApp {
 							edgeIds.add(streetSegment.id);
 							SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
 							if(summaryStatistics != null){
-                                if(summaryStatistics.count == 0 && !compare){
+                                if(summaryStatistics.count == 0){
 
                                     //no data for this segment, find nearby segments of the same road type and average those stats
 

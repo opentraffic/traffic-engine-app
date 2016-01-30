@@ -101,4 +101,6 @@ body, div {
 .compare-notes {
   margin-top: 10px;
   background-color: #DCE6F5;
+  padding: 20px;
+  margin: 20px;
 }
