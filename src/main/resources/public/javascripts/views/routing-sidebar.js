@@ -278,7 +278,7 @@ Traffic.views = Traffic.views || {};
             data.hours.forEach(function (d) {
                 d.hourOfDay = (d.h % 24) + 1;
                 d.dayOfWeek = ((d.h - d.hourOfDay) / 24) + 1;
-                d.s = d.s * 3.6; // convert from m/s km/h
+                //d.s = d.s * 3.6; // convert from m/s km/h
             });
 
             var hourlyData = data.hours;
