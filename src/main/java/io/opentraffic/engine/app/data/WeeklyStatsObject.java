@@ -56,9 +56,6 @@ public class WeeklyStatsObject {
 				hourStats.std = stats.combinedStdDev(hour);
 			}
 
-
-
-
 			hours[hour] = hourStats;
 		}
 	}

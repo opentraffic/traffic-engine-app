@@ -172,8 +172,10 @@ Traffic.views = Traffic.views || {};
 
       var confidenceInterval = this.$("#confidenceInterval").val();
       var normalizeByTime = this.$("#normalizeByTime").val();
+      var compare = $("#compare").prop( "checked" );
 
-      var url = '/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng;
+      var url = '/route?fromLat=' + startLatLng.lat + '&fromLon=' + startLatLng.lng + '&toLat=' + endLatLng.lat + '&toLon=' + endLatLng.lng
+        + '&compare=' + compare + '&normalizeByTime=' + normalizeByTime + '&confidenceInterval=' + confidenceInterval;
 
       if(hoursStr)
         url += '&h=' + hoursStr;
@@ -240,7 +242,7 @@ Traffic.views = Traffic.views || {};
           $('#jqueryGrowlDock .panel').remove(); // remove previous sign
           $.growl({
             title: inferredDataNotificationTitle,
-            message: unableEstimateTravelTimeMessage,
+            message: inferredDataBanner,
             priority: 'primary'
           });
         }
@@ -258,8 +260,8 @@ Traffic.views = Traffic.views || {};
         var speed =  (distance / time) * 3.6;
 
         if(!hasInferredData) {
-          $('.travel-time-span').show();
-          A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
+        $('.travel-time-span').show();
+        A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
         }
         A.app.sidebar.$("#avgSpeed").text(speed.toPrecision(2) + "KPH");
 

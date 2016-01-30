@@ -7,7 +7,7 @@
         <property name="connection.driver_class">org.postgresql.Driver</property>
         <property name="connection.url">jdbc:postgresql://localhost/opentraffic</property>
         <property name="connection.username">postgres</property>
-        <property name="connection.password">password</property>
+        <property name="connection.password">cranium</property>
         <property name="connection.pool_size">1</property>
         <property name="dialect">org.hibernate.dialect.PostgreSQL9Dialect</property>
         <property name="cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</property>

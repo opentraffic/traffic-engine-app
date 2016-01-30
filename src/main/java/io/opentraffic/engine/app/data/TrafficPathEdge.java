@@ -27,19 +27,28 @@ public class TrafficPathEdge {
     private static double maxSpeedInKph = Double.parseDouble(TrafficEngineApp.appProps.getProperty("application.maxSpeedInKph"));
 
     public TrafficPathEdge(StreetSegment streetSegment, SummaryStatistics summaryStatistics) {
-        colors = ColorBrewer.RdYlBu.getColorPalette(numberOfBins + 1);
+        this(streetSegment, summaryStatistics, null);
+    }
+
+    public TrafficPathEdge(StreetSegment streetSegment, SummaryStatistics summaryStatistics, Color comparisonColor) {
 
         EncodedPolylineBean encodedPolyline = PolylineEncoder.createEncodings(streetSegment.getGeometry());
         geometry = encodedPolyline.getPoints();
 
-        if(summaryStatistics.count < 1){
-            color = "#808080";
+        if(comparisonColor == null){
+            colors = ColorBrewer.RdYlBu.getColorPalette(numberOfBins + 1);
+            if(summaryStatistics.count < 1){
+                color = "#808080";
+            }else{
+                int colorNum = (int) (numberOfBins / (maxSpeedInKph / (summaryStatistics.getMean() * 3.6)));
+                if(colorNum > numberOfBins)
+                    colorNum = numberOfBins;
+                color = String.format("#%02x%02x%02x", colors[colorNum].getRed(), colors[colorNum].getGreen(), colors[colorNum].getBlue());
+            }
         }else{
-            int colorNum = (int) (numberOfBins / (maxSpeedInKph / (summaryStatistics.getMean() * 3.6)));
-            if(colorNum > numberOfBins)
-                colorNum = numberOfBins;
-            color = String.format("#%02x%02x%02x", colors[colorNum].getRed(), colors[colorNum].getGreen(), colors[colorNum].getBlue());
+            color = String.format("#%02x%02x%02x", comparisonColor.getRed(), comparisonColor.getGreen(), comparisonColor.getBlue());
         }
+
 
         length = streetSegment.length;
         speed = summaryStatistics.getMean();

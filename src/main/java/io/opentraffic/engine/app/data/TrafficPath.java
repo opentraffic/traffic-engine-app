@@ -3,6 +3,7 @@ package io.opentraffic.engine.app.data;
 import io.opentraffic.engine.data.stats.SummaryStatistics;
 import io.opentraffic.engine.geom.StreetSegment;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +20,13 @@ public class TrafficPath {
         weeklyStats = new WeeklyStatsObject(stats);
     }
 
-    public void addSegment(StreetSegment streetSegment, SummaryStatistics summaryStatistics) {
+    public void setWeeklyStats(WeeklyStatsObject stats) {
+        weeklyStats = stats;
+    }
 
-        TrafficPathEdge pathEdge = new TrafficPathEdge(streetSegment, summaryStatistics);
+    public void addSegment(StreetSegment streetSegment, SummaryStatistics summaryStatistics, Color color) {
+
+        TrafficPathEdge pathEdge = new TrafficPathEdge(streetSegment, summaryStatistics, color);
         pathEdges.add(pathEdge);
     }
 }

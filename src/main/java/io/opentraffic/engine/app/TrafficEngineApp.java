@@ -222,8 +222,13 @@ public class TrafficEngineApp {
 
 					GPSPoint gpsPoint = new GPSPoint(location.getTimestamp(), vehicleId, location.getLon(), location.getLat());
 
-					if(gpsPoint.lat != 0.0 && gpsPoint.lon !=  0.0)
+					if(gpsPoint.lat != 0.0 && gpsPoint.lon !=  0.0){
+                        if(gpsPoint.lat > 10.255465437158735 && gpsPoint.lat < 10.351903377290384
+                                && gpsPoint.lon > 123.79531860351561 && gpsPoint.lon < 124.00131225585939){
 						TrafficEngineApp.engine.locationUpdate(gpsPoint);
+				        }
+			        }
+
 				}
 			}
 			return response;
@@ -243,8 +248,10 @@ public class TrafficEngineApp {
 			double fromLon = request.queryMap("fromLon").doubleValue(); 
 			double toLat = request.queryMap("toLat").doubleValue(); 
 			double toLon = request.queryMap("toLon").doubleValue();
+            boolean compare = request.queryMap("compare").booleanValue();
+            boolean normalizeByTime = request.queryMap("normalizeByTime").booleanValue();
+            String confidenceInterval = request.queryMap("confidenceInterval").value();
 			boolean useTraffic = false;
-			boolean normalizeByTime = true;
 
 
 			Set<Integer> hours = new HashSet<>();
@@ -309,7 +316,7 @@ public class TrafficEngineApp {
 							edgeIds.add(streetSegment.id);
 							SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
 							if(summaryStatistics != null){
-                                if(summaryStatistics.count == 0){
+                                if(summaryStatistics.count == 0 && !compare){
 
                                     //no data for this segment, find nearby segments of the same road type and average those stats
 
@@ -363,10 +370,37 @@ public class TrafficEngineApp {
                                         segmentIds.addAll(distanceTosegmentIdMapDifferentType.values());
                                     }
 
-                                    summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(segmentIds, true, w1, hours);
+                                    summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(segmentIds, normalizeByTime, w1, hours);
                                     summaryStatistics.inferred = true;
                                 }
-                                trafficPath.addSegment(streetSegment, summaryStatistics);
+                                if(compare){
+                                    SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, hours);
+                                    SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, hours);
+                                    SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[Integer.parseInt(confidenceInterval)], stats1, stats2);
+
+                                    Color[] colors;
+
+                                    if(statsComparison.tTest()) {
+                                        double speedPercentChange = statsComparison.differenceAsPercent();
+                                        if(speedPercentChange < 0)
+                                            colors = ColorBrewer.Reds.getColorPalette(5);
+                                        else
+                                            colors = ColorBrewer.Blues.getColorPalette(5);
+                                        int colorNum;
+
+                                        if(Math.abs(speedPercentChange) > .5)
+                                            colorNum = 4;
+                                        else {
+                                            speedPercentChange = Math.abs(speedPercentChange) / 0.5 ;
+                                            colorNum = (int)Math.round(4 * speedPercentChange);
+                                        }
+
+                                        Color color = colors[colorNum];
+                                        trafficPath.addSegment(streetSegment, summaryStatistics, color);
+                                    }
+                                }else{
+                                    trafficPath.addSegment(streetSegment, summaryStatistics, null);
+                                }
                             }
 						}
 						else {
@@ -380,9 +414,14 @@ public class TrafficEngineApp {
 
 			}
 
-			SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, true, w1, null);
-			trafficPath.setWeeklyStats(summaryStatistics);
-
+            SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, null);
+            if (w2.size() > 0) {
+                SummaryStatistics summaryStats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds,normalizeByTime, w2, null);
+                SummaryStatisticsComparison summaryStatisticsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[Integer.parseInt(confidenceInterval)], summaryStatistics, summaryStats2);
+                trafficPath.setWeeklyStats(new WeeklyStatsObject(summaryStatisticsComparison));
+            }else{
+                trafficPath.setWeeklyStats(summaryStatistics);
+            }
             return mapper.writeValueAsString(trafficPath);
 		});
 
