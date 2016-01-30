@@ -223,10 +223,11 @@ public class TrafficEngineApp {
 					GPSPoint gpsPoint = new GPSPoint(location.getTimestamp(), vehicleId, location.getLon(), location.getLat());
 
 					if(gpsPoint.lat != 0.0 && gpsPoint.lon !=  0.0){
-                        if(gpsPoint.lat > 10.255465437158735 && gpsPoint.lat < 10.351903377290384
+                        /*if(gpsPoint.lat > 10.255465437158735 && gpsPoint.lat < 10.351903377290384
                                 && gpsPoint.lon > 123.79531860351561 && gpsPoint.lon < 124.00131225585939){
 						TrafficEngineApp.engine.locationUpdate(gpsPoint);
-				        }
+				        }*/
+                        TrafficEngineApp.engine.locationUpdate(gpsPoint);
 			        }
 
 				}
