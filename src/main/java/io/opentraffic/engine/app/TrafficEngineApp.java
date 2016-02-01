@@ -20,7 +20,6 @@ import io.opentraffic.engine.osm.OSMCluster;
 import org.apache.commons.cli.*;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.hibernate.SessionFactory;
 import org.jcolorbrewer.ColorBrewer;
 import org.mapdb.Fun;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -29,6 +28,7 @@ import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import spark.Request;
+import spark.utils.StringUtils;
 
 import javax.measure.Measure;
 import javax.measure.unit.SI;
@@ -50,8 +50,6 @@ import java.util.stream.Collectors;
 import static spark.Spark.*;
 
 public class TrafficEngineApp {
-
-    private static SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
 	private static final Logger log = Logger.getLogger( TrafficEngineApp.class.getName());
 	
@@ -208,13 +206,17 @@ public class TrafficEngineApp {
 		
 		post("/locationUpdate", (request, response) -> {
 
-            log.info("received locationUpdate");
+            boolean importTest = false;
+            String importTestString = TrafficEngineApp.appProps.getProperty("application.importTest");
+            if(!StringUtils.isEmpty(importTestString) && Boolean.parseBoolean(importTestString))
+                importTest = true;
+
 
 			ExchangeFormat.VehicleMessageEnvelope vmEnvelope = ExchangeFormat.VehicleMessageEnvelope.parseFrom(request.bodyAsBytes());
 
 			long sourceId = vmEnvelope.getSourceId();
 
-			for(ExchangeFormat.VehicleMessage vm : vmEnvelope.getMessagesList()) {
+			for(ExchangeFormat.VehicleMessage vm : vmEnvelope.getMessagesList()                ) {
 
 				long vehicleId = getUniqueIdFromString(sourceId + "_" + vm.getVehicleId());
 
@@ -223,11 +225,14 @@ public class TrafficEngineApp {
 					GPSPoint gpsPoint = new GPSPoint(location.getTimestamp(), vehicleId, location.getLon(), location.getLat());
 
 					if(gpsPoint.lat != 0.0 && gpsPoint.lon !=  0.0){
-                        /*if(gpsPoint.lat > 10.255465437158735 && gpsPoint.lat < 10.351903377290384
-                                && gpsPoint.lon > 123.79531860351561 && gpsPoint.lon < 124.00131225585939){
-						TrafficEngineApp.engine.locationUpdate(gpsPoint);
-				        }*/
-                        TrafficEngineApp.engine.locationUpdate(gpsPoint);
+                        if(importTest){
+                            if(gpsPoint.lat > 10.255465437158735 && gpsPoint.lat < 10.351903377290384
+                                    && gpsPoint.lon > 123.79531860351561 && gpsPoint.lon < 124.00131225585939){
+                                TrafficEngineApp.engine.locationUpdate(gpsPoint);
+                            }
+                        }else{
+                            TrafficEngineApp.engine.locationUpdate(gpsPoint);
+                        }
 			        }
 
 				}

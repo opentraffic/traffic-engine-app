@@ -40,7 +40,7 @@ public class TrafficPathEdge {
             if(summaryStatistics.count < 1){
                 color = "#808080";
             }else{
-                int colorNum = (int) (numberOfBins / (maxSpeedInKph / (summaryStatistics.getMean() * 3.6)));
+                int colorNum = (int) (numberOfBins / (maxSpeedInKph / (summaryStatistics.getMean() * WeeklyStatsObject.MS_TO_KMH)));
                 if(colorNum > numberOfBins)
                     colorNum = numberOfBins;
                 color = String.format("#%02x%02x%02x", colors[colorNum].getRed(), colors[colorNum].getGreen(), colors[colorNum].getBlue());

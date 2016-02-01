@@ -257,7 +257,7 @@ Traffic.views = Traffic.views || {};
         var seconds = time % 60;
         var minutes = time / 60;
 
-        var speed =  (distance / time) * 3.6;
+        var speed =  (distance / time);
 
         $('.travel-time-span').show();
         A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
