@@ -104,3 +104,7 @@ body, div {
   padding: 20px;
   margin: 20px;
 }
+
+.inferred-data-warning {
+  width: 16px;
+}

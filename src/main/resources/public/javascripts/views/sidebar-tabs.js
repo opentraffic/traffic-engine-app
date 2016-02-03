@@ -238,13 +238,12 @@ Traffic.views = Traffic.views || {};
         }
 
         if(hasInferredData) {
-          $('.travel-time-span').hide();
-          $('#jqueryGrowlDock .panel').remove(); // remove previous sign
-          $.growl({
-            title: inferredDataNotificationTitle,
-            message: inferredDataBanner,
-            priority: 'primary'
-          });
+          if($('.inferred-data-warning').length == 0) {
+            var tags = "<span class='glyphicon glyphicon-info-sign' title='" + inferredDataBanner + "'></span>"
+            $('#avgSpeed').after(tags);
+          } 
+        } else {
+          $('.inferred-data-warning').remove();
         }
 
         A.app.pathOverlay = L.featureGroup(lines);
@@ -261,7 +260,7 @@ Traffic.views = Traffic.views || {};
 
         $('.travel-time-span').show();
         A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
-        A.app.sidebar.$("#avgSpeed").text(speed.toPrecision(2) + "KPH");
+        A.app.sidebar.$("#avgSpeed").text(speed.toPrecision(2) + " KPH");
 
         A.app.sidebar.loadChartData(data.weeklyStats);
 
