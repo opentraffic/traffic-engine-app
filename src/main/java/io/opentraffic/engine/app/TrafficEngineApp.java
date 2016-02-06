@@ -56,6 +56,8 @@ public class TrafficEngineApp {
 	private static final ObjectMapper mapper = new ObjectMapper();
 	
 	private static Routing routing = new Routing(new Rectangle(-180, -90, 360, 180));
+
+    private static List<Envelope> importBoundingBoxes = null;
 	
 	public static Properties appProps = new Properties();
 		
@@ -206,11 +208,23 @@ public class TrafficEngineApp {
 		
 		post("/locationUpdate", (request, response) -> {
 
-            boolean importTest = false;
-            String importTestString = TrafficEngineApp.appProps.getProperty("application.importTest");
-            if(!StringUtils.isEmpty(importTestString) && Boolean.parseBoolean(importTestString))
-                importTest = true;
+            String importBoundingBoxesString = TrafficEngineApp.appProps.getProperty("application.importBoundingBoxes");
+            if(!StringUtils.isEmpty(importBoundingBoxesString)){
+                if(importBoundingBoxes == null){
+                    importBoundingBoxes = new ArrayList<>();
 
+                    String[] envelopeStrings = importBoundingBoxesString.split("\\|");
+                    for(int i = 0; i < envelopeStrings.length; i++){
+                        String[] envelopeCoordinates = envelopeStrings[i].split("\\,");
+                        Double minLon = Math.min(Double.parseDouble(envelopeCoordinates[1]), Double.parseDouble(envelopeCoordinates[3]));
+                        Double maxLon = Math.max(Double.parseDouble(envelopeCoordinates[1]), Double.parseDouble(envelopeCoordinates[3]));
+                        Double minLat = Math.min(Double.parseDouble(envelopeCoordinates[0]), Double.parseDouble(envelopeCoordinates[2]));
+                        Double maxLat = Math.max(Double.parseDouble(envelopeCoordinates[0]), Double.parseDouble(envelopeCoordinates[2]));
+                        Envelope env = new Envelope(minLon,  maxLon, minLat, maxLat);
+                        importBoundingBoxes.add(env);
+                    }
+                }
+            }
 
 			ExchangeFormat.VehicleMessageEnvelope vmEnvelope = ExchangeFormat.VehicleMessageEnvelope.parseFrom(request.bodyAsBytes());
 
@@ -225,10 +239,12 @@ public class TrafficEngineApp {
 					GPSPoint gpsPoint = new GPSPoint(location.getTimestamp(), vehicleId, location.getLon(), location.getLat());
 
 					if(gpsPoint.lat != 0.0 && gpsPoint.lon !=  0.0){
-                        if(importTest){
-                            if(gpsPoint.lat > 10.255465437158735 && gpsPoint.lat < 10.351903377290384
-                                    && gpsPoint.lon > 123.79531860351561 && gpsPoint.lon < 124.00131225585939){
-                                TrafficEngineApp.engine.locationUpdate(gpsPoint);
+                        if(importBoundingBoxes != null){
+                            for(Envelope env : importBoundingBoxes){
+                                if(env.contains(gpsPoint.lon, gpsPoint.lat)){
+                                    TrafficEngineApp.engine.locationUpdate(gpsPoint);
+                                    break;
+                                }
                             }
                         }else{
                             TrafficEngineApp.engine.locationUpdate(gpsPoint);
@@ -249,7 +265,8 @@ public class TrafficEngineApp {
             Integer missingStatsMaxSamples = Integer.parseInt(appProps.getProperty("application.missingStatsMaxSamples"));
 			
 			response.header("Access-Control-Allow-Origin", "*");
-			
+
+            Integer hourBin = request.queryMap("hour").integerValue();
 			double fromLat = request.queryMap("fromLat").doubleValue();
 			double fromLon = request.queryMap("fromLon").doubleValue(); 
 			double toLat = request.queryMap("toLat").doubleValue(); 
@@ -257,7 +274,7 @@ public class TrafficEngineApp {
             boolean compare = request.queryMap("compare").booleanValue();
             boolean normalizeByTime = request.queryMap("normalizeByTime").booleanValue();
             String confidenceInterval = request.queryMap("confidenceInterval").value();
-			boolean useTraffic = false;
+			boolean useTraffic = true;
 
 
 			Set<Integer> hours = new HashSet<>();
@@ -293,6 +310,10 @@ public class TrafficEngineApp {
 	        // figure out the time
 	        LocalDateTime dt = LocalDateTime.now();
 	        rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
+
+
+            LocalDateTime twoHoursLater = dt.withHour(2);
+            rr.dateTime = OffsetDateTime.of(twoHoursLater, ZoneOffset.UTC).toEpochSecond();
 
             while(!routing.isReady()){
                 log.info("Graph not ready, waiting 1 second");
