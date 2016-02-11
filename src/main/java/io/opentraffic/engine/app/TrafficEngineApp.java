@@ -1,5 +1,6 @@
 package io.opentraffic.engine.app;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -33,6 +34,7 @@ import spark.utils.StringUtils;
 import javax.measure.Measure;
 import javax.measure.unit.SI;
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -258,24 +260,18 @@ public class TrafficEngineApp {
 		
 		// routing requests 
 		
-		get("/route", (request, response) -> {
+		post("/route", (request, response) -> {
+
+            while(!routing.isReady()){
+                log.info("Graph not ready, waiting 1 second");
+                Thread.sleep(1000);
+            }
 
             Integer missingStatsSearchEnvelopeInMeters = Integer.parseInt(appProps.getProperty("application.missingStatsSearchEnvelopeInMeters"));
 
             Integer missingStatsMaxSamples = Integer.parseInt(appProps.getProperty("application.missingStatsMaxSamples"));
-			
+
 			response.header("Access-Control-Allow-Origin", "*");
-
-            Integer hourBin = request.queryMap("hour").integerValue();
-			double fromLat = request.queryMap("fromLat").doubleValue();
-			double fromLon = request.queryMap("fromLon").doubleValue(); 
-			double toLat = request.queryMap("toLat").doubleValue(); 
-			double toLon = request.queryMap("toLon").doubleValue();
-            boolean compare = request.queryMap("compare").booleanValue();
-            boolean normalizeByTime = request.queryMap("normalizeByTime").booleanValue();
-            String confidenceInterval = request.queryMap("confidenceInterval").value();
-			boolean useTraffic = true;
-
 
 			Set<Integer> hours = new HashSet<>();
 
@@ -300,27 +296,60 @@ public class TrafficEngineApp {
 				values.forEach(v -> w2.add(Integer.parseInt(v.trim())));
 			}
 
-	        RoutingRequest rr = new RoutingRequest();
+            //TODO: shouldn't need to do this but for some reason Spark isn't parsing the post body correctly.
+            StringBuffer jb = new StringBuffer();
+            String line = null;
+            try {
+                BufferedReader reader = request.raw().getReader();
+                while ((line = reader.readLine()) != null)
+                    jb.append(line);
+            } catch (Exception e) { /*report an error*/ }
+            line = jb.toString();
 
-	        rr.useTraffic = useTraffic;
-	        rr.from = new GenericLocation(fromLat, fromLon);
-	        rr.to = new GenericLocation(toLat, toLon);
-	        rr.modes = new TraverseModeSet(TraverseMode.CAR);
+            Map<String, Object> paramMap = mapper.readValue(line, new TypeReference<Map<String, Object>>(){});
 
-	        // figure out the time
-	        LocalDateTime dt = LocalDateTime.now();
-	        rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
+            Integer hourBin = null;
+            if(paramMap.containsKey("hour"))
+                hourBin = Integer.parseInt((String)paramMap.get("hour"));
 
+            boolean compare = (Boolean)paramMap.get("compare");
+            boolean normalizeByTime = Boolean.parseBoolean((String)paramMap.get("normalizeByTime"));
+            String confidenceInterval = (String) paramMap.get("confidenceInterval");
 
-            LocalDateTime twoHoursLater = dt.withHour(2);
-            rr.dateTime = OffsetDateTime.of(twoHoursLater, ZoneOffset.UTC).toEpochSecond();
+            //TODO: 'intermediate places' are in the api but the feature is broken: https://github.com/opentripplanner/OpenTripPlanner/issues/1784
+            List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>();
 
-            while(!routing.isReady()){
-                log.info("Graph not ready, waiting 1 second");
-                Thread.sleep(1000);
+            List routePoints = (List)paramMap.get("routePoints");
+            for(int i = 0; i < routePoints.size() - 1; i++){
+
+                RoutingRequest rr = new RoutingRequest();
+                rr.useTraffic = hourBin == null ? false : true;  //if no hour specified, use the overall edge weights
+                LocalDateTime dt;
+                if(hourBin != null){
+                    dt = LocalDateTime.MIN;
+                    dt = dt.withHour(hourBin);  //use the specific hour's data
+                }else{
+                    dt = LocalDateTime.now();
+                }
+                rr.modes = new TraverseModeSet(TraverseMode.CAR);
+                rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
+
+                Map<String, Double> routePoint = (Map)routePoints.get(i);
+                double lat = routePoint.get("lat");
+                double lng = routePoint.get("lng");
+                GenericLocation fromLocation = new GenericLocation(lat, lng);
+
+                routePoint = (Map)routePoints.get(i + 1);
+                lat = routePoint.get("lat");
+                lng = routePoint.get("lng");
+                GenericLocation toLocation = new GenericLocation(lat, lng);
+                rr.from = fromLocation;
+                rr.to = toLocation;
+                List<Fun.Tuple3<Long, Long, Long>> partialRoute = routing.route(rr);
+                edges.addAll(partialRoute);
             }
 
-			List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>(routing.route(rr));
+
 
 			TrafficPath trafficPath =new TrafficPath();
 

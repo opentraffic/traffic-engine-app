@@ -94,5 +94,11 @@
   "unable_estimate_travel_time":  "[fil]We were unable to estimate travel times for one or more of the segments along your route, no travel times for this route are available.[/fil]",
   "remove_last_route_point":     "[fil]Remove last added point[/fil]",
   "compare_notes":        "[fil]The comparison tool allows for comparison of traffic speeds from two time sets. <br><br>1. Choose the time ranges for comparison.<br>2. Set the confidence interval to remove reports outside the acceptable bounds.<br>3. Normalize the comparison by time for vehicle count.[/fil]",
-  "remove_last_route_point":     "[fil]Remove last added point[/fil]"
+  "remove_last_route_point":     "[fil]Remove last added point[/fil]",
+  "select_hour_of_day":     "Select Hour of Day",
+  "select_day_of_week":     "Select Day of Week",
+  "analyze_by_time":   "Analyze by Day and Hour",
+  "return_to_overall":   "Return to Overall",
+  "selected_day":   "Selected Day",
+  "selected_time":   "Selected Time",
 }

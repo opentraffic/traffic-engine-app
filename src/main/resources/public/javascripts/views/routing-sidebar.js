@@ -9,7 +9,9 @@ Traffic.views = Traffic.views || {};
 
         events : {
             'click #resetRoute' : 'resetRoute',
-            'change #day' : 'getRoute',
+            'click #resetRoute2' : 'resetRoute',
+            'click #resetRoute3' : 'resetRoute',
+            'change #day' : '',
             'change #hour' : 'getRoute',
             'change #week1ToList' : 'changeToWeek',
             'change #week2ToList' : 'changeToWeek',
@@ -19,6 +21,9 @@ Traffic.views = Traffic.views || {};
             'click #compare' : 'clickCompare',
             'change #confidenceInterval' : 'changeConfidenceInterval',
             'change #normalizeByTime' : 'changeNormalizeBy',
+            'click #analyzeByTime' : 'analyzeByTime',
+            'click #returnToOverall' : 'returnToOverall',
+            'click #returnToOverall1' : 'returnToOverall',
         },
 
         toggleFilters : function() {
@@ -48,6 +53,9 @@ Traffic.views = Traffic.views || {};
 
         resetRoute : function() {
             $('#routeButtons').hide();
+            $('#routeCompareNotes').hide();
+            $('#byHourRouteButtons').hide();
+            $('#selectedDateAndTime').hide();
             A.app.sidebarTabs.resetRoute();
 
             //reset the filter state
@@ -510,6 +518,23 @@ Traffic.views = Traffic.views || {};
             return WSD;
         },
 
+        returnToOverall: function(){
+            $('#routeData').show();
+            $('#routeButtons').show();
+            $('#routeSelections').hide();
+            $('#byHourRouteButtons').hide();
+            $('#selectedDateAndTime').hide();
+            this.getRoute();
+        },
+
+        analyzeByTime: function(){
+            $('#routeData').hide();
+            $('#routeButtons').hide();
+            $('#routeSelections').show();
+            $('.daySelect').attr('checked', false);
+            $(".hourButton").addClass('disabled');
+        },
+
         initialize : function() {
             $.getJSON('/colors', function(data) {
                 var binWidth = 240 / data.colorStrings.length;
@@ -530,7 +555,46 @@ Traffic.views = Traffic.views || {};
         },
 
         onRender : function () {
-            this.$("#journeyInfo").hide();
+            var that = this;
+            $( document ).ready(function() {
+                $('#byHourRouteButtons').hide();
+                $('#routeSelections').hide();
+                var timeButtons = $('#hourButtons');
+
+                for(var i = 0; i < 24; i++){
+                    var caption = (i < 10 ? '0' + i : i) + ":00";
+                    var r =  $('<span type="button" class="col-md-4 btn hourButton" data-toggle="button" hour="' + i + '">' + caption + '</span>');
+                    timeButtons.append(r)
+                }
+
+                $(".hourButton").hover(
+                    function () {
+                        $(this).addClass('btn-primary');
+                    },
+                    function () {
+                        $(this).removeClass('btn-primary');
+                        $(this).removeClass('active');
+                    }
+                );
+
+                $(".hourButton").click(
+                    function (evt) {
+                        var hour = $(evt.target).attr('hour');
+                        $(evt.target).removeClass('active');
+                        A.app.sidebarTabs.hourSelect(hour);
+                    }
+                );
+
+                $('.daySelect').click(function(){
+                    if ($(this).is(':checked'))
+                    {
+                        $(".hourButton").removeClass('disabled');
+                    }
+                });
+
+
+            });
+
         }
     });
 })(Traffic, Traffic.views, Traffic.translations, crossfilter, dc);
