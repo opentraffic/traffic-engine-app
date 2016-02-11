@@ -54,7 +54,7 @@ Traffic.views = Traffic.views || {};
         resetRoute : function() {
             $('#routeButtons').hide();
             $('#routeCompareNotes').hide();
-            $('#byHourRouteButtons').hide();
+            $('#analyzeByTimeButtons').hide();
             $('#selectedDateAndTime').hide();
             A.app.sidebarTabs.resetRoute();
 
@@ -522,7 +522,7 @@ Traffic.views = Traffic.views || {};
             $('#routeData').show();
             $('#routeButtons').show();
             $('#routeSelections').hide();
-            $('#byHourRouteButtons').hide();
+            $('#analyzeByTimeButtons').hide();
             $('#selectedDateAndTime').hide();
             this.getRoute();
         },
@@ -531,6 +531,7 @@ Traffic.views = Traffic.views || {};
             $('#routeData').hide();
             $('#routeButtons').hide();
             $('#routeSelections').show();
+            $('#analyzeByTimeButtons').show();
             $('.daySelect').attr('checked', false);
             $(".hourButton").addClass('disabled');
         },

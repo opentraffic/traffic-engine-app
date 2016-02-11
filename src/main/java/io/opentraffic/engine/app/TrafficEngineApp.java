@@ -22,6 +22,8 @@ import org.apache.commons.cli.*;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.jcolorbrewer.ColorBrewer;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.mapdb.Fun;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opentripplanner.common.model.GenericLocation;
@@ -40,9 +42,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
@@ -312,6 +311,10 @@ public class TrafficEngineApp {
             if(paramMap.containsKey("hour"))
                 hourBin = Integer.parseInt((String)paramMap.get("hour"));
 
+            Integer dayBin = null;
+            if(paramMap.containsKey("day"))
+                dayBin = Integer.parseInt((String)paramMap.get("day"));
+
             boolean compare = (Boolean)paramMap.get("compare");
             boolean normalizeByTime = Boolean.parseBoolean((String)paramMap.get("normalizeByTime"));
             String confidenceInterval = (String) paramMap.get("confidenceInterval");
@@ -324,15 +327,14 @@ public class TrafficEngineApp {
 
                 RoutingRequest rr = new RoutingRequest();
                 rr.useTraffic = hourBin == null ? false : true;  //if no hour specified, use the overall edge weights
-                LocalDateTime dt;
                 if(hourBin != null){
-                    dt = LocalDateTime.MIN;
-                    dt = dt.withHour(hourBin);  //use the specific hour's data
-                }else{
-                    dt = LocalDateTime.now();
+                    DateTime time = new DateTime(DateTimeZone.UTC).dayOfMonth().withMinimumValue();
+                    time = time.withDayOfWeek(dayBin);
+                    time = time.withHourOfDay(hourBin);
+
+                    rr.dateTime = time.getMillis() / 1000;
                 }
                 rr.modes = new TraverseModeSet(TraverseMode.CAR);
-                rr.dateTime = OffsetDateTime.of(dt, ZoneOffset.UTC).toEpochSecond();
 
                 Map<String, Double> routePoint = (Map)routePoints.get(i);
                 double lat = routePoint.get("lat");

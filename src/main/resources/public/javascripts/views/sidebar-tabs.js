@@ -376,7 +376,7 @@ Traffic.views = Traffic.views || {};
                         $('#byHourRouteButtons').show();
                         $('#selectedDateAndTime').show();
                         $("#selectedDate").text(dayLabel[day]);
-                        $("#selectedTime").text(hour < 10 ? 0 : '' + hour + ':00');
+                        $("#selectedTime").text((hour < 10 ? 0 : '') + hour + ':00');
                     }
                 }
             });

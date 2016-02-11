@@ -7,16 +7,16 @@
     <div class="col-md-12">
         <table width="100%" align="center">
             <tr>
-                <td>M</td><td>T</td><td>W</td><td>Th</td><td>F</td><td>S</td><td>Su</td>
+                <td>Su</td><td>M</td><td>T</td><td>W</td><td>Th</td><td>F</td><td>S</td>
             </tr>
             <tr>
-                <td><input type="radio" name="day" value="0"/></td>
-                <td><input type="radio" name="day" value="1"/></td>
-                <td><input type="radio" name="day" value="2"/></td>
-                <td><input type="radio" name="day" value="3"/></td>
-                <td><input type="radio" name="day" value="4"/></td>
-                <td><input type="radio" name="day" value="5"/></td>
-                <td><input type="radio" name="day" value="6"/></td>
+                <td><input class="daySelect" type="radio" name="day" value="7"/></td>
+                <td><input class="daySelect" type="radio" name="day" value="1"/></td>
+                <td><input class="daySelect" type="radio" name="day" value="2"/></td>
+                <td><input class="daySelect" type="radio" name="day" value="3"/></td>
+                <td><input class="daySelect" type="radio" name="day" value="4"/></td>
+                <td><input class="daySelect" type="radio" name="day" value="5"/></td>
+                <td><input class="daySelect" type="radio" name="day" value="6"/></td>
             </tr>
         </table>
     </div>
@@ -24,9 +24,11 @@
     <h3>{{I18n "select_hour_of_day"}}:</h3>
     <span type="button" class="col-md-12 btn hourButton" data-toggle="button" >All</span>
     <div id="hourButtons"/>
-    <button type="button"  id="resetRoute2"  class="btn btn-sm col-md-12" data-toggle="button" style="margin: 10px 0 10px 0;">
-        {{I18n "reset_route"}}
-    </button>
+</div>
+
+<div id="selectedDateAndTime" style="display: none">
+    <h4>{{I18n "selected_day"}}: <span id="selectedDate"></span></h4>
+    <h4>{{I18n "selected_time"}}: <span id="selectedTime"></span></h4>
 </div>
 
 <div id="routeData">
@@ -107,15 +109,23 @@
 </div>
 
 <div id="routeButtons" style="text-align: center; display: none;" class="col-md-8 col-md-offset-2">
-
     <button type="button"  id="toggleFilters"  class="btn btn-sm col-md-6" data-toggle="button">
         {{I18n "filter_off"}}
     </button>
     <button type="button"  id="resetRoute"  class="btn btn-sm col-md-6" data-toggle="button">
         {{I18n "reset_route"}}
     </button>
-    <button type="button"  id="analyzeByTime"  class="btn btn-sm col-md-12" data-toggle="button">
+    <button type="button"  id="analyzeByTime"  class="btn btn-sm col-md-12" data-toggle="button" style="margin-top: 5px;">
         {{I18n "analyze_by_time"}}
+    </button>
+</div>
+
+<div id="analyzeByTimeButtons" style="text-align: center; display: none;" class="col-md-8 col-md-offset-2">
+    <button type="button"  id="resetRoute2"  class="btn btn-sm col-md-12" data-toggle="button" style="margin: 10px 0 10px 0;">
+        {{I18n "reset_route"}}
+    </button>
+    <button type="button"  id="returnToOverall1"  class="btn btn-sm col-md-12" data-toggle="button">
+        {{I18n "return_to_overall"}}
     </button>
 </div>
 <div class="compare-notes" style="display: none;" id="routeCompareNotes"><span>{{{I18n "compare_notes"}}}</span></div>
