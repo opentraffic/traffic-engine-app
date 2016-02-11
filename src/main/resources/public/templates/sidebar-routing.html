@@ -4,8 +4,8 @@
 
 <div id="routeSelections" class="col-md-12">
     <h3>{{I18n "select_day_of_week"}}:</h3>
-    <div class="col-md-12">
-        <table width="100%" align="center">
+    <div class="col-md-12" style="margin-bottom: 5px">
+        <table width="100%" align="center" style="table-layout: fixed;">
             <tr>
                 <td>Su</td><td>M</td><td>T</td><td>W</td><td>Th</td><td>F</td><td>S</td>
             </tr>
@@ -22,7 +22,6 @@
     </div>
 
     <h3>{{I18n "select_hour_of_day"}}:</h3>
-    <span type="button" class="col-md-12 btn hourButton" data-toggle="button" >All</span>
     <div id="hourButtons"/>
 </div>
 
@@ -121,7 +120,7 @@
 </div>
 
 <div id="analyzeByTimeButtons" style="text-align: center; display: none;" class="col-md-8 col-md-offset-2">
-    <button type="button"  id="resetRoute2"  class="btn btn-sm col-md-12" data-toggle="button" style="margin: 10px 0 10px 0;">
+    <button type="button"  id="resetRoute2"  class="btn btn-sm col-md-12" data-toggle="button" style="margin: 5px 0 5px 0;">
         {{I18n "reset_route"}}
     </button>
     <button type="button"  id="returnToOverall1"  class="btn btn-sm col-md-12" data-toggle="button">
