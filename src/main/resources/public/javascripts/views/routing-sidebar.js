@@ -7,6 +7,11 @@ Traffic.views = Traffic.views || {};
 
         template: Handlebars.getTemplate('app', 'sidebar-routing'),
 
+        regions: {
+            saveRouteContainer: "#saveRouteContainer",
+            bookmarkRouteContainer: "#bookmarkRouteContainer"
+        },
+
         events : {
             'click #resetRoute' : 'resetRoute',
             'click #resetRoute2' : 'resetRoute',
@@ -24,9 +29,69 @@ Traffic.views = Traffic.views || {};
             'click #analyzeByTime' : 'analyzeByTime',
             'click #returnToOverall' : 'returnToOverall',
             'click #returnToOverall1' : 'returnToOverall',
+            'click #saveRoute' : 'saveRoute',
+
         },
 
-        toggleFilters : function() {
+        loadRouteFromUrl : function(routeId) {
+            $.getJSON('/route/' + routeId, function(data) {
+                if(data.json){
+                    //user's saved route
+                    A.app.sidebar.loadRoute(data.json);
+                }else{
+                    //anonymous bookmark
+                    A.app.sidebar.loadRoute(data);
+                }
+            });
+        },
+
+        loadRoute : function(params) {
+
+            A.app.sidebarTabs.resetRoute();
+            A.app.map.fitBounds(new L.LatLngBounds(
+                new L.LatLng(params.bounds._southWest.lat,params.bounds._southWest.lng),
+                new L.LatLng(params.bounds._northEast.lat,params.bounds._northEast.lng)));
+
+            for(var i = 0; i < params.routePoints.length; i++){
+                var evt = {};
+                evt.latlng = {
+                    lat: params.routePoints[i].lat,
+                    lng: params.routePoints[i].lng
+                };
+                if(i == params.routePoints.length -1){
+                    var blah = 'hello';
+                    var callback = function() {
+                        A.app.sidebar.routeRendered(params);
+                    };
+                    A.app.sidebarTabs.onMapClick(evt, false, callback);
+                }else{
+                    A.app.sidebarTabs.onMapClick(evt, true);
+                }
+            }
+        },
+
+        routeRendered: function(params){
+            if(params.filtersEnabled){
+                this.toggleFilters(true);
+                this.hourlyChart.filter(dc.filters.RangedFilter(params.hourExtent[0], params.hourExtent[1]));
+                this.dailyChart.filter(dc.filters.RangedFilter(params.dayExtent[0], params.dayExtent[1]));
+                dc.renderAll();
+            }
+            if(params.week1FromList){
+                $("#week1FromList").val(params.week1FromList);
+                if(params.week1ToList){
+                    $("#week1ToList").val(params.week1ToList);
+                }
+                if(params.week2FromList){
+                    $("#week2FromList").val(params.week2FromList);
+                    if(params.week2ToList){
+                        $("#week2ToList").val(params.week2ToList);
+                    }
+                }
+            }
+        },
+
+        toggleFilters : function(filterState) {
 
             //reset the filter state
             this.hourlyChart.filterAll();
@@ -34,7 +99,7 @@ Traffic.views = Traffic.views || {};
             dc.renderAll();
 
             //flip the filter on/off
-            var brushOn = !this.dailyChart.brushOn();
+            var brushOn = filterState == null ? !this.dailyChart.brushOn() : filterState;
             this.dailyChart.brushOn(brushOn);
             this.hourlyChart.brushOn(brushOn);
             if(brushOn){
@@ -556,7 +621,6 @@ Traffic.views = Traffic.views || {};
         },
 
         onRender : function () {
-            var that = this;
             $( document ).ready(function() {
                 $('#byHourRouteButtons').hide();
                 $('#routeSelections').hide();
@@ -596,6 +660,11 @@ Traffic.views = Traffic.views || {};
 
             });
 
+            var user = A.app.instance.user;
+            if( !(user && user.isLoggedIn()) ){
+                this.saveRouteContainer.show(new views.SaveRouteButton());
+            }
+            this.bookmarkRouteContainer.show(new views.BookmarkRouteButton());
         }
     });
 })(Traffic, Traffic.views, Traffic.translations, crossfilter, dc);

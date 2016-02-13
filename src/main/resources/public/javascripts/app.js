@@ -14,6 +14,7 @@ var Traffic = Traffic || {};
 
 	A.app.instance.addInitializer(function(options){
 		this.user = new models.UserModel();
+        this.route = new models.RouteModel();
 
 		A.app.nav = new views.Nav();
 		A.app.instance.navbar.show(A.app.nav);
@@ -82,4 +83,9 @@ $(document).ready(function() {
 	Traffic.app.instance.start();
 
 	Traffic.app.instance.vent.trigger('login:auto_auth');
+
+    if(window.location.href.indexOf('route=') > -1){
+        var routeId = window.location.href.substr(window.location.href.indexOf('route=') + 6);
+        Traffic.app.instance.vent.trigger('saveroute:url', routeId);
+    }
 });

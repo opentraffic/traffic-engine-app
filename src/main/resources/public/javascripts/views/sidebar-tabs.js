@@ -211,7 +211,8 @@ Traffic.views = Traffic.views || {};
             }
         },
 
-        onMapClick : function(evt) {
+        onMapClick : function(evt, skip, callback) {
+
             this.initializeRoutePoints();
 
             this.routePoints.push({
@@ -229,10 +230,15 @@ Traffic.views = Traffic.views || {};
                 }
 
                 this.routePointsLayer.addLayer(L.circleMarker(evt.latlng, {fillColor: "#D00", color: '#fff', fillOpacity: 1.0,opacity: 1.0, radius: 5}).addTo(A.app.map));
+                if(skip)
+                    return;
                 this.getRoute();
                 $('#routeData').show();
                 $('#routeButtons').show();
             }
+
+            if(callback)
+                callback();
 
         },
 
@@ -378,6 +384,21 @@ Traffic.views = Traffic.views || {};
                         $("#selectedDate").text(dayLabel[day]);
                         $("#selectedTime").text((hour < 10 ? 0 : '') + hour + ':00');
                     }
+                    params.bounds = A.app.map.getBounds();
+                    if(A.app.sidebar.hourExtent && ( A.app.sidebar.hourExtent[0] >= 1.0 ||  A.app.sidebar.hourExtent[1] >= 1.0)) {
+                        params.hourExtent = A.app.sidebar.hourExtent;
+                        params.dayExtent = A.app.sidebar.dayExtent;
+                    }
+                    if(params.w1){
+                        params.week1FromList = $("#week1FromList").val();
+                        params.week1ToList = $("#week1ToList").val();
+                    }
+                    if(params.w2){
+                        params.week2FromList = $("#week2FromList").val();
+                        params.week2ToList = $("#week2ToList").val();
+                    }
+
+                    A.app.sidebar.params = params;
                 }
             });
         }

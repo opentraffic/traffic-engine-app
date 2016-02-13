@@ -1,6 +1,7 @@
 package io.opentraffic.engine.app.data;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by dbenoff on 1/19/16.
@@ -19,6 +20,8 @@ public class User {
     private String passwordHash;
     private String role;
     private String cookie;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<SavedRoute> savedRoutes;
 
     public int getId() {
         return id;
@@ -58,5 +61,13 @@ public class User {
 
     public void setCookie(String cookie) {
         this.cookie = cookie;
+    }
+
+    public List<SavedRoute> getSavedRoutes() {
+        return savedRoutes;
+    }
+
+    public void setSavedRoutes(List<SavedRoute> savedRoutes) {
+        this.savedRoutes = savedRoutes;
     }
 }

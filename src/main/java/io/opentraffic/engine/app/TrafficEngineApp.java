@@ -86,7 +86,62 @@ public class TrafficEngineApp {
 		// setup public folder
 		staticFileLocation("/public");
 
+        HibernateUtil.getSessionFactory();
+
 		engine = new Engine();
+
+        post("/route/save", (request, response) -> {
+            Map<String, String> cookies = request.cookies();
+            String username = cookies.get("login_username");
+            String cookie = cookies.get("login_token");
+            User user = null;
+            if(cookie != null){
+                user = HibernateUtil.login(username, null, cookie);
+            }
+
+            String routeJson = request.body();
+            Map<String, Object> paramMap = mapper.readValue(routeJson, new TypeReference<Map<String, Object>>() {});
+            SavedRoute savedRoute = new SavedRoute();
+            if(paramMap.keySet().contains("name")){
+                String routeName = (String)paramMap.get("name");
+                savedRoute.setName(routeName);
+            }
+            savedRoute.setCreationDate(new Date());
+            savedRoute.setJson(routeJson);
+            if(user != null)
+                savedRoute.setUser(user);
+
+            HibernateUtil.persistEntity(savedRoute);
+
+            return savedRoute.getId();
+        });
+
+        get("/route/:id", (request, response) -> {
+            Integer id = new Integer(request.params(":id"));
+            SavedRoute savedRoute = HibernateUtil.getSavedRoute(id);
+            return savedRoute.getJson();
+        });
+
+        delete("/routelist/:id", (request, response) -> {
+            Integer id = new Integer(request.params(":id"));
+            HibernateUtil.deleteSavedRoute(id);
+            response.status(200);
+            return response;
+        });
+
+        get("/routelist", (request, response) -> {
+            Map<String, String> cookies = request.cookies();
+            String username = cookies.get("login_username");
+            String cookie = cookies.get("login_token");
+            if (cookie != null) {
+                User user = HibernateUtil.login(username, null, cookie);
+                List<SavedRoute> routes = HibernateUtil.getRoutesForUser(user);
+                response.status(200);
+                return mapper.writeValueAsString(routes);
+            }
+            response.status(403);
+            return response;
+        });
 
 		get("/writeTrafficTiles", (request, response) -> {
 			engine.collectStatistics();
@@ -308,11 +363,11 @@ public class TrafficEngineApp {
             Map<String, Object> paramMap = mapper.readValue(line, new TypeReference<Map<String, Object>>(){});
 
             Integer hourBin = null;
-            if(paramMap.containsKey("hour"))
+            if(paramMap.get("hour") != null)
                 hourBin = Integer.parseInt((String)paramMap.get("hour"));
 
             Integer dayBin = null;
-            if(paramMap.containsKey("day"))
+            if(paramMap.get("day") != null)
                 dayBin = Integer.parseInt((String)paramMap.get("day"));
 
             boolean compare = (Boolean)paramMap.get("compare");
@@ -574,7 +629,7 @@ public class TrafficEngineApp {
             u.setUsername(username);
             u.setPasswordHash(PasswordUtil.hash(password));
             u.setRole(role);
-            HibernateUtil.persistUser(u);
+            HibernateUtil.persistEntity(u);
             response.status(200);
             return response;
         });

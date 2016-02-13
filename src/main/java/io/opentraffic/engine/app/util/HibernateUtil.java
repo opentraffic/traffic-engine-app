@@ -1,5 +1,6 @@
 package io.opentraffic.engine.app.util;
 
+import io.opentraffic.engine.app.data.SavedRoute;
 import io.opentraffic.engine.app.data.User;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -35,7 +36,7 @@ public class HibernateUtil {
             u.setUsername("admin");
             u.setPasswordHash(PasswordUtil.hash("admin"));
             u.setRole("Super Admin");
-            persistUser(u);
+            persistEntity(u);
         }
         return sessionFactory;
     }
@@ -44,12 +45,12 @@ public class HibernateUtil {
         return sessionFactory;
     }
 
-    public static void persistUser(User user){
+    public static void persistEntity(Object obj){
         Session session = sessionFactory.openSession();
         Transaction tx;
         try {
             tx = session.beginTransaction();
-            session.saveOrUpdate(user);
+            session.saveOrUpdate(obj);
             tx.commit();
         }
         catch (Exception e) {
@@ -72,6 +73,11 @@ public class HibernateUtil {
         return (User) session.get(User.class, id);
     }
 
+    public static SavedRoute getSavedRoute(Integer id) {
+        Session session = sessionFactory.openSession();
+        return (SavedRoute) session.get(SavedRoute.class, id);
+    }
+
     public static void deleteUser(Integer id){
         Session session = sessionFactory.openSession();
         Transaction tx;
@@ -79,6 +85,24 @@ public class HibernateUtil {
             tx = session.beginTransaction();
             User u = (User) session.get(User.class, id);
             session.delete(u);
+            tx.commit();
+        }
+        catch (Exception e) {
+            log.warning(e.getMessage());
+            throw new RuntimeException("database error");
+        }
+        finally {
+            session.close();
+        }
+    }
+
+    public static void deleteSavedRoute(Integer id){
+        Session session = sessionFactory.openSession();
+        Transaction tx;
+        try {
+            tx = session.beginTransaction();
+            SavedRoute savedRoute = (SavedRoute) session.get(SavedRoute.class, id);
+            session.delete(savedRoute);
             tx.commit();
         }
         catch (Exception e) {
@@ -107,6 +131,13 @@ public class HibernateUtil {
         }
     }
 
+    public static List<SavedRoute> getRoutesForUser(User user){
+        Session session = sessionFactory.openSession();
+        Query q = session.createQuery("from SavedRoute sr where sr.name is not null and sr.user = :user");
+        q.setParameter("user", user);
+        return q.list();
+    }
+
     public static User login(String username, String password, String cookie){
         Session session = sessionFactory.openSession();
         Query q;
@@ -124,7 +155,19 @@ public class HibernateUtil {
             User user = users.get(0);
             if(user.getCookie() == null){
                 user.setCookie(UUID.randomUUID().toString());
-                persistUser(user);
+                Transaction tx;
+                try {
+                    tx = session.beginTransaction();
+                    session.saveOrUpdate(user);
+                    tx.commit();
+                }
+                catch (Exception e) {
+                    log.warning(e.getMessage());
+                    throw new RuntimeException(e.getMessage());
+                }
+                finally {
+                    session.close();
+                }
             }
             return user;
         }

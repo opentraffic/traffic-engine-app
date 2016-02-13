@@ -100,5 +100,8 @@
   "analyze_by_time":   "Show Fastest Route by Day and Hour",
   "return_to_overall":   "Return to Overall Fastest Route",
   "selected_day":   "Selected Day",
-  "selected_time":   "Selected Time"
+  "selected_time":   "Selected Time",
+  "selected_day":   "Selected Day",
+  "save_route":   "Save this Route",
+  "saved_routes":   "Saved Routes"
 }

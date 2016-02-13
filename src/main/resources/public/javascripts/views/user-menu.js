@@ -11,7 +11,9 @@ Traffic.views = Traffic.views || {};
             'click #newUser' : 'clickNewUser',
             'click #logout' : 'clickLogout',
             'click #usersLink' : 'clickUsersLink',
-            'click #dataManagementLink' : 'clickDataLink'
+            'click #usersLink' : 'clickUsersLink',
+            'click #dataManagementLink' : 'clickDataLink',
+            'click #savedroutesLink' : 'clickSavedRoutesLink'
         },
 
         clickNewUser: function() {
@@ -73,6 +75,51 @@ Traffic.views = Traffic.views || {};
             }];
         },
 
+        getRouteGridColumns: function() {
+            return [{
+                name: 'id',
+                cell: 'integer',
+                editable: false,
+                label: translator.translate('id_title'),
+                formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+                    fromRaw: function (rawValue, obj) {
+                        return rawValue;
+                    }
+                })
+            },{
+                name: 'name',
+                cell: 'string',
+                editable: false,
+                label: translator.translate('routename_title'),
+                formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+                    fromRaw: function (rawValue, obj) {
+                        return rawValue;
+                    }
+                })
+            }, {
+                name: 'date',
+                cell: 'date',
+                editable: false,
+                label: translator.translate('routedate_title'),
+                formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+                    fromRaw: function (rawValue, obj) {
+                        return rawValue;
+                    }
+                })
+            }, {
+                name: '',
+                cell: 'html',
+                editable: false,
+                label: '',
+                formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
+                    fromRaw: function (rawValue, obj) {
+                        var html = '<button class="btn btn-xs delete-route">' + translator.translate('delete_user') + '</button>';
+                        return html;
+                    }
+                })
+            }];
+        },
+
         clickUsersLink: function() {
 
             var _this = this;
@@ -102,7 +149,7 @@ Traffic.views = Traffic.views || {};
                 });
 
                 var renderGrid = function() {
-                    $('.users-table').append(usersList.render().el)
+                    $('.users-table').append(usersList.render().el);
 
                     $('.users-table').on('click', '.delete-user', _this.clickDeleteUser);
                     $('.users-table').on('click', '.edit-user', _this.clickEditUser);
@@ -152,6 +199,116 @@ Traffic.views = Traffic.views || {};
                 A.app.instance.usersModal.on('shown', renderGrid);
 
                 A.app.instance.usersModal.open();
+            });
+        },
+
+        clickSavedRoutesLink: function() {
+
+            var _this = this;
+
+            $.getJSON('/routelist', function(data) {
+                A.app.instance.routesCollection = new A.collections.Routes(data);
+                A.app.instance.routesCollection.setSorting("id", {mode: 'client'});
+                A.app.instance.routesCollection.fullCollection.sort();
+
+                var routesCollection = A.app.instance.routesCollection;
+
+                var SelectableRow = Backgrid.Row.extend({
+                    events: {
+                        'click' : 'onClick'
+                    },
+
+                    onClick: function () {
+                        //this.trigger('click');
+                        A.app.instance.vent.trigger('route:rowclick', this.model.id);
+                        A.app.instance.routesModal.close();
+                    }
+                });
+
+                var routesList = new Backgrid.Grid({
+                    columns: _this.getRouteGridColumns(),
+                    collection: routesCollection,
+                    row: SelectableRow
+                });
+
+                A.app.instance.routesModal = new Backbone.BootstrapModal({
+                    animate: true,
+                    content: "<div class='routes-table'></div>",
+                    title: translator.translate("routes_dialog_title"),
+                    showFooter: false
+                });
+
+                A.app.instance.routesModal.on('cancel', function() {
+                    $('.routes-table').remove(); //remove previous view
+                    A.app.instance.routesModal = null;
+                });
+
+                var renderGrid = function() {
+                    $('.routes-table').append(routesList.render().el);
+                    $('.routes-table').on('click', '.delete-route', _this.clickDeleteRoute);
+
+                    // Initialize the paginator
+                    var paginator = new Backgrid.Extension.Paginator({
+                        collection: routesCollection,
+                        controls: {
+                            rewind: {
+                                label: " <<",
+                                title: translator.translate('move_to_first')
+                            },
+                            back: {
+                                label: " <",
+                                title: translator.translate('move_to_previous')
+                            },
+                            forward: {
+                                label: "> ",
+                                title: translator.translate('move_to_next')
+                            },
+                            fastForward: {
+                                label: ">> ",
+                                title: translator.translate('move_to_last')
+                            }
+                        }
+                    });
+
+                    // Render the paginator
+                    $(routesCollection.el).after(paginator.render().el);
+
+                    // Initialize a client-side filter to filter on the client
+                    // mode pageable collection's cache.
+                    var filter = new Backgrid.Extension.ClientSideFilter({
+                        collection: routesCollection,
+                        fields: ['name']
+                    });
+
+                    // Render the filter
+                    $(routesList.el).before(filter.render().el);
+
+                    // Add some space to the filter and move it to the right
+                    $(filter.el).css({float: "right", margin: "5px 0px"});
+
+                };
+                A.app.instance.routesModal.on('shown', renderGrid);
+
+                A.app.instance.routesModal.open();
+            });
+        },
+
+        clickDeleteRoute: function() {
+            console.log('deleting route');
+            var confirmDialog = new Backbone.BootstrapModal({
+                animate: true,
+                content: translator.translate('deletion_confirmation_message'),
+                title: translator.translate('deletion_confirmation_title')
+            });
+
+            confirmDialog.open();
+            var button = this;
+            confirmDialog.on('ok', function() {
+                var routeId = $(button).parents('tr').find('td:first').text();
+                var routeToDelete = A.app.instance.routesCollection.get(routeId);
+                if(routeToDelete)
+                    routeToDelete.destroy();
+                A.app.instance.routesCollection.remove(routeToDelete);
             });
         },
 
@@ -210,5 +367,9 @@ Traffic.views = Traffic.views || {};
         onRender: function() {
             this.$el.html(this.template(A.app.instance.Login.userModel.toJSON()));
         }
-    });
-})(Traffic, Traffic.views, Traffic.models, Traffic.translations);
+})
+})
+(Traffic, Traffic
+.
+views, Traffic.models, Traffic.translations
+)

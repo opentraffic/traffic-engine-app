@@ -14,5 +14,6 @@
         <property name="show_sql">true</property>
         <property name="hbm2ddl.auto">update</property>
         <mapping class="io.opentraffic.engine.app.data.User"/>
+        <mapping class="io.opentraffic.engine.app.data.SavedRoute"/>
     </session-factory>
 </hibernate-configuration>
