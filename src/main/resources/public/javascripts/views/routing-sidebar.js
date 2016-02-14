@@ -79,15 +79,22 @@ Traffic.views = Traffic.views || {};
             }
             if(params.week1FromList){
                 $("#week1FromList").val(params.week1FromList);
+                this.changeFromWeek();
                 if(params.week1ToList){
                     $("#week1ToList").val(params.week1ToList);
                 }
+                this.changeToWeek();
                 if(params.week2FromList){
+                    this.$("#compare").prop( "checked", true );
+                    this.clickCompare()
                     $("#week2FromList").val(params.week2FromList);
+                    this.changeFromWeek();
                     if(params.week2ToList){
                         $("#week2ToList").val(params.week2ToList);
+                        this.changeToWeek();
                     }
                 }
+
             }
         },
 
