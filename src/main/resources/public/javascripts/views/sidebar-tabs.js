@@ -85,6 +85,8 @@ Traffic.views = Traffic.views || {};
 
             if(A.app.map.hasLayer(A.app.pathOverlay))
                 A.app.map.removeLayer(A.app.pathOverlay);
+
+            A.app.sidebar.$("#routeSelections").hide();
         },
 
         clickAnalysis: function(evt) {
@@ -138,6 +140,10 @@ Traffic.views = Traffic.views || {};
         removeLastRoutePoint: function() {
             if(this.routePoints.length > 0) {
                 this.routePoints.splice(this.routePoints.length - 1, 1);
+            }
+
+            if(this.routePoints.length < 2) {
+                A.app.sidebar.$("#routeButtons").hide();
             }
 
             if(this.routePointsLayer) {
