@@ -90,6 +90,12 @@ public class TrafficEngineApp {
 
 		engine = new Engine();
 
+        String portString = appProps.getProperty("application.port");
+        if(!StringUtils.isEmpty(portString)){
+            port(Integer.parseInt(portString));
+        }
+
+
         post("/route/save", (request, response) -> {
             Map<String, String> cookies = request.cookies();
             String username = cookies.get("login_username");
