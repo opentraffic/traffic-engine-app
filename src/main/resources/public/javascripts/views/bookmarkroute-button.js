@@ -21,8 +21,6 @@ Traffic.views = Traffic.views || {};
             contentType: 'application/json',
             data: JSON.stringify(params),
             success: function(data) {
-                console.log(data);
-
                 window.history.pushState('', '', '?route=' + data);
                 A.app.instance.bookmarkRouteModal = new Backbone.BootstrapModal({
                     animate: true,

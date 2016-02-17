@@ -71,7 +71,7 @@ Traffic.views = Traffic.views || {};
         },
 
         routeRendered: function(params){
-            if(params.filtersEnabled){
+            if(params.hourExtent || params.dayExtent){
                 this.toggleFilters(true);
                 this.hourlyChart.filter(dc.filters.RangedFilter(params.hourExtent[0], params.hourExtent[1]));
                 this.dailyChart.filter(dc.filters.RangedFilter(params.dayExtent[0], params.dayExtent[1]));

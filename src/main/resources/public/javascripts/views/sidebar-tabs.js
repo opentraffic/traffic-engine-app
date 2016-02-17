@@ -238,14 +238,10 @@ Traffic.views = Traffic.views || {};
                 this.routePointsLayer.addLayer(L.circleMarker(evt.latlng, {fillColor: "#D00", color: '#fff', fillOpacity: 1.0,opacity: 1.0, radius: 5}).addTo(A.app.map));
                 if(skip)
                     return;
-                this.getRoute();
+                this.getRoute(null, null, null, callback);
                 $('#routeData').show();
                 $('#routeButtons').show();
             }
-
-            if(callback)
-                callback();
-
         },
 
 
@@ -254,7 +250,7 @@ Traffic.views = Traffic.views || {};
             this.getRoute(null, day, hour);
         },
 
-        getRoute : function(hours, day, hour) {
+        getRoute : function(hours, day, hour, callback) {
 
             if(A.app.map.hasLayer(A.app.pathOverlay))
                 A.app.map.removeLayer(A.app.pathOverlay);
@@ -405,6 +401,9 @@ Traffic.views = Traffic.views || {};
                     }
 
                     A.app.sidebar.params = params;
+
+                    if(callback)
+                        callback();
                 }
             });
         }
