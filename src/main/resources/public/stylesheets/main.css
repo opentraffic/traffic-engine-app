@@ -99,10 +99,9 @@ body, div {
 }
 
 .compare-notes {
-  margin-top: 10px;
   background-color: #DCE6F5;
-  padding: 20px;
-  margin: 20px;
+  padding: 10px;
+  margin: 5px;
 }
 
 .inferred-data-warning {
