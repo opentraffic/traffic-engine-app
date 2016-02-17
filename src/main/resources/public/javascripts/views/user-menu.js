@@ -64,9 +64,9 @@ Traffic.views = Traffic.views || {};
                         if(currentUser.isSuperAdmin()) {
                             html = '<div class="user-actions">';
                             if(currentUser && !obj.isSelf(currentUser.get('username'))) {
-                                html += '<button class="btn btn-xs delete-user">' + translator.translate('delete_user') + '</button>';
+                                html += '<button class="btn btn-danger btn-xs delete-user glyphicon glyphicon-trash" title="' + translator.translate('delete_user') + '"</button>';
                             }
-                            html += '<button class="btn btn-xs edit-user">' + translator.translate('edit_user') + '</button></div>';
+                            html += '<button class="btn btn-primary btn-xs edit-user glyphicon glyphicon-edit" title="' + translator.translate('edit_user') + '"></button></div>';
                         }
 
                         return html;
@@ -80,6 +80,7 @@ Traffic.views = Traffic.views || {};
                 name: 'id',
                 cell: 'integer',
                 editable: false,
+                renderable: false,
                 label: translator.translate('id_title'),
                 formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
                     fromRaw: function (rawValue, obj) {
@@ -113,7 +114,7 @@ Traffic.views = Traffic.views || {};
                 label: '',
                 formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
                     fromRaw: function (rawValue, obj) {
-                        var html = '<button class="btn btn-xs delete-route">' + translator.translate('delete_user') + '</button>';
+                        var html = '<button class="btn btn-danger btn-xs delete-route glyphicon glyphicon-trash" title="' + translator.translate("delete_route") + '"></button>';
                         return html;
                     }
                 })
@@ -208,7 +209,7 @@ Traffic.views = Traffic.views || {};
 
             $.getJSON('/routelist', function(data) {
                 A.app.instance.routesCollection = new A.collections.Routes(data);
-                A.app.instance.routesCollection.setSorting("id", {mode: 'client'});
+                A.app.instance.routesCollection.setSorting("name", {mode: 'client'});
                 A.app.instance.routesCollection.fullCollection.sort();
 
                 var routesCollection = A.app.instance.routesCollection;

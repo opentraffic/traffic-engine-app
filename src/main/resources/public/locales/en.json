@@ -80,7 +80,7 @@
   "move_to_last":         "Last",
   "move_to_previous":     "Previous",
   "move_to_next":         "Next",
-  "delete_user":            "X",
+  "delete_user":           "Delete",
   "edit_user":            "Edit",
   "deletion_confirmation_message": "Are you sure to delete this record?",
   "deletion_confirmation_title": "Deletion Confirmation",
@@ -112,5 +112,6 @@
   "bookmark_route_dialog_title":     "URL for Your Route",
   "saved_routes_dialog_title": "Your Saved Routes",
   "routename_title":        "Name",
-  "routedate_title":         "Date"
+  "routedate_title":        "Date",
+  "delete_route":           "Delete"
 }

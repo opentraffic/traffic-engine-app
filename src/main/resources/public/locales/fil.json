@@ -80,7 +80,7 @@
   "move_to_last":         "[fil]Last[/fil]",
   "move_to_previous":     "[fil]Previous[/fil]",
   "move_to_next":         "[fil]Next[/fil]",
-  "delete_user":          "[fil]X[/fil]",
+  "delete_user":          "[fil]Delete[/fil]",
   "edit_user":            "[fil]Edit[/fil]",
   "deletion_confirmation_message": "[fil]Are you sure to delete this record?[/fil]",
   "deletion_confirmation_title": "[fil]Deletion Confirmation[/fil]",
@@ -111,5 +111,6 @@
   "bookmark_route_dialog_title": "[fil]URL for Your Route[/fil]",
   "saved_routes_dialog_title": "[fil]Your Saved Routes[/fil]",
   "routename_title":        "[fil]Name[/fil]",
-  "routedate_title":         "[fil]Date[/fil]"
+  "routedate_title":        "[fil]Date[/fil]",
+  "delete_route":           "[fil]Delete[/fil]"
 }
