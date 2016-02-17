@@ -58,6 +58,7 @@
     });
 
     app.vent.on('login:success', function() {
+      $('#saveroute').show();
       var user = app.user;
       if(user.get('remember_me')) {
           Cookies.set('login_username', user.get('username'), { expires: 30 });
@@ -78,6 +79,7 @@
     });
 
     app.vent.on('logout:success', function() {
+      $('#saveroute').hide();
       Cookies.remove('login_username');
       Cookies.remove('login_token');
       app.Login.userModel.reset();
