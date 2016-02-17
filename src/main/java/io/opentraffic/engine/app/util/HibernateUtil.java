@@ -119,7 +119,7 @@ public class HibernateUtil {
         Transaction tx;
         try {
             tx = session.beginTransaction();
-            session.update(user);
+            session.merge(user);
             tx.commit();
         }
         catch (Exception e) {
