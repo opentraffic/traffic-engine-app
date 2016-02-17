@@ -25,7 +25,7 @@ Traffic.views = Traffic.views || {};
                 A.app.instance.bookmarkRouteModal = new Backbone.BootstrapModal({
                     animate: true,
                     content: window.location.href,
-                    title: translator.translate("route_dialog_title"),
+                    title: translator.translate("bookmark_route_dialog_title"),
                     showFooter: false,
                     escape: false
                 });
