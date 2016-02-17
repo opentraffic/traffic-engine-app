@@ -67,7 +67,7 @@
           Cookies.set('login_token', user.get('cookie'), { expires: 30 });
       }else{
           //session cookies
-          document.cookie = "login_username=admin; path=/";
+          document.cookie = "login_username=" + user.get('username') + "; path=/";
           document.cookie = "login_token="  + user.get('cookie') + "; path=/"
       }
       
