@@ -602,7 +602,47 @@ Traffic.views = Traffic.views || {};
             this.getRoute();
         },
 
+        renderHourButtons: function() {
+            $('#byHourRouteButtons').hide();
+            $('#routeSelections').hide();
+            var timeButtons = $('#hourButtons');
+
+            for(var i = 0; i < 24; i++){
+                var caption = (i < 10 ? '0' + i : i) + ":00";
+                var r =  $('<span type="button" class="col-md-4 btn hourButton" data-toggle="button" hour="' + i + '">' + caption + '</span>');
+                timeButtons.append(r)
+            }
+
+            $(".hourButton").hover(
+                function () {
+                    $(this).addClass('btn-primary');
+                },
+                function () {
+                    $(this).removeClass('btn-primary');
+                    $(this).removeClass('active');
+                }
+            );
+
+            $(".hourButton").click(
+                function (evt) {
+                    var hour = $(evt.target).attr('hour');
+                    $(evt.target).removeClass('active');
+                    A.app.sidebarTabs.hourSelect(hour);
+                }
+            );
+
+            $('.daySelect').click(function(){
+                if ($(this).is(':checked'))
+                {
+                    $(".hourButton").removeClass('disabled');
+                }
+            });
+        },
+
         analyzeByTime: function(){
+            if($('.hourButton').length == 0) {
+                this.renderHourButtons();
+            }
             $('#routeData').hide();
             $('#routeButtons').hide();
             $('#routeSelections').show();
@@ -631,45 +671,6 @@ Traffic.views = Traffic.views || {};
         },
 
         onRender : function () {
-            $( document ).ready(function() {
-                $('#byHourRouteButtons').hide();
-                $('#routeSelections').hide();
-                var timeButtons = $('#hourButtons');
-
-                for(var i = 0; i < 24; i++){
-                    var caption = (i < 10 ? '0' + i : i) + ":00";
-                    var r =  $('<span type="button" class="col-md-4 btn hourButton" data-toggle="button" hour="' + i + '">' + caption + '</span>');
-                    timeButtons.append(r)
-                }
-
-                $(".hourButton").hover(
-                    function () {
-                        $(this).addClass('btn-primary');
-                    },
-                    function () {
-                        $(this).removeClass('btn-primary');
-                        $(this).removeClass('active');
-                    }
-                );
-
-                $(".hourButton").click(
-                    function (evt) {
-                        var hour = $(evt.target).attr('hour');
-                        $(evt.target).removeClass('active');
-                        A.app.sidebarTabs.hourSelect(hour);
-                    }
-                );
-
-                $('.daySelect').click(function(){
-                    if ($(this).is(':checked'))
-                    {
-                        $(".hourButton").removeClass('disabled');
-                    }
-                });
-
-
-            });
-
             var user = A.app.instance.user;
             if( !(user && user.isLoggedIn()) ){
                 this.saveRouteContainer.show(new views.SaveRouteButton());
