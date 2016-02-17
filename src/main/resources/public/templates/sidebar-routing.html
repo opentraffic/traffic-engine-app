@@ -109,25 +109,25 @@
 
 <div id="routeButtons" class="row col-md-12" style="text-align: center; display: none;">
     <div class="col-md-10 col-md-offset-1" style="margin-bottom: 5px;">
-        <button type="button"  id="toggleFilters"  class="btn btn-default" data-toggle="button">
-        {{I18n "filter_off"}}
-        </button>
+        <div class="col-md-8" style="padding: 0px 5px 0px 0px;">
+            <button type="button"  id="toggleFilters"  class="btn btn-sm btn-default btn-block" data-toggle="button">
+            {{I18n "filter_off"}}
+            </button>
+        </div>
+        <div class="col-md-4" style="padding: 0px;">
+            <button type="button"  id="resetRoute"  class="btn btn-sm btn-warning btn-block" data-toggle="button">
+                {{I18n "reset_route"}}
+            </button>
+        </div>
     </div>
     <div class="col-md-10 col-md-offset-1" style="margin-bottom: 5px;">
-        <button type="button"  id="analyzeByTime"  class="btn btn-default" data-toggle="button">
+        <button type="button"  id="analyzeByTime"  class="btn btn-sm btn-default btn-block" data-toggle="button">
             {{I18n "analyze_by_time"}}
         </button>
     </div>
     <div class="col-md-10 col-md-offset-1" style="margin-bottom: 5px;">
-        <div class="col-md-4" id="saveRouteContainer"/>
-        <div class="col-md-4" id="bookmarkRouteContainer"/>
-        <div class="col-md-4">
-            <div>
-                <button type="button"  id="resetRoute"  class="btn btn-sm btn-warning" data-toggle="button">
-                    {{I18n "reset_route"}}
-                </button>
-            </div>
-        </div>
+        <div class="col-md-6" id="saveRouteContainer"/>
+        <div class="col-md-6" id="bookmarkRouteContainer"/>
     </div>
 </div>
 

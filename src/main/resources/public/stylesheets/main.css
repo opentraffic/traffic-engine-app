@@ -112,3 +112,11 @@ body, div {
   background-image: url(/images/undo.png);
   background-size: 20px 20px;
 }
+
+#saveRouteContainer {
+  padding: 0px 5px 0px 0px;
+}
+
+#bookmarkRouteContainer {
+  padding: 0px;
+}

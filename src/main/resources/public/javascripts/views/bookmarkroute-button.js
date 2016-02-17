@@ -38,5 +38,6 @@ Traffic.views = Traffic.views || {};
             }
         });
     }
+
   });
 })(Traffic, Traffic.views, Traffic.translations);
