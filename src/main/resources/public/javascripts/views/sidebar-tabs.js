@@ -83,8 +83,11 @@ Traffic.views = Traffic.views || {};
             if(A.app.map.hasLayer(A.app.segmentOverlay))
                 A.app.map.removeLayer(A.app.segmentOverlay);
 
-            if(A.app.map.hasLayer(A.app.pathOverlay))
-                A.app.map.removeLayer(A.app.pathOverlay);
+            if(A.app.pathOverlay) {
+                A.app.pathOverlay.clearLayers();
+            } else {
+                A.app.pathOverlay = L.featureGroup([]).addTo(A.app.map);
+            }
 
             A.app.sidebar.$("#routeSelections").hide();
         },
@@ -117,9 +120,10 @@ Traffic.views = Traffic.views || {};
                 this.routePointsLayer.clearLayers();
             }
 
-            if(A.app.map.hasLayer(A.app.pathOverlay))
-                A.app.map.removeLayer(A.app.pathOverlay);
-
+            if(A.app.pathOverlay) {
+                A.app.pathOverlay.clearLayers();
+            }
+            
         },
 
         startRouting : function() {
@@ -251,9 +255,9 @@ Traffic.views = Traffic.views || {};
         },
 
         getRoute : function(hours, day, hour, callback) {
-
-            if(A.app.map.hasLayer(A.app.pathOverlay))
-                A.app.map.removeLayer(A.app.pathOverlay);
+            if(A.app.pathOverlay) {
+                A.app.pathOverlay.clearLayers();
+            }
 
             var routePoints = this.routePoints;
             if(!routePoints || routePoints.length < 2)
@@ -293,11 +297,13 @@ Traffic.views = Traffic.views || {};
                 contentType: 'application/json',
                 data: JSON.stringify(params),
                 success: function(data) {
+                    if(A.app.pathOverlay) {
+                        A.app.pathOverlay.clearLayers();
+                    }
                     data = JSON.parse(data);
                     var distance = 0;
                     var time = 0;
 
-                    var lines = new Array();
                     var insufficientDataWarning = translator.translate('insufficient_data_warning');
                     var inferredDataNotification = translator.translate('inferred_data_notification');
                     var inferredDataBanner = translator.translate('inferred_data_banner');
@@ -331,7 +337,7 @@ Traffic.views = Traffic.views || {};
                             e.target.closePopup();
                         });
 
-                        lines.push(polyLine);
+                        A.app.pathOverlay.addLayer(polyLine);
 
                         if(edge.speed > 0 && edge.length > 0) {
                             distance += edge.length;
@@ -348,9 +354,6 @@ Traffic.views = Traffic.views || {};
                         $('.inferred-data-warning').remove();
                     }
 
-                    A.app.pathOverlay = L.featureGroup(lines);
-
-                    A.app.pathOverlay.addTo(A.app.map);
 
                     A.app.sidebar.$("#clickInfo").hide();
                     A.app.sidebar.$("#journeyInfo").show();
