@@ -120,3 +120,12 @@ body, div {
 #bookmarkRouteContainer {
   padding: 0px;
 }
+
+.backgrid tr:hover td {
+  background: lightgrey;
+  font-style: italic;
+}
+
+.routes-table .backgrid tr:hover td {
+  cursor: pointer;
+}
