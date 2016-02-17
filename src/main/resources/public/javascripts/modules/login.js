@@ -60,8 +60,12 @@
     app.vent.on('login:success', function() {
       var user = app.user;
       if(user.get('remember_me')) {
-        Cookies.set('login_username', user.get('username'), { expires: 30 });
-        Cookies.set('login_token', user.get('cookie'), { expires: 30 });
+          Cookies.set('login_username', user.get('username'), { expires: 30 });
+          Cookies.set('login_token', user.get('cookie'), { expires: 30 });
+      }else{
+          //session cookies
+          document.cookie = "login_username=admin; path=/";
+          document.cookie = "login_token="  + user.get('cookie') + "; path=/"
       }
       
       setTimeout(function(){
