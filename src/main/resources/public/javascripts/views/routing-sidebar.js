@@ -137,6 +137,7 @@ Traffic.views = Traffic.views || {};
             this.dailyChart.brushOn(false);
             this.hourlyChart.brushOn(false);
             dc.redrawAll();
+            window.history.pushState('', '', '?');
         },
 
         getRoute : function() {
