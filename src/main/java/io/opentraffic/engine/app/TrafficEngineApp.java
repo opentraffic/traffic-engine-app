@@ -36,7 +36,6 @@ import spark.utils.StringUtils;
 import javax.measure.Measure;
 import javax.measure.unit.SI;
 import java.awt.*;
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -333,10 +332,12 @@ public class TrafficEngineApp {
 
 			response.header("Access-Control-Allow-Origin", "*");
 
+            Map<String, Object> paramMap= mapper.readValue(request.body(), new TypeReference<Map<String, Object>>(){});
+
 			Set<Integer> hours = new HashSet<>();
 
-			if(request.queryMap("h").value() != null && !request.queryMap("h").value().trim().isEmpty()) {
-				String valueStr[] = request.queryMap("h").value().trim().split(",");
+			if(paramMap.containsKey("h") && !((String)paramMap.get("h")).trim().isEmpty()) {
+				String valueStr[] = ((String)paramMap.get("h")).trim().split(",");
 				List<String> values = new ArrayList(Arrays.asList(valueStr));
 				values.forEach(v -> hours.add(Integer.parseInt(v.trim())));
 			}
@@ -344,29 +345,17 @@ public class TrafficEngineApp {
 			Set<Integer> w1 = new HashSet<>();
 			Set<Integer> w2 = new HashSet<>();
 
-			if(request.queryMap("w1").value() != null && !request.queryMap("w1").value().trim().isEmpty()) {
-				String valueStr[] = request.queryMap("w1").value().trim().split(",");
+            if(paramMap.containsKey("w1") && !((String)paramMap.get("w1")).trim().isEmpty()) {
+				String valueStr[] = ((String)paramMap.get("w1")).trim().split(",");
 				List<String> values = new ArrayList(Arrays.asList(valueStr));
 				values.forEach(v -> w1.add(Integer.parseInt(v.trim())));
 			}
 
-			if(request.queryMap("w2").value() != null && !request.queryMap("w2").value().trim().isEmpty()) {
-				String valueStr[] = request.queryMap("w2").value().trim().split(",");
+            if(paramMap.containsKey("w2") && !((String)paramMap.get("w2")).trim().isEmpty()) {
+				String valueStr[] = ((String)paramMap.get("w2")).trim().split(",");
 				List<String> values = new ArrayList(Arrays.asList(valueStr));
 				values.forEach(v -> w2.add(Integer.parseInt(v.trim())));
 			}
-
-            //TODO: shouldn't need to do this but for some reason Spark isn't parsing the post body correctly.
-            StringBuffer jb = new StringBuffer();
-            String line = null;
-            try {
-                BufferedReader reader = request.raw().getReader();
-                while ((line = reader.readLine()) != null)
-                    jb.append(line);
-            } catch (Exception e) { /*report an error*/ }
-            line = jb.toString();
-
-            Map<String, Object> paramMap = mapper.readValue(line, new TypeReference<Map<String, Object>>(){});
 
             Integer hourBin = null;
             if(paramMap.get("hour") != null)
