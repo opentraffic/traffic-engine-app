@@ -234,7 +234,7 @@ Traffic.views = Traffic.views || {};
                 A.app.instance.routesModal = new Backbone.BootstrapModal({
                     animate: true,
                     content: "<div class='routes-table'></div>",
-                    title: translator.translate("routes_dialog_title"),
+                    title: translator.translate("saved_routes_dialog_title"),
                     showFooter: false
                 });
 

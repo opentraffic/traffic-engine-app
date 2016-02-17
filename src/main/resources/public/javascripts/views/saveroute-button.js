@@ -15,7 +15,7 @@ Traffic.views = Traffic.views || {};
       A.app.instance.saverouteModal = new Backbone.BootstrapModal({
         animate: true, 
         content: new views.Saveroute({model: A.app.instance.Saveroute.routeModel}),
-        title: translator.translate("route_dialog_title"),
+        title: translator.translate("save_route_dialog_title"),
         showFooter: false,
         escape: false
       });
