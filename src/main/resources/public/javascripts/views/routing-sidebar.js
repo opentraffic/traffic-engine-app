@@ -130,6 +130,8 @@ Traffic.views = Traffic.views || {};
             $('#selectedDateAndTime').hide();
             A.app.sidebarTabs.resetRoute();
 
+            this.$('#routeCompareNotes').hide();
+
             //reset the filter state
             $("#toggleFilters").html(translator.translate("filter_off"))
             this.hourlyChart.filterAll();

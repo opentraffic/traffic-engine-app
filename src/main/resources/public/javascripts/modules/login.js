@@ -59,6 +59,8 @@
 
     app.vent.on('login:success', function() {
       $('#saveroute').show();
+      $('#saveRouteContainer').removeClass('col-md-0').addClass('col-md-6');
+      $('#bookmarkRouteContainer').removeClass('col-md-12').addClass('col-md-6');
       var user = app.user;
       if(user.get('remember_me')) {
           Cookies.set('login_username', user.get('username'), { expires: 30 });
@@ -80,6 +82,8 @@
 
     app.vent.on('logout:success', function() {
       $('#saveroute').hide();
+      $('#saveRouteContainer').removeClass('col-md-6').addClass('col-md-0');
+      $('#bookmarkRouteContainer').removeClass('col-md-6').addClass('col-md-12');
       Cookies.remove('login_username');
       Cookies.remove('login_token');
       app.Login.userModel.reset();

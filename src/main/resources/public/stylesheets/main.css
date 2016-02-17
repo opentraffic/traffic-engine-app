@@ -99,10 +99,9 @@ body, div {
 }
 
 .compare-notes {
-  margin-top: 10px;
   background-color: #DCE6F5;
-  padding: 20px;
-  margin: 20px;
+  padding: 10px;
+  margin: 5px;
 }
 
 .inferred-data-warning {
@@ -112,4 +111,21 @@ body, div {
 .remove-last-route-point {
   background-image: url(/images/undo.png);
   background-size: 20px 20px;
+}
+
+#saveRouteContainer {
+  padding: 0px 5px 0px 0px;
+}
+
+#bookmarkRouteContainer {
+  padding: 0px;
+}
+
+.backgrid tr:hover td {
+  background: lightgrey;
+  font-style: italic;
+}
+
+.routes-table .backgrid tr:hover td {
+  cursor: pointer;
 }
