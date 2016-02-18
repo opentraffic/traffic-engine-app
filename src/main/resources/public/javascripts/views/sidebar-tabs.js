@@ -70,6 +70,9 @@ Traffic.views = Traffic.views || {};
         },
 
         clickRouting: function(evt) {
+            if($('.remove-last-route-point').length > 0){
+                return
+            }
             this.startRouting();
 
             A.app.sidebar = new views.RoutingSidebar();
@@ -187,9 +190,7 @@ Traffic.views = Traffic.views || {};
                 this.undoRouteButton = button;
             }
 
-            if($('.remove-last-route-point').length == 0){
-                this.undoRouteButton.addTo(A.app.map);
-            }
+            this.undoRouteButton.addTo(A.app.map);
         },
 
         initializeRoutePoints: function() {
