@@ -72,7 +72,7 @@ Traffic.views = Traffic.views || {};
 
         routeRendered: function(params){
             if(params.hourExtent || params.dayExtent){
-                this.toggleFilters(true);
+                this.toggleFilters(null, true);
                 this.hourlyChart.filter(dc.filters.RangedFilter(params.hourExtent[0], params.hourExtent[1]));
                 this.dailyChart.filter(dc.filters.RangedFilter(params.dayExtent[0], params.dayExtent[1]));
                 dc.renderAll();
@@ -98,7 +98,7 @@ Traffic.views = Traffic.views || {};
             }
         },
 
-        toggleFilters : function(filterState) {
+        toggleFilters : function(event, overrideState) {
 
             //reset the filter state
             this.hourlyChart.filterAll();
@@ -106,7 +106,14 @@ Traffic.views = Traffic.views || {};
             dc.renderAll();
 
             //flip the filter on/off
-            var brushOn = filterState == null ? !this.dailyChart.brushOn() : filterState;
+            var brushOn;
+            if(overrideState != null){
+                brushOn = overrideState;
+            }else{
+                A.app.sidebarTabs.filterEnabled = !A.app.sidebarTabs.filterEnabled;
+                brushOn =A.app.sidebarTabs.filterEnabled;
+            }
+
             this.dailyChart.brushOn(brushOn);
             this.hourlyChart.brushOn(brushOn);
             if(brushOn){

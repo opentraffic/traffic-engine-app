@@ -18,7 +18,7 @@ Traffic.views = Traffic.views || {};
             'click #toggleFilters' : 'toggleFilters'
         },
 
-        toggleFilters : function() {
+        toggleFilters : function(event, overrideState) {
 
 
             var hourlyChart = A.app.sidebar.hourlyChart;
@@ -30,7 +30,14 @@ Traffic.views = Traffic.views || {};
             dc.renderAll();
 
             //flip the filter on/off
-            var brushOn = !this.dailyChart.brushOn();
+            var brushOn;
+            if(overrideState != null){
+                brushOn = overrideState;
+            }else{
+                A.app.sidebarTabs.filterEnabled = !A.app.sidebarTabs.filterEnabled;
+                brushOn =A.app.sidebarTabs.filterEnabled;
+            }
+
             dailyChart.brushOn(brushOn);
             hourlyChart.brushOn(brushOn);
             if(brushOn){

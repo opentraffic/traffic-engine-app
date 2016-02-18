@@ -5,6 +5,8 @@ Traffic.views = Traffic.views || {};
 
     views.SidebarTabs = Marionette.Layout.extend({
 
+        filterEnabled: false,
+
         template: Handlebars.getTemplate('app', 'sidebar-tabs'),
 
         events : {
@@ -16,7 +18,6 @@ Traffic.views = Traffic.views || {};
 
         initialize : function() {
             var _this = this;
-
             _.bindAll(this, 'onMapClick', 'clickAnalysis', 'selectLocale');
         },
 
@@ -123,7 +124,7 @@ Traffic.views = Traffic.views || {};
             if(A.app.pathOverlay) {
                 A.app.pathOverlay.clearLayers();
             }
-            
+            A.app.sidebarTabs.filterEnabled = false;
         },
 
         startRouting : function() {
