@@ -310,7 +310,6 @@ Traffic.views = Traffic.views || {};
         },
 
         clickDeleteUser: function() {
-            //TODO
             console.log('deleting user');
             var confirmDialog = new Backbone.BootstrapModal({
                 animate: true,
