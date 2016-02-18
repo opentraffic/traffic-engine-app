@@ -98,7 +98,7 @@ Traffic.views = Traffic.views || {};
                         var dateStr = '';
                         if(creationDate) {
                             var dateObj = new Date(obj.attributes.creationDate);
-                            dateStr = dateObj.getFullYear() + "-" + (dateObj.getMonth() + 1) + "-" + dateObj.getDate(); //ISO date format
+                            dateStr = dateObj.toLocaleString();
                         } 
                         return dateStr;
                     }
@@ -310,7 +310,6 @@ Traffic.views = Traffic.views || {};
         },
 
         clickDeleteUser: function() {
-            //TODO
             console.log('deleting user');
             var confirmDialog = new Backbone.BootstrapModal({
                 animate: true,
