@@ -81,30 +81,26 @@ Traffic.views = Traffic.views || {};
                 cell: 'integer',
                 editable: false,
                 renderable: false,
-                label: translator.translate('id_title'),
-                formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-                    fromRaw: function (rawValue, obj) {
-                        return rawValue;
-                    }
-                })
+                label: translator.translate('id_title')
             },{
                 name: 'name',
                 cell: 'string',
                 editable: false,
-                label: translator.translate('routename_title'),
-                formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
-                    fromRaw: function (rawValue, obj) {
-                        return rawValue;
-                    }
-                })
+                label: translator.translate('routename_title')
             }, {
                 name: 'date',
-                cell: 'date',
+                cell: 'string',
                 editable: false,
                 label: translator.translate('routedate_title'),
                 formatter: _.extend({}, Backgrid.CellFormatter.prototype, {
                     fromRaw: function (rawValue, obj) {
-                        return rawValue;
+                        var creationDate = obj.attributes.creationDate;
+                        var dateStr = '';
+                        if(creationDate) {
+                            var dateObj = new Date(obj.attributes.creationDate);
+                            dateStr = dateObj.getFullYear() + "-" + (dateObj.getMonth() + 1) + "-" + dateObj.getDate(); //ISO date format
+                        } 
+                        return dateStr;
                     }
                 })
             }, {
