@@ -59,7 +59,6 @@ Traffic.views = Traffic.views || {};
                     lng: params.routePoints[i].lng
                 };
                 if(i == params.routePoints.length -1){
-                    var blah = 'hello';
                     var callback = function() {
                         A.app.sidebar.routeRendered(params);
                     };
@@ -85,16 +84,23 @@ Traffic.views = Traffic.views || {};
                 }
                 this.changeToWeek();
                 if(params.week2FromList){
+                    var that = this;
+                    var callback = function() {
+                        that.clickCompareCallback(params)
+                    };
                     this.$("#compare").prop( "checked", true );
-                    this.clickCompare()
-                    $("#week2FromList").val(params.week2FromList);
-                    this.changeFromWeek();
-                    if(params.week2ToList){
-                        $("#week2ToList").val(params.week2ToList);
-                        this.changeToWeek();
-                    }
+                    this.clickCompare(callback)
                 }
 
+            }
+        },
+
+        clickCompareCallback: function(params){
+            $("#week2FromList").val(params.week2FromList);
+            this.changeFromWeek();
+            if(params.week2ToList){
+                $("#week2ToList").val(params.week2ToList);
+                this.changeToWeek();
             }
         },
 
@@ -256,7 +262,7 @@ Traffic.views = Traffic.views || {};
         },
 
 
-        clickCompare : function() {
+        clickCompare : function(callback) {
 
             A.app.sidebar.filterChanged = true;
 
@@ -282,10 +288,10 @@ Traffic.views = Traffic.views || {};
                 this.$('#routeCompareNotes').hide();
             }
 
-            this.update();
+            this.update(callback);
         },
 
-        update : function() {
+        update : function(callback) {
             A.app.sidebar.filterChanged = true;
 
             if(!A.app.sidebar.hourlyChart)
@@ -322,7 +328,7 @@ Traffic.views = Traffic.views || {};
                 }
             }
 
-            A.app.sidebarTabs.getRoute(hours);
+            A.app.sidebarTabs.getRoute(hours, null, null, callback);
         },
 
         getWeek1List : function() {

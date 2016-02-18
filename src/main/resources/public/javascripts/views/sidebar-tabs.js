@@ -187,7 +187,9 @@ Traffic.views = Traffic.views || {};
                 this.undoRouteButton = button;
             }
 
-            this.undoRouteButton.addTo(A.app.map);
+            if($('.remove-last-route-point').length == 0){
+                this.undoRouteButton.addTo(A.app.map);
+            }
         },
 
         initializeRoutePoints: function() {
