@@ -275,6 +275,21 @@ Traffic.views = Traffic.views || {};
             var w1List = A.app.sidebar.getWeek1List();
             var w2List = A.app.sidebar.getWeek2List();
 
+            if(hour && day){
+                var utcAdjustment = 8;
+                var fixDay = false;
+                if((hour + utcAdjustment) % 24 > 0)
+                    fixDay = true;
+                hour = (hour + utcAdjustment) % 24;
+                if(fixDay){
+                    day = day + 1;
+                    if(d.dayOfWeek > 7)
+                        day = 1;
+                }
+            }
+
+
+
             var params = {};
             params.hour = hour;
             params.day = day;
