@@ -174,5 +174,11 @@
           <artifactId>bcprov-ext-jdk15on</artifactId>
           <version>1.54</version>
       </dependency>
+      <dependency>
+          <groupId>org.zeroturnaround</groupId>
+          <artifactId>zt-zip</artifactId>
+          <version>1.9</version>
+          <type>jar</type>
+      </dependency>
   </dependencies>
 </project>

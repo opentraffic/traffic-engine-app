@@ -9,7 +9,8 @@ Traffic.views = Traffic.views || {};
 
         regions: {
             saveRouteContainer: "#saveRouteContainer",
-            bookmarkRouteContainer: "#bookmarkRouteContainer"
+            bookmarkRouteContainer: "#bookmarkRouteContainer",
+            exportDataContainer: "#exportDataContainer",
         },
 
         events : {
@@ -263,6 +264,8 @@ Traffic.views = Traffic.views || {};
 
 
         clickCompare : function(callback) {
+            if(typeof callback != "function")
+                callback = null;
 
             A.app.sidebar.filterChanged = true;
 
@@ -702,6 +705,7 @@ Traffic.views = Traffic.views || {};
             var user = A.app.instance.user;
             if( !(user && user.isLoggedIn()) ){
                 this.saveRouteContainer.show(new views.SaveRouteButton());
+                this.exportDataContainer.show(new views.ExportDataButton());
             }
             this.bookmarkRouteContainer.show(new views.BookmarkRouteButton());
         }

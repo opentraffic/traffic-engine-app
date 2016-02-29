@@ -2,6 +2,7 @@ package io.opentraffic.engine.app;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.net.MediaType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import io.opentraffic.engine.app.data.*;
@@ -10,6 +11,7 @@ import io.opentraffic.engine.app.routing.Routing;
 import io.opentraffic.engine.app.tiles.TrafficTileRequest;
 import io.opentraffic.engine.app.util.HibernateUtil;
 import io.opentraffic.engine.app.util.PasswordUtil;
+import io.opentraffic.engine.app.util.ShapefileUtil;
 import io.opentraffic.engine.data.SpatialDataItem;
 import io.opentraffic.engine.data.pbf.ExchangeFormat;
 import io.opentraffic.engine.data.stats.SegmentStatistics;
@@ -19,6 +21,8 @@ import io.opentraffic.engine.geom.GPSPoint;
 import io.opentraffic.engine.geom.StreetSegment;
 import io.opentraffic.engine.osm.OSMCluster;
 import org.apache.commons.cli.*;
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.jcolorbrewer.ColorBrewer;
@@ -30,17 +34,22 @@ import org.opentripplanner.common.model.GenericLocation;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
+import org.zeroturnaround.zip.ZipUtil;
 import spark.Request;
 import spark.utils.StringUtils;
 
 import javax.measure.Measure;
 import javax.measure.unit.SI;
+import javax.servlet.ServletOutputStream;
 import java.awt.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
@@ -93,6 +102,341 @@ public class TrafficEngineApp {
         if(!StringUtils.isEmpty(portString)){
             port(Integer.parseInt(portString));
         }
+
+
+
+        get("/download", (request, response) -> {
+            String filename = request.queryMap("filename").value();
+            File file = new File(filename);
+
+            response.header("Content-Disposition", String.format("attachment; filename=\"%s\"", filename));
+            response.type(MediaType.OCTET_STREAM.toString());
+            response.raw().setContentLength((int) file.length());
+            response.status(200);
+
+            final ServletOutputStream os = response.raw().getOutputStream();
+            final FileInputStream in = new FileInputStream(file);
+            IOUtils.copy(in, os);
+            in.close();
+            os.close();
+            file.delete();
+            return null;
+        });
+
+        post("/csv", (request, response) -> {
+
+            while(!routing.isReady()){
+                log.info("Graph not ready, waiting 1 second");
+                Thread.sleep(1000);
+            }
+
+            response.header("Access-Control-Allow-Origin", "*");
+
+            Map<String, Object> paramMap= mapper.readValue(request.body(), new TypeReference<Map<String, Object>>(){});
+
+            Set<Integer> hours = new HashSet<>();
+
+            if(paramMap.containsKey("h") && !((String)paramMap.get("h")).trim().isEmpty()) {
+                String valueStr[] = ((String)paramMap.get("h")).trim().split(",");
+                List<String> values = new ArrayList(Arrays.asList(valueStr));
+                values.forEach(v -> hours.add(Integer.parseInt(v.trim())));
+            }
+
+            Set<Integer> w1 = new HashSet<>();
+            Set<Integer> w2 = new HashSet<>();
+
+            if(paramMap.containsKey("w1") && !((String)paramMap.get("w1")).trim().isEmpty()) {
+                String valueStr[] = ((String)paramMap.get("w1")).trim().split(",");
+                List<String> values = new ArrayList(Arrays.asList(valueStr));
+                values.forEach(v -> w1.add(Integer.parseInt(v.trim())));
+            }
+
+            if(paramMap.containsKey("w2") && !((String)paramMap.get("w2")).trim().isEmpty()) {
+                String valueStr[] = ((String)paramMap.get("w2")).trim().split(",");
+                List<String> values = new ArrayList(Arrays.asList(valueStr));
+                values.forEach(v -> w2.add(Integer.parseInt(v.trim())));
+            }
+
+            Integer hourBin = null;
+            if(paramMap.get("hour") != null)
+                hourBin = Integer.parseInt((String)paramMap.get("hour"));
+
+            Integer dayBin = null;
+            if(paramMap.get("day") != null)
+                dayBin = Integer.parseInt((String)paramMap.get("day"));
+
+            boolean compare = (Boolean)paramMap.get("compare");
+            boolean normalizeByTime = Boolean.parseBoolean((String)paramMap.get("normalizeByTime"));
+
+            //TODO: 'intermediate places' are in the api but the feature is broken: https://github.com/opentripplanner/OpenTripPlanner/issues/1784
+            List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>();
+
+            List routePoints = (List)paramMap.get("routePoints");
+            for(int i = 0; i < routePoints.size() - 1; i++){
+
+                RoutingRequest rr = new RoutingRequest();
+                rr.useTraffic = hourBin == null ? false : true;  //if no hour specified, use the overall edge weights
+                if(hourBin != null){
+                    DateTime time = new DateTime(DateTimeZone.UTC).dayOfMonth().withMinimumValue();
+                    time = time.withDayOfWeek(dayBin);
+                    time = time.withHourOfDay(hourBin);
+
+                    rr.dateTime = time.getMillis() / 1000;
+                }
+                rr.modes = new TraverseModeSet(TraverseMode.CAR);
+
+                Map<String, Double> routePoint = (Map)routePoints.get(i);
+                double lat = routePoint.get("lat");
+                double lng = routePoint.get("lng");
+                GenericLocation fromLocation = new GenericLocation(lat, lng);
+
+                routePoint = (Map)routePoints.get(i + 1);
+                lat = routePoint.get("lat");
+                lng = routePoint.get("lng");
+                GenericLocation toLocation = new GenericLocation(lat, lng);
+                rr.from = fromLocation;
+                rr.to = toLocation;
+                List<Fun.Tuple3<Long, Long, Long>> partialRoute = routing.route(rr);
+                edges.addAll(partialRoute);
+            }
+
+            Fun.Tuple3<Long, Long, Long> lastUnmatchedEdgeId = null;
+
+            class StatsVO {
+                public Long edgeId;
+                public SummaryStatistics summaryStatistics;
+                public SummaryStatisticsComparison summaryStatisticsComparison;
+                public SummaryStatistics summaryStatisticsCompare1;
+                public SummaryStatistics summaryStatisticsCompare2;
+                public StreetSegment streetSegment;
+            }
+
+            List<StatsVO> statsVOs = new ArrayList<>();
+
+            for(Fun.Tuple3<Long, Long, Long> edgeId : edges) {
+                List<SpatialDataItem> streetSegments = engine.getTrafficEngine().getStreetSegmentsBySegmentId(edgeId);
+                if(streetSegments.size() == 0) {
+                    if(lastUnmatchedEdgeId != null && lastUnmatchedEdgeId.a.equals(edgeId.a)) {
+                        edgeId = new Fun.Tuple3<>(edgeId.a, lastUnmatchedEdgeId.b, edgeId.c);
+                    }
+                    streetSegments = engine.getTrafficEngine().getStreetSegmentsBySegmentId(edgeId);
+                }
+                if(streetSegments.size() != 0) {
+                    for(SpatialDataItem sdi : streetSegments) {
+                        StreetSegment streetSegment = (StreetSegment)sdi;
+                        if(streetSegment != null) {
+                            lastUnmatchedEdgeId = null;
+
+                            StatsVO statsVO = new StatsVO();
+                            statsVOs.add(statsVO);
+                            statsVO.edgeId = streetSegment.id;
+                            statsVO.streetSegment = streetSegment;
+
+                            if(compare) {
+                                Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
+                                SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, hours);
+                                SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, hours);
+                                SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[confidenceInterval], stats1, stats2);
+                                statsVO.summaryStatisticsComparison = statsComparison;
+                                statsVO.summaryStatisticsCompare1 = stats1;
+                                statsVO.summaryStatisticsCompare2 = stats2;
+                            }else{
+                                SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
+                                statsVO.summaryStatistics = summaryStatistics;
+                            }
+                        }
+                        else {
+                            lastUnmatchedEdgeId = edgeId;
+                        }
+                    }
+                }
+                else {
+                    lastUnmatchedEdgeId = edgeId;
+                }
+
+            }
+
+            String dir = "opentraffic_export_" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").format(new Date());
+            new File(dir).mkdir();
+            List<StreetSegment> segments = new ArrayList<>();
+            statsVOs.forEach(v -> segments.add(v.streetSegment));
+            ShapefileUtil.create(segments, dir);
+
+            StringBuilder builder = new StringBuilder();
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+
+            Integer minHour = 0;
+            Integer maxHour = 23;
+            if(hours != null && hours.size() > 0){
+                minHour = Collections.min(hours);
+                maxHour = Collections.max(hours);
+            }
+
+            String dayBooleanString = "1,1,1,1,1,1,1,";
+            if(hours != null && hours.size() > 0){
+                dayBooleanString = "";
+                Integer startDay = (minHour  -  1) / 24;
+                Integer endDay = ((maxHour - minHour) / 24) + startDay;
+                for(int i = 0; i < 7; i++){
+                    if(i >= startDay && i <= endDay){
+                        dayBooleanString += "1,";
+                    }else{
+                        dayBooleanString += "0,";
+                    }
+                }
+            }
+
+
+            if(compare){
+                Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
+                builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed (Baseline),Number of Observations (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed (Comparison),Number of Observations (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
+                for(StatsVO statsVO : statsVOs){
+                    if(statsVO.summaryStatisticsComparison != null){
+                        for(int i = 0; i < SegmentStatistics.HOURS_IN_WEEK; i++){
+                            Double count = statsVO.summaryStatisticsCompare1.hourCount.get(i);
+                            if(count < 1)
+                                continue;
+
+                            builder.append(statsVO.edgeId + ",");
+                            Date start = new Date(SegmentStatistics.getTimeForWeek(Collections.min(w1)));
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTimeInMillis(SegmentStatistics.getTimeForWeek(Collections.max(w1)));
+                            cal.add(Calendar.DATE, 6); //bump end date to end of week
+                            builder.append(sdf.format(start) + ",");//Date Start (Baseline)
+                            builder.append(sdf.format(cal.getTime()) + ",");//Date End (Baseline)
+
+                            start = new Date(SegmentStatistics.getTimeForWeek(Collections.min(w2)));
+                            cal = Calendar.getInstance();
+                            cal.setTimeInMillis(SegmentStatistics.getTimeForWeek(Collections.max(w2)));
+                            cal.add(Calendar.DATE, 6); //bump end date to end of week
+                            builder.append(sdf.format(start) + ",");//Date Start (Comparison)
+                            builder.append(sdf.format(cal.getTime()) + ",");//Date End (Comparison)
+
+                            builder.append(dayBooleanString);//Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday
+                            int hourIndex = i;
+                            if(i > 24)
+                                hourIndex = hourIndex % 24;
+                            if(i < 10)
+                                builder.append("0");
+                            builder.append(hourIndex + ":00,");
+
+                            if(i < 10)
+                                builder.append("0");
+                            builder.append(hourIndex + ":59,");
+                            builder.append(statsVO.summaryStatisticsComparison.differenceAsPercent(i) + ",");
+                            builder.append(confidenceInterval + ",");
+                            builder.append(1 - confidenceInterval + ",");
+                            builder.append(statsVO.summaryStatisticsComparison.tStat(i) + ",");
+                            builder.append((statsVO.summaryStatisticsCompare1.count + statsVO.summaryStatisticsCompare2.count - 2) + ",");//Degrees of Freedom, df=n1+n2−2
+
+                            double tCrit = statsVO.summaryStatisticsComparison.tCrit(i);
+                            double stdDev = statsVO.summaryStatisticsComparison.combinedStdDev(i);
+                            double combinedN = statsVO.summaryStatisticsComparison.getMeanSize(i);
+                            double marginOfError = tCrit * (stdDev / Math.sqrt(combinedN));
+                            builder.append(marginOfError + ","); // Margin of Error: tCrit * (std dev / √n)
+                            builder.append(normalizeByTime + ","); //normalize by time
+                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + ","); //Average Speed (Baseline),
+                            builder.append(statsVO.summaryStatisticsCompare1.hourCount.get(i) + ",");// Number of Observations (Baseline)
+                            builder.append(statsVO.summaryStatisticsCompare1.getStdDev(i) + ","); //,Standard Deviation (Baseline),
+                            stdDev = statsVO.summaryStatisticsCompare1.getStdDev(i);
+                            double stdError = Math.sqrt(((stdDev * stdDev) / statsVO.summaryStatisticsCompare1.hourCount.get(i)) + ((stdDev * stdDev) / statsVO.summaryStatisticsCompare2.hourCount.get(i) ));
+                            builder.append(stdError + ",");// Standard Error (Baseline),  square.root[(sd2/na) + (sd2/nb)]
+
+                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + (2.58 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 99% Upper Bound (Baseline)
+                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) - (2.58 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 99% Lower Bound (Baseline)
+                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + (2.17 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 97% Upper Bound (Baseline)
+                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) - (2.17 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 97% Lower Bound (Baseline)
+                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + (1.96 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 95% Upper Bound (Baseline)
+                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) - (1.96 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 95% Lower Bound (Baseline)
+                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + (1.64 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 90% Upper Bound (Baseline)
+                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) - (1.64 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 90% Lower Bound (Baseline)
+
+                            builder.append(statsVO.summaryStatisticsCompare2.getStdDev(i) + ","); // Number of Observations (Comparison),
+                            builder.append(statsVO.summaryStatisticsCompare2.getStdDev(i) + ",");// Standard Deviation (Comparison),
+                            stdDev = statsVO.summaryStatisticsCompare2.getStdDev(i);
+                            stdError = Math.sqrt(((stdDev * stdDev) / statsVO.summaryStatisticsCompare2.hourCount.get(i)) + ((stdDev * stdDev) / statsVO.summaryStatisticsCompare1.hourCount.get(i) ));
+                            builder.append(stdError + ",");// Standard Error (Comparison),
+
+                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) + (2.58 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 99% Upper Bound (Comparison)
+                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) - (2.58 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 99% Lower Bound (Comparison)
+                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) + (2.17 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 97% Upper Bound (Comparison)
+                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) - (2.17 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 97% Lower Bound (Comparison)
+                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) + (1.96 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 95% Upper Bound (Comparison)
+                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) - (1.96 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 95% Lower Bound (Comparison)
+                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) + (1.64 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 90% Upper Bound (Comparison)
+                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) - (1.64 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 90% Lower Bound (Comparison)
+                            builder.append("\n");
+                        }
+                    }
+                }
+            }else{
+                builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed,Number of Observations,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
+                for(StatsVO statsVO : statsVOs){
+                    if(statsVO.summaryStatistics != null){
+                        for(int i = 0; i < SegmentStatistics.HOURS_IN_WEEK; i++){
+
+                            Double count = statsVO.summaryStatistics.hourCount.get(i);
+                            if(count < 1)
+                                continue;
+
+                            builder.append(statsVO.edgeId + "'],");
+                            Date start = new Date(SegmentStatistics.getTimeForWeek(Collections.min(w1)));
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTimeInMillis(SegmentStatistics.getTimeForWeek(Collections.max(w1)));
+                            cal.add(Calendar.DATE, 6); //bump end date to end of week
+                            builder.append(sdf.format(start) + ",");
+                            builder.append(sdf.format(cal.getTime()) + ",");
+                            builder.append(dayBooleanString);
+                            int hourIndex = i;
+                            if(i > 24)
+                                hourIndex = hourIndex % 24;
+                            if(i < 10)
+                                builder.append("0");
+                            builder.append(hourIndex + ":00,");
+
+                            if(i < 10)
+                                builder.append("0");
+                            builder.append(hourIndex + ":59,");
+
+                            Double sum = statsVO.summaryStatistics.hourSum.get(i);
+                            Double mean = statsVO.summaryStatistics.getMean(i);
+                            Double stdDev = statsVO.summaryStatistics.getStdDev(i);
+                            builder.append(mean + ",");
+                            builder.append(count + ",");
+                            builder.append(stdDev + ",");
+                            builder.append(stdDev / Math.sqrt(count));
+                            builder.append(",");
+                            builder.append(mean + (2.58 * stdDev)); //99% Upper Bound
+                            builder.append(",");
+                            builder.append(mean - (2.58 * stdDev)); //99% Lower Bound
+                            builder.append(",");
+                            builder.append(mean + (2.17 * stdDev)); //97% Upper Bound
+                            builder.append(",");
+                            builder.append(mean - (2.17 * stdDev)); //97% Lower Bound
+                            builder.append(",");
+                            builder.append(mean + (1.96 * stdDev)); //95% Upper Bound
+                            builder.append(",");
+                            builder.append(mean - (1.96 * stdDev)); //95% Lower Bound
+                            builder.append(",");
+                            builder.append(mean + (1.64 * stdDev)); //90% Upper Bound
+                            builder.append(",");
+                            builder.append(mean - (1.64 * stdDev)); //90% Lower Bound
+                            builder.append("\n");
+                        }
+                    }
+                }
+            }
+
+            PrintWriter pw = new PrintWriter(new File( dir + "/" + dir + ".csv"));
+            pw.write(builder.toString());
+            pw.flush();
+            pw.close();
+            File directory = new File(dir);
+            ZipUtil.pack(directory, new File(dir + ".zip"));
+            FileUtils.cleanDirectory(directory);
+            new File(dir).delete();
+            return dir + ".zip";
+        });
 
 
         post("/route/save", (request, response) -> {
@@ -707,7 +1051,4 @@ public class TrafficEngineApp {
 			e.printStackTrace();
 		}
 	}
-
-
-
 }

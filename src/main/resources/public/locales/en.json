@@ -113,5 +113,6 @@
   "saved_routes_dialog_title": "Your Saved Routes",
   "routename_title":        "Name",
   "routedate_title":        "Date",
-  "delete_route":           "Delete"
+  "delete_route":           "Delete",
+  "export_data":           "Export Data"
 }
