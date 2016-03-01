@@ -24,6 +24,7 @@ Traffic.views = Traffic.views || {};
             'change #week1FromList' : 'changeFromWeek',
             'change #week2FromList' : 'changeFromWeek',
             'click #toggleFilters' : 'toggleFilters',
+            'click #toggleFilters2' : 'toggleFilters',
             'click #compare' : 'clickCompare',
             'change #confidenceInterval' : 'changeConfidenceInterval',
             'change #normalizeByTime' : 'changeNormalizeBy',
@@ -124,9 +125,9 @@ Traffic.views = Traffic.views || {};
             this.dailyChart.brushOn(brushOn);
             this.hourlyChart.brushOn(brushOn);
             if(brushOn){
-                $("#toggleFilters").html(translator.translate("filter_on"))
+                $(event.target).html(translator.translate("filter_on"))
             }else{
-                $("#toggleFilters").html(translator.translate("filter_off"))
+                $(event.target).html(translator.translate("filter_off"))
                 A.app.sidebarTabs.getRoute();
             }
             dc.renderAll();
@@ -680,6 +681,7 @@ Traffic.views = Traffic.views || {};
             $('#analyzeByTimeButtons').show();
             $('.daySelect').attr('checked', false);
             $(".hourButton").addClass('disabled');
+            $('#toggleFilters2').hide();
         },
 
         initialize : function() {

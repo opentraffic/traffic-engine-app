@@ -255,7 +255,10 @@ Traffic.views = Traffic.views || {};
 
         hourSelect: function(hour){
             var day = $('.daySelect:checked').val();
+
             this.getRoute(null, day, hour);
+
+            $('#toggleFilters2').show();
         },
 
         getRoute : function(hours, day, hour, callback) {
@@ -276,16 +279,21 @@ Traffic.views = Traffic.views || {};
             var w2List = A.app.sidebar.getWeek2List();
 
             if(hour && day){
+                var numHour = parseInt(hour); //convert to number so can be used in following code
+                var numDay = parseInt(day);
                 var utcAdjustment = 8;
                 var fixDay = false;
-                if((hour + utcAdjustment) % 24 > 0)
+                if((numHour + utcAdjustment) > 24)
                     fixDay = true;
-                hour = (hour + utcAdjustment) % 24;
+                numHour = (numHour + utcAdjustment) % 24;
                 if(fixDay){
-                    day = day + 1;
-                    if(d.dayOfWeek > 7)
-                        day = 1;
+                    numDay = numDay + 1;
+                    if(numDay > 7)
+                        numDay = 1;
                 }
+
+                hour = numHour.toString();
+                day = numDay.toString();
             }
 
 
