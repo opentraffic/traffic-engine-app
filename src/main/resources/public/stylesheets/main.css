@@ -129,3 +129,17 @@ body, div {
 .routes-table .backgrid tr:hover td {
   cursor: pointer;
 }
+
+.sidebar-pills > li > a,
+.sidebar-pills > li > a:hover,
+.sidebar-pills > li > a:focus {
+  color: #fff;
+  background-color: #337ab7;
+}
+
+.sidebar-pills > li.active > a,
+.sidebar-pills > li.active > a:hover,
+.sidebar-pills > li.active > a:focus {
+  color: #337ab7;
+  background-color: #fff;
+}
