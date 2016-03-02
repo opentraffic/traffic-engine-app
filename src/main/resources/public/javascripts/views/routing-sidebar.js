@@ -708,6 +708,12 @@ Traffic.views = Traffic.views || {};
             if( !(user && user.isLoggedIn()) ){
                 this.saveRouteContainer.show(new views.SaveRouteButton());
                 this.exportDataContainer.show(new views.ExportDataButton());
+
+                setTimeout(function() {
+                    $('#saveroute').show();
+                    $('#saveRouteContainer').removeClass('col-md-0').addClass('col-md-6');
+                    $('#bookmarkRouteContainer').removeClass('col-md-12').addClass('col-md-6');
+                }, 200);
             }
             this.bookmarkRouteContainer.show(new views.BookmarkRouteButton());
         }
