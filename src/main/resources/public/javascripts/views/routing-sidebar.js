@@ -30,9 +30,7 @@ Traffic.views = Traffic.views || {};
             'change #normalizeByTime' : 'changeNormalizeBy',
             'click #analyzeByTime' : 'analyzeByTime',
             'click #returnToOverall' : 'returnToOverall',
-            'click #returnToOverall1' : 'returnToOverall',
-            'click #saveRoute' : 'saveRoute',
-
+            'click #returnToOverall1' : 'returnToOverall'
         },
 
         loadRouteFromUrl : function(routeId) {
@@ -631,6 +629,8 @@ Traffic.views = Traffic.views || {};
             $('#routeSelections').hide();
             $('#analyzeByTimeButtons').hide();
             $('#selectedDateAndTime').hide();
+            $('#analyzeByTime').show();
+            $('#returnToOverall').hide();
             this.getRoute();
         },
 

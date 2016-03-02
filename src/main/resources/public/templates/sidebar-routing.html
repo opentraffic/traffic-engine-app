@@ -120,24 +120,26 @@
             </button>
         </div>
     </div>
-    <div class="col-md-10 col-md-offset-1" style="margin-bottom: 5px;">
+    <div class="col-md-10 col-md-offset-1">
         <button type="button"  id="analyzeByTime"  class="btn btn-sm btn-default btn-block" data-toggle="button">
             {{I18n "analyze_by_time"}}
         </button>
     </div>
-    <div class="col-md-10 col-md-offset-1" style="margin-bottom: 5px;">
+    <div class="col-md-10 col-md-offset-1">
+        <button type="button"  id="returnToOverall"  style="display: none;" class="btn btn-sm btn-default btn-block" data-toggle="button">
+            {{I18n "return_to_overall"}}
+        </button>
+    </div>
+    <div class="col-md-10 col-md-offset-1" style="margin-top: 5px;">
         <div class="col-md-6" id="saveRouteContainer"/>
         <div class="col-md-12" id="bookmarkRouteContainer"/>
     </div>
-    <div class="col-md-10 col-md-offset-1" style="margin-bottom: 5px;" id="exportDataContainer">
+    <div class="col-md-10 col-md-offset-1" style="margin-top: 5px;" id="exportDataContainer">
     </div>
 </div>
 
 <div id="analyzeByTimeButtons" style="text-align: center; display: none;" class="col-md-10 col-md-offset-1">
-    <button type="button"  id="toggleFilters2"  class="btn btn-sm btn-warning col-md-12" data-toggle="button" style="display: none; margin: 5px 0 5px 0;">
-        {{I18n "filter_off"}}
-    </button>
-    <button type="button"  id="resetRoute2"  class="btn btn-sm btn-warning col-md-12" data-toggle="button" >
+    <button type="button"  id="resetRoute2"  class="btn btn-sm btn-warning col-md-12" data-toggle="button" style="margin-bottom: 5px;">
         {{I18n "reset_route"}}
     </button>
     <button type="button"  id="returnToOverall1"  class="btn btn-sm btn-primary col-md-12" data-toggle="button">

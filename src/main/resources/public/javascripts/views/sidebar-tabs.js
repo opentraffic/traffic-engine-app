@@ -257,8 +257,10 @@ Traffic.views = Traffic.views || {};
             var day = $('.daySelect:checked').val();
 
             this.getRoute(null, day, hour);
-
-            $('#toggleFilters2').show();
+            $('#analyzeByTimeButtons').hide();
+            $('#routeButtons').show();
+            $('#analyzeByTime').hide();
+            $('#returnToOverall').show();
         },
 
         getRoute : function(hours, day, hour, callback) {
