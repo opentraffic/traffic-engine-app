@@ -39,10 +39,10 @@ public class ShapefileUtil {
         //set the name
         b.setName( "Opentraffic" );
         //add a geometry property
-        b.setCRS( DefaultGeographicCRS.WGS84 ); // set crs first
+
         //b.add( "route", LineString.class );
         b.add( "the_geom", LineString.class );
-        b.add( "segment_count", Integer.class);
+        b.add( "segment_id", Long.class);
 
         //build the type
         final SimpleFeatureType TYPE = b.buildFeatureType();
@@ -52,12 +52,14 @@ public class ShapefileUtil {
         GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
         DefaultFeatureCollection featureCollection = new DefaultFeatureCollection("internal",TYPE);
         List<LineString> lineStrings = new ArrayList<>();
+        List<Long> ids = new ArrayList<>();
         for(StreetSegment segment : segments){
             LineString lineString = geometryFactory.createLineString(segment.getCoordinates());
             lineStrings.add(lineString);
+            ids.add(segment.id);
         }
 
-        SimpleFeature[] simpleFeatures = features(lineStrings.toArray(new LineString[]{}));
+        SimpleFeature[] simpleFeatures = features(TYPE, lineStrings.toArray(new LineString[]{}), ids.toArray(new Long[]{}));
 
         for(int i = 0; i < simpleFeatures.length; i++){
             featureCollection.add(simpleFeatures[i]);
@@ -105,19 +107,12 @@ public class ShapefileUtil {
         }
     }
 
-    public static SimpleFeature[] features( LineString[] lines ) throws SchemaException, IllegalAttributeException {
+    public static SimpleFeature[] features( SimpleFeatureType schema, LineString[] lines, Long[] ids ) throws SchemaException, IllegalAttributeException {
 
-
-        SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
-        b.setName( "test");
-        b.add("the_geom", LineString.class);
-        b.add("id", Integer.class);
-        SimpleFeatureType schema = b.buildFeatureType();
         SimpleFeature[] features = new SimpleFeature[ lines.length ];
 
         for ( int i = 0; i < lines.length; i++) {
-            Integer id = new Integer(i);
-            features[i] = SimpleFeatureBuilder.build(schema, new Object[] {lines[i], id}, "fid" + id.toString());
+            features[i] = SimpleFeatureBuilder.build(schema, new Object[] {lines[i], ids[i]}, "fid" + ids[i].toString());
         }
 
         return features;

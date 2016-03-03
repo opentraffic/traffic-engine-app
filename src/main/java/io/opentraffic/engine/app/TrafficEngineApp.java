@@ -125,10 +125,16 @@ public class TrafficEngineApp {
 
         post("/csv", (request, response) -> {
 
-            while(!routing.isReady()){
-                log.info("Graph not ready, waiting 1 second");
-                Thread.sleep(1000);
+            class StatsVO {
+                public Long edgeId;
+                public SummaryStatistics summaryStatistics;
+                public SummaryStatisticsComparison summaryStatisticsComparison;
+                public SummaryStatistics summaryStatisticsCompare1;
+                public SummaryStatistics summaryStatisticsCompare2;
+                public StreetSegment streetSegment;
             }
+
+            List<StatsVO> statsVOs = new ArrayList<>();
 
             response.header("Access-Control-Allow-Origin", "*");
 
@@ -168,92 +174,119 @@ public class TrafficEngineApp {
             boolean compare = (Boolean)paramMap.get("compare");
             boolean normalizeByTime = Boolean.parseBoolean((String)paramMap.get("normalizeByTime"));
 
-            //TODO: 'intermediate places' are in the api but the feature is broken: https://github.com/opentripplanner/OpenTripPlanner/issues/1784
-            List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>();
 
-            List routePoints = (List)paramMap.get("routePoints");
-            for(int i = 0; i < routePoints.size() - 1; i++){
+            if(paramMap.keySet().contains("network")){
+                Map<String, Double> southWest = (Map<String, Double>) ((Map)paramMap.get("bounds")).get("_southWest");
+                Map<String, Double> northEast = (Map<String, Double>) ((Map)paramMap.get("bounds")).get("_northEast");
+                Envelope env = new Envelope();
+                env.expandToInclude(southWest.get("lng"), southWest.get("lat"));
+                env.expandToInclude(northEast.get("lng"), northEast.get("lat"));
+                List<SpatialDataItem> segments  = engine.getTrafficEngine().getStreetSegments(env);
+                for(SpatialDataItem sdi : segments) {
+                    StreetSegment streetSegment = (StreetSegment)sdi;
+                    if(streetSegment != null) {
+                        StatsVO statsVO = new StatsVO();
+                        statsVOs.add(statsVO);
+                        statsVO.edgeId = streetSegment.id;
+                        statsVO.streetSegment = streetSegment;
 
-                RoutingRequest rr = new RoutingRequest();
-                rr.useTraffic = hourBin == null ? false : true;  //if no hour specified, use the overall edge weights
-                if(hourBin != null){
-                    DateTime time = new DateTime(DateTimeZone.UTC).dayOfMonth().withMinimumValue();
-                    time = time.withDayOfWeek(dayBin);
-                    time = time.withHourOfDay(hourBin);
-
-                    rr.dateTime = time.getMillis() / 1000;
-                }
-                rr.modes = new TraverseModeSet(TraverseMode.CAR);
-
-                Map<String, Double> routePoint = (Map)routePoints.get(i);
-                double lat = routePoint.get("lat");
-                double lng = routePoint.get("lng");
-                GenericLocation fromLocation = new GenericLocation(lat, lng);
-
-                routePoint = (Map)routePoints.get(i + 1);
-                lat = routePoint.get("lat");
-                lng = routePoint.get("lng");
-                GenericLocation toLocation = new GenericLocation(lat, lng);
-                rr.from = fromLocation;
-                rr.to = toLocation;
-                List<Fun.Tuple3<Long, Long, Long>> partialRoute = routing.route(rr);
-                edges.addAll(partialRoute);
-            }
-
-            Fun.Tuple3<Long, Long, Long> lastUnmatchedEdgeId = null;
-
-            class StatsVO {
-                public Long edgeId;
-                public SummaryStatistics summaryStatistics;
-                public SummaryStatisticsComparison summaryStatisticsComparison;
-                public SummaryStatistics summaryStatisticsCompare1;
-                public SummaryStatistics summaryStatisticsCompare2;
-                public StreetSegment streetSegment;
-            }
-
-            List<StatsVO> statsVOs = new ArrayList<>();
-
-            for(Fun.Tuple3<Long, Long, Long> edgeId : edges) {
-                List<SpatialDataItem> streetSegments = engine.getTrafficEngine().getStreetSegmentsBySegmentId(edgeId);
-                if(streetSegments.size() == 0) {
-                    if(lastUnmatchedEdgeId != null && lastUnmatchedEdgeId.a.equals(edgeId.a)) {
-                        edgeId = new Fun.Tuple3<>(edgeId.a, lastUnmatchedEdgeId.b, edgeId.c);
+                        if(compare) {
+                            Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
+                            SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, hours);
+                            SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, hours);
+                            SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[confidenceInterval], stats1, stats2);
+                            statsVO.summaryStatisticsComparison = statsComparison;
+                            statsVO.summaryStatisticsCompare1 = stats1;
+                            statsVO.summaryStatisticsCompare2 = stats2;
+                        }else{
+                            SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
+                            statsVO.summaryStatistics = summaryStatistics;
+                        }
                     }
-                    streetSegments = engine.getTrafficEngine().getStreetSegmentsBySegmentId(edgeId);
                 }
-                if(streetSegments.size() != 0) {
-                    for(SpatialDataItem sdi : streetSegments) {
-                        StreetSegment streetSegment = (StreetSegment)sdi;
-                        if(streetSegment != null) {
-                            lastUnmatchedEdgeId = null;
+            }else{
+                while(!routing.isReady()){
+                    log.info("Graph not ready, waiting 1 second");
+                    Thread.sleep(1000);
+                }
+                //TODO: 'intermediate places' are in the api but the feature is broken: https://github.com/opentripplanner/OpenTripPlanner/issues/1784
+                List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>();
 
-                            StatsVO statsVO = new StatsVO();
-                            statsVOs.add(statsVO);
-                            statsVO.edgeId = streetSegment.id;
-                            statsVO.streetSegment = streetSegment;
+                List routePoints = (List)paramMap.get("routePoints");
+                for(int i = 0; i < routePoints.size() - 1; i++){
 
-                            if(compare) {
-                                Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
-                                SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, hours);
-                                SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, hours);
-                                SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[confidenceInterval], stats1, stats2);
-                                statsVO.summaryStatisticsComparison = statsComparison;
-                                statsVO.summaryStatisticsCompare1 = stats1;
-                                statsVO.summaryStatisticsCompare2 = stats2;
-                            }else{
-                                SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
-                                statsVO.summaryStatistics = summaryStatistics;
+                    RoutingRequest rr = new RoutingRequest();
+                    rr.useTraffic = hourBin == null ? false : true;  //if no hour specified, use the overall edge weights
+                    if(hourBin != null){
+                        DateTime time = new DateTime(DateTimeZone.UTC).dayOfMonth().withMinimumValue();
+                        time = time.withDayOfWeek(dayBin);
+                        time = time.withHourOfDay(hourBin);
+
+                        rr.dateTime = time.getMillis() / 1000;
+                    }
+                    rr.modes = new TraverseModeSet(TraverseMode.CAR);
+
+                    Map<String, Double> routePoint = (Map)routePoints.get(i);
+                    double lat = routePoint.get("lat");
+                    double lng = routePoint.get("lng");
+                    GenericLocation fromLocation = new GenericLocation(lat, lng);
+
+                    routePoint = (Map)routePoints.get(i + 1);
+                    lat = routePoint.get("lat");
+                    lng = routePoint.get("lng");
+                    GenericLocation toLocation = new GenericLocation(lat, lng);
+                    rr.from = fromLocation;
+                    rr.to = toLocation;
+                    List<Fun.Tuple3<Long, Long, Long>> partialRoute = routing.route(rr);
+                    edges.addAll(partialRoute);
+                }
+
+                Fun.Tuple3<Long, Long, Long> lastUnmatchedEdgeId = null;
+
+
+
+                for(Fun.Tuple3<Long, Long, Long> edgeId : edges) {
+                    List<SpatialDataItem> streetSegments = engine.getTrafficEngine().getStreetSegmentsBySegmentId(edgeId);
+                    if(streetSegments.size() == 0) {
+                        if(lastUnmatchedEdgeId != null && lastUnmatchedEdgeId.a.equals(edgeId.a)) {
+                            edgeId = new Fun.Tuple3<>(edgeId.a, lastUnmatchedEdgeId.b, edgeId.c);
+                        }
+                        streetSegments = engine.getTrafficEngine().getStreetSegmentsBySegmentId(edgeId);
+                    }
+                    if(streetSegments.size() != 0) {
+                        for(SpatialDataItem sdi : streetSegments) {
+                            StreetSegment streetSegment = (StreetSegment)sdi;
+                            if(streetSegment != null) {
+                                lastUnmatchedEdgeId = null;
+
+                                StatsVO statsVO = new StatsVO();
+                                statsVOs.add(statsVO);
+                                statsVO.edgeId = streetSegment.id;
+                                statsVO.streetSegment = streetSegment;
+
+                                if(compare) {
+                                    Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
+                                    SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, hours);
+                                    SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, hours);
+                                    SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[confidenceInterval], stats1, stats2);
+                                    statsVO.summaryStatisticsComparison = statsComparison;
+                                    statsVO.summaryStatisticsCompare1 = stats1;
+                                    statsVO.summaryStatisticsCompare2 = stats2;
+                                }else{
+                                    SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
+                                    statsVO.summaryStatistics = summaryStatistics;
+                                }
+                            }
+                            else {
+                                lastUnmatchedEdgeId = edgeId;
                             }
                         }
-                        else {
-                            lastUnmatchedEdgeId = edgeId;
-                        }
                     }
-                }
-                else {
-                    lastUnmatchedEdgeId = edgeId;
-                }
+                    else {
+                        lastUnmatchedEdgeId = edgeId;
+                    }
 
+                }
             }
 
             String dir = "opentraffic_export_" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").format(new Date());
@@ -379,7 +412,7 @@ public class TrafficEngineApp {
                             if(count < 1)
                                 continue;
 
-                            builder.append(statsVO.edgeId + "'],");
+                            builder.append(statsVO.edgeId + ",");
                             Date start = new Date(SegmentStatistics.getTimeForWeek(Collections.min(w1)));
                             Calendar cal = Calendar.getInstance();
                             cal.setTimeInMillis(SegmentStatistics.getTimeForWeek(Collections.max(w1)));

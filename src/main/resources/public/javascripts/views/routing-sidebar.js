@@ -380,9 +380,6 @@ Traffic.views = Traffic.views || {};
 
             data.hours.forEach(function (d) {
 
-                if(d.c > 0)
-                    console.log(d.c);
-
                 d.hourOfDay = (d.h % 24) + 1;
                 d.dayOfWeek = ((d.h - d.hourOfDay) / 24) + 1;
 

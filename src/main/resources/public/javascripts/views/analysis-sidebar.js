@@ -7,6 +7,10 @@ Traffic.views = Traffic.views || {};
 
         template: Handlebars.getTemplate('app', 'sidebar-analysis'),
 
+        regions: {
+            exportDataContainer: "#exportDataContainer"
+        },
+
         events : {
             'change #week1ToList' : 'changeToWeek',
             'change #week2ToList' : 'changeToWeek',
@@ -524,6 +528,28 @@ Traffic.views = Traffic.views || {};
                     url += '&w2=' + w2List.join(",");
             }
 
+            var params = {};
+            params.confidenceInterval = this.$("#confidenceInterval").val();
+            params.normalizeByTime = this.$("#normalizeByTime").val();
+            params.compare = $("#compare").prop( "checked" );
+            params.routePoints = this.routePoints;
+
+            if(hoursStr)
+                params.h = hoursStr
+
+            if(w1List && w1List.length > 0)
+                params.w1 = w1List.join(",");
+
+            if(this.$("#compare").prop( "checked" )) {
+                if (w2List && w2List.length > 0)
+                    params.w2 = w2List.join(",");
+            }
+
+            params.bounds = A.app.map.getBounds();
+            params.network = true;
+
+            A.app.sidebar.params = params;
+
             A.app.segmentOverlay = L.tileLayer(url).addTo(A.app.map).bringToFront();
         },
 
@@ -586,6 +612,7 @@ Traffic.views = Traffic.views || {};
 
         onRender : function () {
             this.$("#journeyInfo").hide();
+            this.exportDataContainer.show(new views.ExportDataButton());
         }
     });
 })(Traffic, Traffic.views, Traffic.translations, crossfilter, dc);

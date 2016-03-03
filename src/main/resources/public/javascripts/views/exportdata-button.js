@@ -13,7 +13,6 @@ Traffic.views = Traffic.views || {};
 
     clickExportData: function() {
         var params = A.app.sidebar.params;
-
         $.ajax({
             type: "POST",
             url: "/csv",
