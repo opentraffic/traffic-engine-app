@@ -280,6 +280,9 @@ Traffic.views = Traffic.views || {};
             var w1List = A.app.sidebar.getWeek1List();
             var w2List = A.app.sidebar.getWeek2List();
 
+            var uncorrectedDay = day;
+            var uncorrectedHour = hour;
+
             if(hour && day){
                 var numHour = parseInt(hour); //convert to number so can be used in following code
                 var numDay = parseInt(day);
@@ -415,8 +418,8 @@ Traffic.views = Traffic.views || {};
                         $('#routeSelections').hide();
                         $('#byHourRouteButtons').show();
                         $('#selectedDateAndTime').show();
-                        $("#selectedDate").text(dayLabel[day]);
-                        $("#selectedTime").text((hour < 10 ? 0 : '') + hour + ':00');
+                        $("#selectedDate").text(dayLabel[uncorrectedDay]);
+                        $("#selectedTime").text((uncorrectedHour < 10 ? 0 : '') + uncorrectedHour + ':00');
                     }
                     params.bounds = A.app.map.getBounds();
                     if(A.app.sidebar.hourExtent && ( A.app.sidebar.hourExtent[0] >= 1.0 ||  A.app.sidebar.hourExtent[1] >= 1.0)) {
