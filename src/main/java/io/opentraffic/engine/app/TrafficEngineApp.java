@@ -125,6 +125,16 @@ public class TrafficEngineApp {
 
         post("/csv", (request, response) -> {
 
+            Map<String, String> cookies = request.cookies();
+            String username = cookies.get("login_username");
+            String cookie = cookies.get("login_token");
+            boolean isAdmin = false;
+            if(cookie != null){
+                User user = HibernateUtil.login(username, null, cookie);
+                if(user.getRole().equalsIgnoreCase("super admin") || user.getRole().equalsIgnoreCase("super admin"))
+                    isAdmin = true;
+            }
+
             class StatsVO {
                 public Long edgeId;
                 public SummaryStatistics summaryStatistics;
@@ -322,7 +332,11 @@ public class TrafficEngineApp {
 
             if(compare){
                 Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
-                builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed (Baseline),Number of Observations (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed (Comparison),Number of Observations (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
+                if(isAdmin){
+                    builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed (Baseline),Number of Observations (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed (Comparison),Number of Observations (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
+                }else{
+                    builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
+                }
                 for(StatsVO statsVO : statsVOs){
                     if(statsVO.summaryStatisticsComparison != null){
                         for(int i = 0; i < SegmentStatistics.HOURS_IN_WEEK; i++){
@@ -369,7 +383,8 @@ public class TrafficEngineApp {
                             builder.append(marginOfError + ","); // Margin of Error: tCrit * (std dev / √n)
                             builder.append(normalizeByTime + ","); //normalize by time
                             builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + ","); //Average Speed (Baseline),
-                            builder.append(statsVO.summaryStatisticsCompare1.hourCount.get(i) + ",");// Number of Observations (Baseline)
+                            if(isAdmin)
+                                builder.append(statsVO.summaryStatisticsCompare1.hourCount.get(i) + ",");// Number of Observations (Baseline)
                             builder.append(statsVO.summaryStatisticsCompare1.getStdDev(i) + ","); //,Standard Deviation (Baseline),
                             stdDev = statsVO.summaryStatisticsCompare1.getStdDev(i);
                             double stdError = Math.sqrt(((stdDev * stdDev) / statsVO.summaryStatisticsCompare1.hourCount.get(i)) + ((stdDev * stdDev) / statsVO.summaryStatisticsCompare2.hourCount.get(i) ));
@@ -384,7 +399,8 @@ public class TrafficEngineApp {
                             builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + (1.64 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 90% Upper Bound (Baseline)
                             builder.append(statsVO.summaryStatisticsCompare1.getMean(i) - (1.64 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 90% Lower Bound (Baseline)
 
-                            builder.append(statsVO.summaryStatisticsCompare2.getStdDev(i) + ","); // Number of Observations (Comparison),
+                            if(isAdmin)
+                                builder.append(statsVO.summaryStatisticsCompare2.getStdDev(i) + ","); // Number of Observations (Comparison),
                             builder.append(statsVO.summaryStatisticsCompare2.getStdDev(i) + ",");// Standard Deviation (Comparison),
                             stdDev = statsVO.summaryStatisticsCompare2.getStdDev(i);
                             stdError = Math.sqrt(((stdDev * stdDev) / statsVO.summaryStatisticsCompare2.hourCount.get(i)) + ((stdDev * stdDev) / statsVO.summaryStatisticsCompare1.hourCount.get(i) ));
@@ -403,7 +419,11 @@ public class TrafficEngineApp {
                     }
                 }
             }else{
-                builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed,Number of Observations,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
+                if(isAdmin){
+                    builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed,Number of Observations,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
+                }else{
+                    builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
+                }
                 for(StatsVO statsVO : statsVOs){
                     if(statsVO.summaryStatistics != null){
                         for(int i = 0; i < SegmentStatistics.HOURS_IN_WEEK; i++){
@@ -435,7 +455,8 @@ public class TrafficEngineApp {
                             Double mean = statsVO.summaryStatistics.getMean(i);
                             Double stdDev = statsVO.summaryStatistics.getStdDev(i);
                             builder.append(mean + ",");
-                            builder.append(count + ",");
+                            if(isAdmin)
+                                builder.append(count + ",");
                             builder.append(stdDev + ",");
                             builder.append(stdDev / Math.sqrt(count));
                             builder.append(",");
