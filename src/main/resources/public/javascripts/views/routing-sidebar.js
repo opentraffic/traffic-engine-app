@@ -140,6 +140,8 @@ Traffic.views = Traffic.views || {};
             $('#routeButtons').hide();
             $('#routeCompareNotes').hide();
             $('#analyzeByTimeButtons').hide();
+            $('#returnToOverall').hide();
+            $('#analyzeByTime').show();
             $('#selectedDateAndTime').hide();
             A.app.sidebarTabs.resetRoute();
 
@@ -153,7 +155,6 @@ Traffic.views = Traffic.views || {};
             this.hourlyChart.brushOn(false);
             dc.redrawAll();
             window.history.pushState('', '', '?');
-            this.returnToOverall();
         },
 
         getRoute : function() {
