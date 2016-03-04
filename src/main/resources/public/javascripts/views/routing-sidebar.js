@@ -153,6 +153,7 @@ Traffic.views = Traffic.views || {};
             this.hourlyChart.brushOn(false);
             dc.redrawAll();
             window.history.pushState('', '', '?');
+            this.returnToOverall();
         },
 
         getRoute : function() {

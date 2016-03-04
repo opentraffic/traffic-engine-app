@@ -180,5 +180,10 @@
           <version>1.9</version>
           <type>jar</type>
       </dependency>
+      <dependency>
+          <groupId>com.carrotsearch</groupId>
+          <artifactId>hppc</artifactId>
+          <version>0.7.1</version>
+      </dependency>
   </dependencies>
 </project>
