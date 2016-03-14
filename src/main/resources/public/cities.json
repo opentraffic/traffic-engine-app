@@ -1,0 +1,26 @@
+[
+  {
+    "country": "Philippines",
+    "city": "Cebu",
+    "lat": 10.3036741,
+    "lng": 123.8982952
+  },
+  {
+    "country": "Philippines",
+    "city": "Davao City",
+    "lat": 7.199001,
+    "lng": 125.454941
+  },
+  {
+    "country": "Philippines",
+    "city": "Iloilo City",
+    "lat": 10.720321,
+    "lng": 122.562019
+  },
+  {
+    "country": "Philippines",
+    "city": "Manila",
+    "lat": 14.599512,
+    "lng": 120.984222
+  }
+]

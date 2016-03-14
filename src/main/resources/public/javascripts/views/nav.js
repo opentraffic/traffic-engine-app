@@ -15,16 +15,17 @@ Traffic.views = Traffic.views || {};
       var _this = this;
       _this.cities = [];
 
-      $.getJSON('/cityNames', function(data) {
+      //$.getJSON('/cityNames', function(data) {
+      $.getJSON('/cities.json', function(data) {
         _this.cities = data;
       }).always(function() {
         _this.initLocationTypeahead();
       });
     },
 
-    zoomToLocation : function(lat, lon) {
-      if(lat && lon) {
-        A.app.map.setView([lat,lon], 13);
+    zoomToLocation : function(lat, lng) {
+      if(lat && lng) {
+        A.app.map.setView([lat,lng], 13);
       }
     },
 
@@ -50,7 +51,7 @@ Traffic.views = Traffic.views || {};
       });
 
       this.$('#locationSearch').bind('typeahead:select', function(obj, datum, name) { 
-        _this.zoomToLocation(datum.lat, datum.lon);
+        _this.zoomToLocation(datum.lat, datum.lng);
         localStorage.setItem('traffic-engine-city', datum.city);
       });
 
@@ -62,7 +63,7 @@ Traffic.views = Traffic.views || {};
         })
 
         if(cityObj) {
-          _this.zoomToLocation(cityObj.lat, cityObj.lon);
+          _this.zoomToLocation(cityObj.lat, cityObj.lng);
         }
       }
     },
