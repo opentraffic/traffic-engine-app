@@ -280,7 +280,7 @@ Traffic.views = Traffic.views || {};
             var w1List = A.app.sidebar.getWeek1List();
             var w2List = A.app.sidebar.getWeek2List();
 
-            var uncorrectedDay = day;
+            /*var uncorrectedDay = day;
             var uncorrectedHour = hour;
 
             if(hour && day){
@@ -299,7 +299,7 @@ Traffic.views = Traffic.views || {};
 
                 hour = numHour.toString();
                 day = numDay.toString();
-            }
+            }*/
 
 
 
