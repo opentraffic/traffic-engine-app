@@ -300,6 +300,7 @@ public class TrafficEngineApp {
             }
 
             String dir = "opentraffic_export_" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").format(new Date());
+            dir = dir.replace(":", "-");
             new File(dir).mkdir();
             List<StreetSegment> segments = new ArrayList<>();
             statsVOs.forEach(v -> segments.add(v.streetSegment));
