@@ -385,7 +385,8 @@ Traffic.views = Traffic.views || {};
                 d.hourOfDay = (d.h % 24) + 1;
                 d.dayOfWeek = ((d.h - d.hourOfDay) / 24) + 1;
 
-                var utcAdjustment = 8;
+                //var utcAdjustment = 8;
+                var utcAdjustment = 0;
                 var fixDay = false;
                 if((d.hourOfDay + utcAdjustment) % 24 > 0)
                     fixDay = true;
