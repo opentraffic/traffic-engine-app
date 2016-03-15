@@ -385,7 +385,7 @@ Traffic.views = Traffic.views || {};
                 d.hourOfDay = (d.h % 24) + 1;
                 d.dayOfWeek = ((d.h - d.hourOfDay) / 24) + 1;
 
-                //var utcAdjustment = 8;
+                /*var utcAdjustment = 8;
                 var utcAdjustment = 0;
                 var fixDay = false;
                 if((d.hourOfDay + utcAdjustment) % 24 > 0)
@@ -395,7 +395,7 @@ Traffic.views = Traffic.views || {};
                     d.dayOfWeek = d.dayOfWeek + 1;
                     if(d.dayOfWeek > 7)
                         d.dayOfWeek = d.dayOfWeek % 7;
-                }
+                }*/
                 //d.s = d.s * 3.6; // convert from m/s km/h
             });
 
