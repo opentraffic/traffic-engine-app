@@ -283,10 +283,12 @@ Traffic.views = Traffic.views || {};
             var uncorrectedDay = day;
             var uncorrectedHour = hour;
 
-            /*if(hour && day){
+            // TODO: convert local to UTC
+            var utcAdjustment = A.app.instance.utcTimezoneOffset || 0;
+            if(hour && day && utcAdjustment){
+                /*
                 var numHour = parseInt(hour); //convert to number so can be used in following code
                 var numDay = parseInt(day);
-                var utcAdjustment = 8;
                 var fixDay = false;
                 if((numHour + utcAdjustment) > 24)
                     fixDay = true;
@@ -298,10 +300,8 @@ Traffic.views = Traffic.views || {};
                 }
 
                 hour = numHour.toString();
-                day = numDay.toString();
-            }*/
-
-
+                day = numDay.toString(); */
+            }
 
             var params = {};
             params.hour = hour;

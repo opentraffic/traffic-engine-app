@@ -12,6 +12,21 @@ var Traffic = Traffic || {};
 		sidebar: "#side-panel"
 	});
 
+  function updateTimezoneOffset(latlng) {
+    var latlngStr = latlng.lat + "," + latlng.lng;
+    var timestamp = parseInt(Date.now() / 1000);
+    $.ajax({
+      url: "https://maps.googleapis.com/maps/api/timezone/json?location=" + latlngStr + "&timestamp=" + timestamp,
+    }).done(function(data) {
+      if(data.rawOffset || data.rawOffset == 0) {
+        A.app.instance.utcTimezoneOffset = parseInt(data.rawOffset / 3600);
+      }
+    }).fail(function() {
+      console.log('Failed to request time zone offset');
+      console.log(latlng);
+    });
+  }
+
 	A.app.instance.addInitializer(function(options){
 		this.user = new models.UserModel();
         this.route = new models.RouteModel();
@@ -29,6 +44,16 @@ var Traffic = Traffic || {};
 		});
 		
 		A.app.map = mapWrapperObject.LMmap;
+
+    A.app.map.on('load', function(e) {
+      console.log('map loaded');
+      updateTimezoneOffset(e.target.getCenter());
+    });
+
+    A.app.map.on('moveend', function(e) {
+      console.log('map moved');
+      updateTimezoneOffset(e.target.getCenter());
+    });
 
 		// Click Data in sidebar
 		$('#routing').click();
