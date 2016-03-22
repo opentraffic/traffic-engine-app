@@ -5,6 +5,7 @@
 <hibernate-configuration>
     <session-factory>
         <property name="connection.driver_class">org.postgresql.Driver</property>
+
         <property name="connection.url">jdbc:postgresql://opentraffic-db.cvixngn88xdi.us-east-1.rds.amazonaws.com/opentraffic</property>
         <property name="connection.username">opentraffic</property>
         <property name="connection.password">password</property>
