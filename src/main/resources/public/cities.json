@@ -1,26 +1,80 @@
-[
-  {
-    "country": "Philippines",
-    "city": "Cebu",
-    "lat": 10.3036741,
-    "lng": 123.8982952
-  },
-  {
-    "country": "Philippines",
-    "city": "Davao City",
-    "lat": 7.199001,
-    "lng": 125.454941
-  },
-  {
-    "country": "Philippines",
-    "city": "Iloilo City",
-    "lat": 10.720321,
-    "lng": 122.562019
-  },
-  {
-    "country": "Philippines",
-    "city": "Manila",
-    "lat": 14.599512,
-    "lng": 120.984222
-  }
-]
+{
+  "Indonesia": [
+    {
+      "country": "Indonesia",
+      "city": "Jakarta",
+      "lat": -6.271194,
+      "lng": 106.894547
+    }
+  ],
+  "Malaysia": [
+    {
+      "country": "Malaysia",
+      "city": "Butterworth",
+      "lat": 5.4167,
+      "lng": 100.4000
+    },
+    {
+      "country": "Malaysia",
+      "city": "Kuala Lumpur",
+      "lat": 3.133,
+      "lng": 101.6833
+    }
+  ],
+  "Philippines": [
+    {
+      "country": "Philippines",
+      "city": "Cebu",
+      "lat": 10.3036741,
+      "lng": 123.8982952
+    },
+    {
+      "country": "Philippines",
+      "city": "Davao City",
+      "lat": 7.199001,
+      "lng": 125.454941
+    },
+    {
+      "country": "Philippines",
+      "city": "Iloilo City",
+      "lat": 10.720321,
+      "lng": 122.562019
+    },
+    {
+      "country": "Philippines",
+      "city": "Manila",
+      "lat": 14.599512,
+      "lng": 120.984222
+    }
+  ],
+  "Singapore": [
+    {
+      "country": "Singapore",
+      "city": "Singapore",
+      "lat": 1.3000,
+      "lng": 103.8000
+    }
+  ],
+  "Thailand": [
+    {
+      "country": "Thailand",
+      "city": "Bangkok",
+      "lat": 13.7563,
+      "lng": 100.5018
+    }
+  ],
+  "Vietnam": [
+    {
+      "country": "Vietnam",
+      "city": "Hanoi",
+      "lat": 21.0285,
+      "lng": 105.8542
+    },
+    {
+      "country": "Vietnam",
+      "city": "Ho Chi Minh City",
+      "lat": 10.7500,
+      "lng": 106.6667
+    }
+  ]
+}

@@ -286,7 +286,7 @@ Traffic.views = Traffic.views || {};
             // TODO: convert local to UTC
             var utcAdjustment = A.app.instance.utcTimezoneOffset || 0;
             if(hour && day && utcAdjustment){
-                /*
+
                 var numHour = parseInt(hour); //convert to number so can be used in following code
                 var numDay = parseInt(day);
                 var fixDay = false;
@@ -300,7 +300,7 @@ Traffic.views = Traffic.views || {};
                 }
 
                 hour = numHour.toString();
-                day = numDay.toString(); */
+                day = numDay.toString();
             }
 
             var params = {};

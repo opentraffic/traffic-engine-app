@@ -114,5 +114,6 @@
   "routename_title":        "Name",
   "routedate_title":        "Date",
   "delete_route":           "Delete",
-  "export_data":           "Export Data"
+  "export_data":           "Export Data",
+  "select_city":           "Select City"
 }

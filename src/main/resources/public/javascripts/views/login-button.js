@@ -17,11 +17,23 @@ Traffic.views = Traffic.views || {};
         content: new views.Login({model: A.app.instance.Login.userModel}), 
         title: translator.translate("login_dialog_title"),
         showFooter: false,
-        escape: false
+        escape: false,
+        okCloses: false,
+        allowCancel: false,
       });
-      A.app.instance.loginModal.on('shown', function() {
-        $('#loginForm input[name=username]').focus();
-      });
+        A.app.instance.loginModal.on('shown', function() {
+            $('#loginForm input[name=username]').focus();
+            for (var property in A.app.instance.cities) {
+                var cities = A.app.instance.cities[property];
+                for (var index in cities) {
+                    var city = cities[index];
+                    var text = city.country + ": " + city.city;
+                    var option = $('<option/>');
+                    option.attr({ 'value': text }).text(text);
+                    $('#login-city-select').append(option);
+                }
+            }
+        });
       A.app.instance.loginModal.on('cancel', function() {
         this.options.content.remove(); //remove previous view
         A.app.instance.loginModal = null;

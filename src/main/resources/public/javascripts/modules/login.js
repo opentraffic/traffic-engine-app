@@ -8,9 +8,8 @@
       var userObj = JSON.parse(data);
       var userModel = module.userModel;
       for(var attr in userObj) {
-        userModel.set(attr, userObj[attr]);  
+        userModel.set(attr, userObj[attr]);
       }
-      
       userModel.set('state', userModel.authSuccessState);
     };
 
@@ -43,6 +42,8 @@
                   Cookies.remove('login_token');
                   app.Login.userModel.reset();
               });
+      }else{
+          $('#login').click();
       }
     });
 
@@ -62,15 +63,17 @@
       $('#saveRouteContainer').removeClass('col-md-0').addClass('col-md-6');
       $('#bookmarkRouteContainer').removeClass('col-md-12').addClass('col-md-6');
       var user = app.user;
+      var hostname = window.location.hostname.substring(window.location.hostname.lastIndexOf(".", window.location.hostname.lastIndexOf(".") - 1) + 1);
       if(user.get('remember_me')) {
-          Cookies.set('login_username', user.get('username'), { expires: 30 });
-          Cookies.set('login_token', user.get('cookie'), { expires: 30 });
-      }else{
-          //session cookies
-          document.cookie = "login_username=" + user.get('username') + "; path=/";
-          document.cookie = "login_token="  + user.get('cookie') + "; path=/"
+          Cookies.set('login_username', user.get('username'), { domain: hostname, expires: 30 });
+          Cookies.set('login_token', user.get('cookie'), { domain: hostname, expires: 30 });
+          Cookies.set('city', user.get('city'), { domain: hostname, expires: 30 });
+      }else if (!Cookies.get('login_token')){
+          Cookies.set('login_username', user.get('username'), { domain: hostname});
+          Cookies.set('login_token', user.get('cookie'), { domain: hostname});
+          Cookies.set('city', user.get('city'), { domain: hostname});
       }
-      
+
       setTimeout(function(){
         if(app.loginModal) {
           app.loginModal.close();
@@ -78,16 +81,64 @@
         user.clearPasswords();
         A.app.nav.userMenuContainer.show(new views.UserMenu());
       }, 1000);
+
+        if(window.location.href.indexOf('city=') > -1){
+            var city = window.location.href.substr(window.location.href.indexOf('city=') + 5);
+            for (var property in A.app.instance.cities) {
+                var cities = A.app.instance.cities[property];
+                for (var index in cities) {
+                    var cityObj = cities[index];
+                    if(cityObj.city.toLowerCase() == city){
+                        $('#locationSearch').val(cityObj.city);
+                        A.app.map.setView([cityObj.lat, cityObj.lng], 13);
+                        window.history.pushState('', '', '?');
+                    }
+                }
+            }
+        }else{
+
+            var countryAndCity = Cookies.get('city');
+            var country = countryAndCity.split(":")[0].trim().toLowerCase();
+            var city = countryAndCity.split(":")[1].trim().toLowerCase();
+
+            if(window.location.href.toLowerCase().indexOf(country) < 0){
+                var href = window.location.href.toLowerCase();
+                var start = window.location.href.indexOf('//');
+                var end = window.location.href.indexOf('.');
+                var currentCountry = href.substring(start + 2, end);
+                href = href.replace(currentCountry, country)
+                href = href.substr(0, href.lastIndexOf("/") + 1)
+                href += "?city=" + city;
+                window.location.href = href;
+            }else{
+                for (var property in A.app.instance.cities) {
+                    if(property.toLowerCase() == country.toLowerCase()){
+                        var cities = A.app.instance.cities[property];
+                        for (var index in cities) {
+                            var cityObj = cities[index];
+                            if(cityObj.city.toLowerCase() == city){
+                                $('#locationSearch').val(cityObj.city);
+                                A.app.map.setView([cityObj.lat, cityObj.lng], 13);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     });
 
     app.vent.on('logout:success', function() {
       $('#saveroute').hide();
       $('#saveRouteContainer').removeClass('col-md-6').addClass('col-md-0');
       $('#bookmarkRouteContainer').removeClass('col-md-6').addClass('col-md-12');
-      Cookies.remove('login_username');
-      Cookies.remove('login_token');
+      var hostname = window.location.hostname.substring(window.location.hostname.lastIndexOf(".", window.location.hostname.lastIndexOf(".") - 1) + 1);
+      Cookies.remove('login_username', { domain: hostname});
+      Cookies.remove('login_token', { domain: hostname});
+      Cookies.remove('city', { domain: hostname});
       app.Login.userModel.reset();
       A.app.nav.userMenuContainer.show(new views.LoginButton());
+      $('#login').click();
     });
+
   });
 })(Traffic, Traffic.views, Traffic.models, Traffic.translations);

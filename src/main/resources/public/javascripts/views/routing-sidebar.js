@@ -388,7 +388,7 @@ Traffic.views = Traffic.views || {};
 
                 // TODO: convert UTC to local
                 if (utcAdjustment) {
-                    /*
+
                     var fixDay = false;
                     if((d.hourOfDay + utcAdjustment) % 24 > 0)
                         fixDay = true;
@@ -397,7 +397,7 @@ Traffic.views = Traffic.views || {};
                         d.dayOfWeek = d.dayOfWeek + 1;
                         if(d.dayOfWeek > 7)
                             d.dayOfWeek = d.dayOfWeek % 7;
-                    }*/
+                    }
                 }
                 //d.s = d.s * 3.6; // convert from m/s km/h
             });

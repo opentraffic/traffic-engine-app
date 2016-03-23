@@ -142,11 +142,11 @@ public class HibernateUtil {
         Session session = sessionFactory.openSession();
         Query q;
         if(password != null){
-            q = session.createQuery("from User u where u.username = :username and u.passwordHash = :passwordHash");
+            q = session.createQuery("from User u left join fetch u.savedRoutes where u.username = :username and u.passwordHash = :passwordHash");
             q.setParameter("username", username);
             q.setParameter("passwordHash", password);
         }else{
-            q = session.createQuery("from User u where u.username = :username and u.cookie = :cookie");
+            q = session.createQuery("from User u left join fetch u.savedRoutes where u.username = :username and u.cookie = :cookie");
             q.setParameter("username", username);
             q.setParameter("cookie", cookie);
         }

@@ -13,14 +13,17 @@ Traffic.views = Traffic.views || {};
 
     initialize : function() {
       var _this = this;
-      _this.cities = [];
-
-      //$.getJSON('/cityNames', function(data) {
-      $.getJSON('/cities.json', function(data) {
-        _this.cities = data;
-      }).always(function() {
+      _this.cities = A.app.instance.cities;
+      if(!this.cities){
+        $.getJSON('/cities.json', function(data) {
+          _this.cities = data;
+        }).always(function() {
+          _this.initLocationTypeahead();
+          A.app.instance.cities = _this.cities;
+        });
+      }else{
         _this.initLocationTypeahead();
-      });
+      }
     },
 
     zoomToLocation : function(lat, lng) {
