@@ -88,7 +88,7 @@
                 var cities = A.app.instance.cities[property];
                 for (var index in cities) {
                     var cityObj = cities[index];
-                    if(cityObj.city.toLowerCase() == city){
+                    if(cityObj.city.toLowerCase() == city.toLowerCase()){
                         $('#locationSearch').val(cityObj.city);
                         A.app.map.setView([cityObj.lat, cityObj.lng], 13);
                         window.history.pushState('', '', '?');

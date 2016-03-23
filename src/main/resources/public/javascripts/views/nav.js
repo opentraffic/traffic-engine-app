@@ -60,13 +60,21 @@ Traffic.views = Traffic.views || {};
         }
       });
 
-      this.$('#locationSearch').bind('typeahead:select', function(obj, datum, name) { 
-        _this.zoomToLocation(datum.lat, datum.lng);
+      this.$('#locationSearch').bind('typeahead:select', function(obj, datum, name) {
         var hostname = window.location.hostname.substring(window.location.hostname.lastIndexOf(".", window.location.hostname.lastIndexOf(".") - 1) + 1);
-        var selectedCity = Cookies.get('city').split(":")[1].trim();
-        var countryAndCity = Cookies.get('city');
-        countryAndCity = countryAndCity.replace(selectedCity, datum.city)
-        Cookies.set('city', countryAndCity, { domain: hostname, expires: 30 });
+        Cookies.set('city', datum.country + ": " + datum.city, { domain: hostname, expires: 30 });
+        if(window.location.href.toLowerCase().indexOf(datum.country.toLowerCase()) < 0){
+          var href = window.location.href.toLowerCase();
+          var start = window.location.href.indexOf('//');
+          var end = window.location.href.indexOf('.');
+          var currentCountry = href.substring(start + 2, end);
+          href = href.replace(currentCountry, datum.country)
+          href = href.substr(0, href.lastIndexOf("/") + 1)
+          href += "?city=" + datum.city;
+          window.location.href = href;
+        }else{
+          _this.zoomToLocation(datum.lat, datum.lng);
+        }
       });
 
       if(Cookies.get('city')){
