@@ -37,6 +37,9 @@ Traffic.views = Traffic.views || {};
       this.model.set('json', A.app.sidebar.params);
       this.model.set('date', new Date());
 
+      var countryAndCity = Cookies.get('city');
+      var country = countryAndCity.split(":")[0].trim().toLowerCase();
+      this.model.set('country', country);
       // Fire off the global event for the controller so that it handles the server communication.
       A.app.instance.vent.trigger('saveroute:submit', this.model)
     },

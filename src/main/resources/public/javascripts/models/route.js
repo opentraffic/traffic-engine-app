@@ -8,7 +8,8 @@ Traffic.models.RouteModel = Backbone.Model.extend({
     id: '',
     name: '',
     date: '',
-    json: ''
+    json: '',
+    country: ''
   }
 
 });

@@ -13,7 +13,8 @@ Traffic.views = Traffic.views || {};
 
     clickBookmarkRoute: function() {
         var params = A.app.sidebar.params;
-
+        var selectedCountry = Cookies.get('city').split(":")[0].trim().toLowerCase();
+        params.country = selectedCountry;
         $.ajax({
             type: "POST",
             url: "/route/save",

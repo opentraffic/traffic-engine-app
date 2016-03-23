@@ -23,6 +23,7 @@ public class SavedRoute {
     @Type(type="text")
     private String json;
     private Date creationDate;
+    private String country;
 
     public int getId() {
         return id;
@@ -63,5 +64,13 @@ public class SavedRoute {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }

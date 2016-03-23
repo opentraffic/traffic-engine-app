@@ -41,6 +41,7 @@
                   Cookies.remove('login_username');
                   Cookies.remove('login_token');
                   app.Login.userModel.reset();
+                  $('#login').click();
               });
       }else{
           $('#login').click();

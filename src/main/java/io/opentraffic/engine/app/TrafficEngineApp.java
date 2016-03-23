@@ -506,10 +506,8 @@ public class TrafficEngineApp {
             String routeJson = request.body();
             Map<String, Object> paramMap = mapper.readValue(routeJson, new TypeReference<Map<String, Object>>() {});
             SavedRoute savedRoute = new SavedRoute();
-            if(paramMap.keySet().contains("name")){
-                String routeName = (String)paramMap.get("name");
-                savedRoute.setName(routeName);
-            }
+            savedRoute.setName((String)paramMap.get("name"));
+            savedRoute.setCountry((String)paramMap.get("country"));
             savedRoute.setCreationDate(new Date());
             savedRoute.setJson(routeJson);
             if(user != null)
@@ -533,13 +531,14 @@ public class TrafficEngineApp {
             return response;
         });
 
-        get("/routelist", (request, response) -> {
+        get("/routesbycountry/:country", (request, response) -> {
+            String country = request.params(":country");
             Map<String, String> cookies = request.cookies();
             String username = cookies.get("login_username");
             String cookie = cookies.get("login_token");
             if (cookie != null) {
                 User user = HibernateUtil.login(username, null, cookie);
-                List<SavedRoute> routes = HibernateUtil.getRoutesForUser(user);
+                List<SavedRoute> routes = HibernateUtil.getRoutesForUser(user, country);
                 response.status(200);
                 return mapper.writeValueAsString(routes);
             }

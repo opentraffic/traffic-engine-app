@@ -131,10 +131,11 @@ public class HibernateUtil {
         }
     }
 
-    public static List<SavedRoute> getRoutesForUser(User user){
+    public static List<SavedRoute> getRoutesForUser(User user, String country){
         Session session = sessionFactory.openSession();
-        Query q = session.createQuery("from SavedRoute sr where sr.name is not null and sr.user = :user");
+        Query q = session.createQuery("from SavedRoute sr where sr.name is not null and sr.user = :user and sr.country = :country");
         q.setParameter("user", user);
+        q.setParameter("country", country);
         return q.list();
     }
 

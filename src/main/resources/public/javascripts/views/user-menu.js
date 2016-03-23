@@ -203,7 +203,9 @@ Traffic.views = Traffic.views || {};
 
             var _this = this;
 
-            $.getJSON('/routelist', function(data) {
+            var selectedCountry = Cookies.get('city').split(":")[0].trim().toLowerCase();
+
+            $.getJSON('/routesbycountry/' + selectedCountry, function(data) {
                 A.app.instance.routesCollection = new A.collections.Routes(data);
                 A.app.instance.routesCollection.setSorting("name", {mode: 'client'});
                 A.app.instance.routesCollection.fullCollection.sort();

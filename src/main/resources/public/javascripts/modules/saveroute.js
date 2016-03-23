@@ -5,6 +5,8 @@
     });
 
     app.vent.on('saveroute:submit', function(routeModel) {
+        var selectedCountry = Cookies.get('city').split(":")[0].trim().toLowerCase();
+        routeModel.country = selectedCountry;
         $.ajax({
             type: "POST",
             url: "/route/save",
