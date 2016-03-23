@@ -134,7 +134,6 @@
       var hostname = window.location.hostname.substring(window.location.hostname.lastIndexOf(".", window.location.hostname.lastIndexOf(".") - 1) + 1);
       Cookies.remove('login_username', { domain: hostname});
       Cookies.remove('login_token', { domain: hostname});
-      Cookies.remove('city', { domain: hostname});
       app.Login.userModel.reset();
       A.app.nav.userMenuContainer.show(new views.LoginButton());
       $('#login').click();

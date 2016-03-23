@@ -33,6 +33,9 @@ Traffic.views = Traffic.views || {};
                     $('#login-city-select').append(option);
                 }
             }
+            if(Cookies.get('city')){
+                $('#login-city-select').val(Cookies.get('city'));
+            }
         });
       A.app.instance.loginModal.on('cancel', function() {
         this.options.content.remove(); //remove previous view

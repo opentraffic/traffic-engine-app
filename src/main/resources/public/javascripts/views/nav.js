@@ -13,13 +13,11 @@ Traffic.views = Traffic.views || {};
 
     initialize : function() {
       var _this = this;
-      _this.cities = A.app.instance.cities;
-      if(!this.cities){
+      if(!A.app.instance.cities){
         $.getJSON('/cities.json', function(data) {
-          _this.cities = data;
+          A.app.instance.cities = data;
         }).always(function() {
           _this.initLocationTypeahead();
-          A.app.instance.cities = _this.cities;
         });
       }else{
         _this.initLocationTypeahead();
@@ -34,6 +32,15 @@ Traffic.views = Traffic.views || {};
 
     initLocationTypeahead: function() {
       var _this = this;
+
+      var href = window.location.href.toLowerCase();
+      var start = window.location.href.indexOf('//');
+      var end = window.location.href.indexOf('.');
+      var currentCountry = href.substring(start + 2, end);
+      _this.cities = [];
+      for (var property in A.app.instance.cities) {
+        _this.cities = _this.cities.concat(A.app.instance.cities[property]);
+      }
 
       var citiesEngine = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('city'),
@@ -55,18 +62,24 @@ Traffic.views = Traffic.views || {};
 
       this.$('#locationSearch').bind('typeahead:select', function(obj, datum, name) { 
         _this.zoomToLocation(datum.lat, datum.lng);
-        localStorage.setItem('traffic-engine-city', datum.city);
+        var hostname = window.location.hostname.substring(window.location.hostname.lastIndexOf(".", window.location.hostname.lastIndexOf(".") - 1) + 1);
+        var selectedCity = Cookies.get('city').split(":")[1].trim();
+        var countryAndCity = Cookies.get('city');
+        countryAndCity = countryAndCity.replace(selectedCity, datum.city)
+        Cookies.set('city', countryAndCity, { domain: hostname, expires: 30 });
       });
 
-      var selectedCity = localStorage.getItem('traffic-engine-city');
-      if(_this.cities && selectedCity) {
-        this.$('#locationSearch').val(selectedCity);
-        var cityObj = _.find(_this.cities, function(cityData) {
-          return cityData.city == selectedCity;
-        })
+      if(Cookies.get('city')){
+        var selectedCity = Cookies.get('city').split(":")[1].trim();
+        if(_this.cities && selectedCity) {
+          this.$('#locationSearch').val(selectedCity);
+          var cityObj = _.find(_this.cities, function(cityData) {
+            return cityData.city == selectedCity;
+          })
 
-        if(cityObj) {
-          _this.zoomToLocation(cityObj.lat, cityObj.lng);
+          if(cityObj) {
+            _this.zoomToLocation(cityObj.lat, cityObj.lng);
+          }
         }
       }
     },

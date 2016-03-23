@@ -40,6 +40,7 @@ Traffic.views = Traffic.views || {};
 
       this.model.set('username', this.$('input[name=username]').val()); 
       this.model.set('password', this.$('input[name=password]').val());
+      this.model.set('city', this.$('#login-city-select').val());
       A.app.instance.city =  this.$('#login-city-select').val();
 
       this.model.set('remember_me', this.$('input[name=remember_me]').prop('checked'));
@@ -67,6 +68,19 @@ Traffic.views = Traffic.views || {};
           // appropriate error message and focus the password field for their convenience.
           this.ui.authErrorMessage.show();
           this.ui.passwordField.focus();
+          for (var property in A.app.instance.cities) {
+            var cities = A.app.instance.cities[property];
+            for (var index in cities) {
+              var city = cities[index];
+              var text = city.country + ": " + city.city;
+              var option = $('<option/>');
+              option.attr({ 'value': text }).text(text);
+              $('#login-city-select').append(option);
+            }
+          }
+          if(Cookies.get('city')){
+            $('#login-city-select').val(Cookies.get('city'));
+          }
           break;
 
         case this.model.authUnknownState:
