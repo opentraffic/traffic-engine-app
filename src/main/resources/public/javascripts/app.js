@@ -55,10 +55,10 @@ var Traffic = Traffic || {};
       updateTimezoneOffset(e.target.getCenter());
     });
 
-		// Click Data in sidebar
-		$('#routing').click();
-
-	});
+	// Click Data in sidebar
+	$('#routing').click();
+    updateTimezoneOffset(A.app.map.getCenter());
+  });
 
 })(Traffic, jQuery, Traffic.translations, Traffic.views, Traffic.models, Traffic.MapWrapper);
 

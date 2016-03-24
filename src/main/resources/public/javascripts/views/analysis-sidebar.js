@@ -291,11 +291,32 @@ Traffic.views = Traffic.views || {};
         loadChartData : function(data) {
             var compareCheckbox = this.$('#compare');
 
+            var utcAdjustment = A.app.instance.utcTimezoneOffset || 0;
             data.hours.forEach(function (d) {
+
                 d.hourOfDay = (d.h % 24) + 1;
                 d.dayOfWeek = ((d.h - d.hourOfDay) / 24) + 1;
-                d.s = d.s * 3.6; // convert from m/s km/h
+
+                if (utcAdjustment) {
+
+                    var fixDay = false;
+                    if((d.hourOfDay + utcAdjustment) % 24 > 0)
+                        fixDay = true;
+                    d.hourOfDay = (d.hourOfDay + utcAdjustment) % 24;
+                    if(fixDay){
+                        d.dayOfWeek = d.dayOfWeek + 1;
+                        if(d.dayOfWeek > 7)
+                            d.dayOfWeek = d.dayOfWeek % 7;
+                    }
+                }
+                //d.s = d.s * 3.6; // convert from m/s km/h
             });
+
+            //data.hours.forEach(function (d) {
+            //    d.hourOfDay = (d.h % 24) + 1;
+            //    d.dayOfWeek = ((d.h - d.hourOfDay) / 24) + 1;
+            //    d.s = d.s * 3.6; // convert from m/s km/h
+            //});
 
             if(!this.chartData) {
                 this.chartData = C(data.hours);
