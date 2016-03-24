@@ -309,7 +309,7 @@ Traffic.views = Traffic.views || {};
                             d.dayOfWeek = d.dayOfWeek % 7;
                     }
                 }
-                //d.s = d.s * 3.6; // convert from m/s km/h
+                d.s = d.s * 3.6; // convert from m/s km/h
             });
 
             //data.hours.forEach(function (d) {
