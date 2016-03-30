@@ -300,7 +300,7 @@ Traffic.views = Traffic.views || {};
                 if (utcAdjustment) {
 
                     var fixDay = false;
-                    if((d.hourOfDay + utcAdjustment) % 24 > 0)
+                    if((d.hourOfDay + utcAdjustment) > 24)
                         fixDay = true;
                     d.hourOfDay = (d.hourOfDay + utcAdjustment) % 24;
                     if(fixDay){
