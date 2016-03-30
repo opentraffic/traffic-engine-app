@@ -384,9 +384,8 @@ Traffic.views = Traffic.views || {};
             data.hours.forEach(function (d) {
 
                 d.hourOfDay = (d.h % 24) + 1;
-                d.dayOfWeek = ((d.h - d.hourOfDay) / 24) + 1;
+                d.dayOfWeek = Math.round(((d.h - d.hourOfDay) / 24) + 1 );
 
-                // TODO: convert UTC to local
                 if (utcAdjustment) {
 
                     var fixDay = false;
