@@ -283,27 +283,25 @@ Traffic.views = Traffic.views || {};
             var uncorrectedDay = day;
             var uncorrectedHour = hour;
 
-            // TODO: convert local to UTC
             var utcAdjustment = A.app.instance.utcTimezoneOffset || 0;
-            data.hours.forEach(function (d) {
 
-                d.hourOfDay = (d.h % 24) + 1;
-                d.dayOfWeek = Math.round(((d.h - d.hourOfDay) / 24) + 1 );
+            if(hour && day && utcAdjustment){
 
-                if (utcAdjustment) {
-
-                    var fixDay = false;
-                    if((d.hourOfDay + utcAdjustment) > 24)
-                        fixDay = true;
-                    d.hourOfDay = (d.hourOfDay + utcAdjustment) % 24;
-                    if(fixDay){
-                        d.dayOfWeek = d.dayOfWeek + 1;
-                        if(d.dayOfWeek > 7)
-                            d.dayOfWeek = d.dayOfWeek % 7;
-                    }
+                var numHour = parseInt(hour); //convert to number so can be used in following code
+                var numDay = parseInt(day);
+                var fixDay = false;
+                if((numHour + utcAdjustment) > 24)
+                    fixDay = true;
+                numHour = (numHour + utcAdjustment) % 24;
+                if(fixDay){
+                    numDay = numDay + 1;
+                    if(numDay > 7)
+                        numDay = 1;
                 }
-                d.s = d.s * 3.6; // convert from m/s km/h
-            });
+
+                hour = numHour.toString();
+                day = numDay.toString();
+            }
 
             var params = {};
             params.hour = hour;
