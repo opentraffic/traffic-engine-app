@@ -305,6 +305,7 @@ Traffic.views = Traffic.views || {};
 
             var params = {};
             params.hour = hour;
+            params.utcAdjustment = utcAdjustment;
             params.day = day;
             params.confidenceInterval = this.$("#confidenceInterval").val();
             params.normalizeByTime = this.$("#normalizeByTime").val();
@@ -335,6 +336,7 @@ Traffic.views = Traffic.views || {};
                     data = JSON.parse(data);
                     var distance = 0;
                     var time = 0;
+                    var speedSum = 0;
 
                     var insufficientDataWarning = translator.translate('insufficient_data_warning');
                     var inferredDataNotification = translator.translate('inferred_data_notification');
@@ -342,8 +344,30 @@ Traffic.views = Traffic.views || {};
                     var hasInferredData = false;
                     var routeInfoTemplate = Handlebars.getTemplate('app', 'route-popup');
                     for(i in data.pathEdges) {
-                        var edge = data.pathEdges[i];
 
+                        var edge = data.pathEdges[i];
+                        if(isNaN(edge.speed) || isNaN(edge.length))
+                            continue;
+
+                        if(hoursStr)
+                            hoursArray = hoursStr.split(",");
+
+                        var edge = data.pathEdges[i];
+                        if(hoursArray && edge.speedMap){
+                            var segmentSpeedSum = 0;
+                            var hourCount = 0;
+                            for(hourKey in edge.speedMap) {
+                                if(hoursArray.indexOf(hourKey) > -1 && edge.speedMap[hourKey]){
+                                    var hourSpeedSum = edge.speedMap[hourKey]  / 3.6;
+                                    var hourCount = edge.countMap[hourKey];
+                                    segmentSpeedSum += hourSpeedSum / hourCount;
+                                    hourCount++;
+                                }
+                            }
+                            edge.speed = segmentSpeedSum / hourCount;
+                        }
+
+                        speedSum += (edge.speed * edge.length);
                         var polyLine = L.Polyline.fromEncoded(edge.geometry);
                         polyLine = L.polyline(polyLine.getLatLngs(), {opacity: 1.0, color: edge.color});
 
@@ -375,6 +399,7 @@ Traffic.views = Traffic.views || {};
                             distance += edge.length;
                             time += edge.length * (1 /edge.speed);
                         }
+
                     }
 
                     if(hasInferredData) {
@@ -394,10 +419,12 @@ Traffic.views = Traffic.views || {};
                     var minutes = time / 60;
 
                     var speed =  (distance / time);
+                    speed = speedSum / distance;
 
                     $('.travel-time-span').show();
                     A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
-                    A.app.sidebar.$("#avgSpeed").text(speed.toPrecision(2) + " KPH");
+                    //A.app.sidebar.$("#avgSpeed").text((speed * 3.6).toPrecision(2) +  " KPH");
+                    A.app.sidebar.$("#avgSpeed").text(data.averageSpeedForRouteInKph +  " KPH");
 
                     A.app.sidebar.loadChartData(data.weeklyStats);
 

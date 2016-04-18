@@ -60,7 +60,7 @@ public class WeeklyStatsObject {
 		}
 	}
 
-	private static class HourStats {
+	public static class HourStats {
 		public int h;
 		public double s;
 		public double c;

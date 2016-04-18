@@ -1,7 +1,11 @@
 package io.opentraffic.engine.app;
 
+import com.carrotsearch.hppc.IntCollection;
+import com.carrotsearch.hppc.cursors.IntCursor;
+import com.carrotsearch.hppc.cursors.ShortCursor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.std.IterableSerializer;
 import com.google.common.net.MediaType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -734,6 +738,8 @@ public class TrafficEngineApp {
 
 			Set<Integer> hours = new HashSet<>();
 
+            Integer utcAdjustment = (Integer)paramMap.get("utcAdjustment");
+
 			if(paramMap.containsKey("h") && !((String)paramMap.get("h")).trim().isEmpty()) {
 				String valueStr[] = ((String)paramMap.get("h")).trim().split(",");
 				List<String> values = new ArrayList(Arrays.asList(valueStr));
@@ -928,6 +934,131 @@ public class TrafficEngineApp {
             }else{
                 trafficPath.setWeeklyStats(summaryStatistics);
             }
+
+
+
+            Map<Integer, Double> hourCountMap = new HashMap<Integer, Double>();
+            Iterator<IntCursor> hourIter = summaryStatistics.hourCount.keys().iterator();
+            while(hourIter.hasNext()){
+                IntCursor hourCursor = hourIter.next();
+                int hour = hourCursor.value;
+                double count = summaryStatistics.hourCount.get(hour);
+                if(!hourCountMap.keySet().contains(hour))
+                    hourCountMap.put(hour, 0d);
+                hourCountMap.put(hour, hourCountMap.get(hour) + count);
+            }
+
+            Map<Integer, Double> hourSpeedMap = new HashMap<Integer, Double>();
+            hourIter = summaryStatistics.hourSum.keys().iterator();
+            while(hourIter.hasNext()){
+                IntCursor hourCursor = hourIter.next();
+                int hour = hourCursor.value;
+                double speedSum = summaryStatistics.hourSum.get(hour);
+                if(!hourSpeedMap.keySet().contains(hour))
+                    hourSpeedMap.put(hour, 0d);
+                hourSpeedMap.put(hour, hourCountMap.get(hour) + speedSum);
+            }
+
+            //divide speed sum by count, change from m/s to kph.
+            for(Integer hour : hourCountMap.keySet()){
+                double speedSum = hourSpeedMap.get(hour);
+                hourSpeedMap.put(hour, (speedSum / hourCountMap.get(hour)) * 3.6);
+            }
+
+            class SpeedInfo {
+                public int count = 0;
+                public double speed = 0d;
+            }
+
+            Map<Integer, SpeedInfo> hourOfDaySpeedMap = new TreeMap<>();
+            Map<Integer, SpeedInfo> dayOfWeekSpeedMap = new TreeMap<>();
+            Map<Integer, Double> hourOfWeekSpeedMap = new TreeMap<>();
+            for(Integer hour: hourSpeedMap.keySet()){
+
+                Integer utcCorrectedHour = hour + utcAdjustment;
+
+                //ran past end of week?
+                if(utcCorrectedHour >  167)
+                    utcCorrectedHour = utcCorrectedHour - 167;
+
+                Integer hourOfDay = utcCorrectedHour % 24;
+                Integer dayOfWeek = Math.round(((utcCorrectedHour - hourOfDay) / 24));
+
+                if(!hourOfDaySpeedMap.keySet().contains(hourOfDay))
+                    hourOfDaySpeedMap.put(hourOfDay, new SpeedInfo());
+                if(!dayOfWeekSpeedMap.keySet().contains(dayOfWeek))
+                    dayOfWeekSpeedMap.put(dayOfWeek, new SpeedInfo());
+                if(!hourOfWeekSpeedMap.keySet().contains(utcCorrectedHour))
+                    hourOfWeekSpeedMap.put(utcCorrectedHour, 0d);
+
+                SpeedInfo hourOfDayInfo = hourOfDaySpeedMap.get(hourOfDay);
+                SpeedInfo dayOfWeekInfo = dayOfWeekSpeedMap.get(dayOfWeek);
+
+                double speedSumForHour = hourSpeedMap.get(hour);
+                hourOfDayInfo.count = hourOfDayInfo.count + 1;
+                hourOfDayInfo.speed = hourOfDayInfo.speed + speedSumForHour;
+                dayOfWeekInfo.count = dayOfWeekInfo.count + 1;
+                dayOfWeekInfo.speed = dayOfWeekInfo.speed + speedSumForHour;
+                hourOfWeekSpeedMap.put(utcCorrectedHour, speedSumForHour);
+            }
+
+            System.out.println("hour of day,avg");
+            for(int i = 0; i < 24; i++){
+                if(hourOfDaySpeedMap.keySet().contains(i)){
+                    SpeedInfo info = hourOfDaySpeedMap.get(i);
+                    System.out.println(i + "," + info.speed / info.count);
+                }else{
+                    System.out.println(i + ",0");
+                }
+            }
+
+            System.out.println("day of week,avg");
+            for(int i = 0; i < 7; i++){
+                if(dayOfWeekSpeedMap.keySet().contains(i)){
+                    SpeedInfo info = dayOfWeekSpeedMap.get(i);
+                    System.out.println(i + "," + info.speed / info.count);
+                }else{
+                    System.out.println(i + ",0");
+                }
+            }
+
+            System.out.println("hour of week,avg");
+            for(int i = 0; i < 168; i++){
+                if(hourOfWeekSpeedMap.keySet().contains(i)){
+                    Double speed = hourOfWeekSpeedMap.get(i);
+                    System.out.println(i + "," + speed);
+                }else{
+                    System.out.println(i + ",0");
+                }
+            }
+
+            int measurementCount = 0;
+            double speedSum = 0;
+            for(TrafficPathEdge segment : trafficPath.pathEdges){
+                if(hours.size() > 0){
+                    for(Integer hour : hours){
+                        hour--;
+                        if(segment.countMap.containsKey(hour)){
+                            double avgSpeedForHour = segment.speedMap.get(hour) / segment.countMap.get(hour);
+                            measurementCount++;
+                            speedSum += avgSpeedForHour;
+                        }
+                    }
+                }else{
+                    speedSum += segment.speed;
+                    measurementCount++;
+                }
+            }
+
+            Double avgSpeedForRoute = (speedSum / measurementCount) * 3.6;
+            trafficPath.averageSpeedForRouteInKph = Math.round(avgSpeedForRoute * 100.0) / 100.0;
+            System.out.println("average speed for route: " + avgSpeedForRoute);
+
+            for(int i = 0; i < trafficPath.weeklyStats.hours.length; i++){
+                WeeklyStatsObject.HourStats stats = trafficPath.weeklyStats.hours[i];
+                stats.h = stats.h + 1;
+            }
+
             return mapper.writeValueAsString(trafficPath);
 		});
 
@@ -1105,4 +1236,5 @@ public class TrafficEngineApp {
 			e.printStackTrace();
 		}
 	}
+
 }

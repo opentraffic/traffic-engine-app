@@ -12,6 +12,8 @@ import java.util.List;
  */
 public class TrafficPath {
 
+    public Double averageSpeedForRouteInKph;
+
     public List<TrafficPathEdge> pathEdges = new ArrayList<>();
 
     public WeeklyStatsObject weeklyStats;
