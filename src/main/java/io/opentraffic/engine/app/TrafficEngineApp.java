@@ -1011,6 +1011,8 @@ public class TrafficEngineApp {
                 int localizedHour = fixOutgoingHour(utcCorrectedHour, utcAdjustment);
 
                 Integer hourOfDay = localizedHour % 24;
+                if(hourOfDay == 0)
+                    hourOfDay = 24;
                 Integer dayOfWeek = Math.round(((localizedHour - hourOfDay) / 24));
 
                 if(!hourOfDaySpeedMap.keySet().contains(hourOfDay))
@@ -1034,14 +1036,14 @@ public class TrafficEngineApp {
                     WeeklyStatsObject.HourStats stats = statsMap.get(utcCorrectedHour);
                     stats.avg = Math.round(stats.s / stats.c * 100.0) / 100.0;
                     stats.hourOfDay = hourOfDay;
-                    stats.dayOfWeek = dayOfWeek;
+                    stats.dayOfWeek = dayOfWeek + 1;
                     stats.h = localizedHour;
                     stats.s = stats.s * 3.6;
                 }
             }
 
             System.out.println("hour of day,avg");
-            for(int i = 0; i < 24; i++){
+            for(int i = 0; i < 25; i++){
                 if(hourOfDaySpeedMap.keySet().contains(i)){
                     SpeedInfo info = hourOfDaySpeedMap.get(i);
                     System.out.println(i + "," + info.speed / info.count);
@@ -1051,7 +1053,7 @@ public class TrafficEngineApp {
             }
 
             System.out.println("day of week,avg");
-            for(int i = 0; i < 7; i++){
+            for(int i = 0; i < 8; i++){
                 if(dayOfWeekSpeedMap.keySet().contains(i)){
                     SpeedInfo info = dayOfWeekSpeedMap.get(i);
                     System.out.println(i + "," + info.speed / info.count);
@@ -1061,7 +1063,7 @@ public class TrafficEngineApp {
             }
 
             System.out.println("hour of week,avg");
-            for(int i = 0; i < 168; i++){
+            for(int i = 0; i < 169; i++){
                 if(hourOfWeekSpeedMap.keySet().contains(i)){
                     Double speed = hourOfWeekSpeedMap.get(i);
                     System.out.println(i + "," + speed);
