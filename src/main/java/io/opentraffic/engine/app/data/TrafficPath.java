@@ -18,6 +18,8 @@ public class TrafficPath {
 
     public WeeklyStatsObject weeklyStats;
 
+    public boolean inferred = false;
+
     public void setWeeklyStats(SummaryStatistics stats) {
         weeklyStats = new WeeklyStatsObject(stats);
     }

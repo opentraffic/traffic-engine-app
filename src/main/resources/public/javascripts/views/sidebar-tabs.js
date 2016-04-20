@@ -19,6 +19,12 @@ Traffic.views = Traffic.views || {};
         initialize : function() {
             var _this = this;
             _.bindAll(this, 'onMapClick', 'clickAnalysis', 'selectLocale');
+
+            $.getJSON('/data.json', function(data) {
+                A.app.sidebar.loadChartData(data.weeklyStats);
+                A.app.sidebar.$("#clickInfo").hide();
+                A.app.sidebar.$("#routeData").show();
+            })
         },
 
         onRender : function() {
@@ -225,6 +231,14 @@ Traffic.views = Traffic.views || {};
             }
         },
 
+        localizeHour : function(hour) {
+            var utcAdjustment = A.app.instance.utcTimezoneOffset || 0;
+            hour = hour + utcAdjustment + 1;
+            if(hour > 167)
+                hour -= 167;
+            return hour;
+        },
+
         onMapClick : function(evt, skip, callback) {
 
             this.initializeRoutePoints();
@@ -323,6 +337,8 @@ Traffic.views = Traffic.views || {};
                     params.w2 = w2List.join(",");
             }
 
+            var that = this;
+
             $.ajax({
                 type: "POST",
                 url: "/route",
@@ -349,22 +365,24 @@ Traffic.views = Traffic.views || {};
                         if(isNaN(edge.speed) || isNaN(edge.length))
                             continue;
 
+                        var hoursArray = null;
                         if(hoursStr)
                             hoursArray = hoursStr.split(",");
 
                         var edge = data.pathEdges[i];
                         if(hoursArray && edge.speedMap){
                             var segmentSpeedSum = 0;
-                            var hourCount = 0;
+                            var hoursFoundCount = 0;
                             for(hourKey in edge.speedMap) {
-                                if(hoursArray.indexOf(hourKey) > -1 && edge.speedMap[hourKey]){
+                                var localizedHour = that.localizeHour(new Number(hourKey));
+                                if(hoursArray.indexOf(localizedHour.toString()) > -1 && edge.speedMap[hourKey]){
                                     var hourSpeedSum = edge.speedMap[hourKey]  / 3.6;
                                     var hourCount = edge.countMap[hourKey];
                                     segmentSpeedSum += hourSpeedSum / hourCount;
-                                    hourCount++;
+                                    hoursFoundCount++;
                                 }
                             }
-                            edge.speed = segmentSpeedSum / hourCount;
+                            edge.speed = segmentSpeedSum / hoursFoundCount;
                         }
 
                         speedSum += (edge.speed * edge.length);
@@ -402,7 +420,8 @@ Traffic.views = Traffic.views || {};
 
                     }
 
-                    if(hasInferredData) {
+                    //if(hasInferredData) {
+                    if(data.inferred) {
                         if($('.inferred-data-warning').length == 0) {
                             var tags = "<span class='glyphicon glyphicon-info-sign inferred-data-warning' title='" + inferredDataBanner + "'></span>"
                             $('#avgSpeed').after(tags);
@@ -425,6 +444,16 @@ Traffic.views = Traffic.views || {};
                     A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
                     //A.app.sidebar.$("#avgSpeed").text((speed * 3.6).toPrecision(2) +  " KPH");
                     A.app.sidebar.$("#avgSpeed").text(data.averageSpeedForRouteInKph +  " KPH");
+
+                    //sort by hour attr
+                    function compare(a,b) {
+                        if (a.h < b.h)
+                            return -1;
+                        if (a.h > b.h)
+                            return 1;
+                        return 0;
+                    }
+                    data.weeklyStats.hours.sort(compare);
 
                     A.app.sidebar.loadChartData(data.weeklyStats);
 

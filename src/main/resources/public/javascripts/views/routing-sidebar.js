@@ -381,7 +381,8 @@ Traffic.views = Traffic.views || {};
             var compareCheckbox = this.$('#compare');
 
             var utcAdjustment = A.app.instance.utcTimezoneOffset || 0;
-            data.hours.forEach(function (d) {
+
+           /* data.hours.forEach(function (d) {
 
                 d.hourOfDay = (d.h % 24) + 1;
                 d.dayOfWeek = Math.round(((d.h - d.hourOfDay) / 24) + 1 );
@@ -399,7 +400,7 @@ Traffic.views = Traffic.views || {};
                     }
                 }
                 d.s = d.s * 3.6; // convert from m/s km/h
-            });
+            });*/
 
             if(!this.chartData) {
                 this.chartData = C(data.hours);

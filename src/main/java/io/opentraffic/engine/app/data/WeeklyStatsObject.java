@@ -64,7 +64,10 @@ public class WeeklyStatsObject {
 		public int h;
 		public double s;
 		public double c;
+		public double avg;
 		public double std;
 		public boolean t;
+		public int hourOfDay;
+		public int dayOfWeek;
 	}
 }

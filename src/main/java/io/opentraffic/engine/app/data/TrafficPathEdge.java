@@ -14,6 +14,7 @@ import org.opentripplanner.util.model.EncodedPolylineBean;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by kpw on 7/19/15.
@@ -29,8 +30,8 @@ public class TrafficPathEdge {
     public double stdDev;
     public boolean inferred;
     public double count;
-    public Map<Integer, Double> speedMap = new HashMap<>();
-    public Map<Integer, Double> countMap = new HashMap<>();
+    public Map<Integer, Double> speedMap = new TreeMap<>();
+    public Map<Integer, Double> countMap = new TreeMap<>();
 
     private static int numberOfBins = Integer.parseInt(TrafficEngineApp.appProps.getProperty("application.numberOfBins"));
     private static double maxSpeedInKph = Double.parseDouble(TrafficEngineApp.appProps.getProperty("application.maxSpeedInKph"));

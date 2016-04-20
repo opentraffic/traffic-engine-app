@@ -185,5 +185,10 @@
           <artifactId>hppc</artifactId>
           <version>0.7.1</version>
       </dependency>
+      <dependency>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate-c3p0</artifactId>
+          <version>4.3.4.Final</version>
+      </dependency>
   </dependencies>
 </project>
