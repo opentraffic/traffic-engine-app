@@ -19,12 +19,6 @@ Traffic.views = Traffic.views || {};
         initialize : function() {
             var _this = this;
             _.bindAll(this, 'onMapClick', 'clickAnalysis', 'selectLocale');
-
-            $.getJSON('/data.json', function(data) {
-                A.app.sidebar.loadChartData(data.weeklyStats);
-                A.app.sidebar.$("#clickInfo").hide();
-                A.app.sidebar.$("#routeData").show();
-            })
         },
 
         onRender : function() {
@@ -233,9 +227,7 @@ Traffic.views = Traffic.views || {};
 
         localizeHour : function(hour) {
             var utcAdjustment = A.app.instance.utcTimezoneOffset || 0;
-            hour = hour + utcAdjustment + 1;
-            if(hour > 167)
-                hour -= 167;
+            hour = ((hour + utcAdjustment) % 168) + 1;
             return hour;
         },
 
@@ -393,7 +385,7 @@ Traffic.views = Traffic.views || {};
                         if(!isNaN(edge.length) && !isNaN(edge.speed && edge.stdDev)){
                             segmentPopupContent = routeInfoTemplate({
                                 segment_length: new Number(edge.length).toFixed(2),
-                                segment_speed: new Number(edge.speed).toFixed(2),
+                                segment_speed: new Number(edge.speed).toFixed(2) * 3.6,
                                 segment_std_dev: new Number(edge.stdDev).toFixed(2)
                             });
                             if(edge.inferred == true){
