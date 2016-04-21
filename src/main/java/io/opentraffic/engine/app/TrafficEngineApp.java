@@ -1072,10 +1072,9 @@ public class TrafficEngineApp {
                 }
             }
 
+            avgSpeedForRoute = summaryStatistics.getMean() * 3.6;
             trafficPath.averageSpeedForRouteInKph = Math.round(avgSpeedForRoute * 100.0) / 100.0;
             System.out.println("average speed for route: " + avgSpeedForRoute);
-
-            System.out.println("average speed for route: " + summaryStatistics.getMean() * 3.6);
 
             return mapper.writeValueAsString(trafficPath);
 		});
