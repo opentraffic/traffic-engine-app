@@ -1254,18 +1254,12 @@ public class TrafficEngineApp {
 	}
 
     public static int fixIncomingHour(int uncorrectedHour, int utcAdjustment){
-        int hour = uncorrectedHour - utcAdjustment - 1;
-        if(hour < 0)
-            hour += 167;
-        System.out.println("adjusted incoming hour from " + uncorrectedHour + " to " + hour);
+        int hour = (uncorrectedHour - utcAdjustment - 1) % 168;
         return hour;
     }
 
     public static int fixOutgoingHour(int uncorrectedHour, int utcAdjustment){
-        int hour = uncorrectedHour + utcAdjustment + 1;
-        if(hour > 167)
-            hour -= 167;
-        System.out.println("adjusted outgoing hour from " + uncorrectedHour + " to " + hour);
+        int hour = ((uncorrectedHour + utcAdjustment) % 168) + 1;
         return hour;
     }
 
