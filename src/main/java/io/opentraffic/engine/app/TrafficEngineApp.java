@@ -943,24 +943,34 @@ public class TrafficEngineApp {
                 trafficPath.setWeeklyStats(summaryStatistics);
             }
 
-            int measurementCount = 0;
-            double speedSum = 0;
+            double travelTimeInSeconds = 0;
+            double distanceInMeters = 0;
+            System.out.println("Calculating average speed for route");
+            System.out.println("Segment Id, length in meters, avg speed in meters per sec, hour of week (if filtering w/ chart)");
             for(TrafficPathEdge segment : trafficPath.pathEdges){
                 if(utcCorrectedhours.size() > 0){
                     for(Integer hour : utcCorrectedhours){
                         if(segment.countMap.containsKey(hour)){
-                            double avgSpeedForHour = segment.speedMap.get(hour) / segment.countMap.get(hour);
-                            measurementCount++;
-                            speedSum += avgSpeedForHour;
+                            double segmentSpeedInMetersPerSecond = segment.speedMap.get(hour);
+                            double segmentLengthInMeters = segment.countMap.get(hour);
+                            distanceInMeters += segmentLengthInMeters;
+                            double segmentTravelTimeInSeconds = segmentLengthInMeters/segmentSpeedInMetersPerSecond;
+                            travelTimeInSeconds += segmentTravelTimeInSeconds;
+                            int localHour = fixOutgoingHour(hour, utcAdjustment);
+                            System.out.println(segment.segmentId + "," + segmentLengthInMeters + "," + segmentSpeedInMetersPerSecond + "," + localHour);
                         }
                     }
                 }else{
-                    speedSum += segment.speed;
-                    measurementCount++;
+                    double segmentSpeedInMetersPerSecond = segment.speed;
+                    double segmentLengthInMeters = segment.length;
+                    distanceInMeters += segmentLengthInMeters;
+                    double segmentTravelTimeInSeconds = segmentLengthInMeters/segmentSpeedInMetersPerSecond;
+                    travelTimeInSeconds += segmentTravelTimeInSeconds;
+                    System.out.println(segment.segmentId + "," + segmentLengthInMeters + "," + segmentSpeedInMetersPerSecond + ", no filtering");
                 }
             }
 
-            Double avgSpeedForRoute = (speedSum / measurementCount) * 3.6;
+            Double avgSpeedForRoute = (distanceInMeters / travelTimeInSeconds) * 3.6 ;
 
             //put the speed data into hashmaps...
             Map<Integer, Double> hourCountMap = new TreeMap<>();
@@ -979,7 +989,7 @@ public class TrafficEngineApp {
             while(hourIter.hasNext()){
                 IntCursor hourCursor = hourIter.next();
                 int hour = hourCursor.value;
-                speedSum = summaryStatistics.hourSum.get(hour);
+                double speedSum = summaryStatistics.hourSum.get(hour);
                 if(!hourSpeedMap.keySet().contains(hour))
                     hourSpeedMap.put(hour, 0d);
                 hourSpeedMap.put(hour, hourSpeedMap.get(hour) + speedSum);
@@ -1072,9 +1082,8 @@ public class TrafficEngineApp {
                 }
             }
 
-            avgSpeedForRoute = summaryStatistics.getMean() * 3.6;
             trafficPath.averageSpeedForRouteInKph = Math.round(avgSpeedForRoute * 100.0) / 100.0;
-            System.out.println("average speed for route: " + avgSpeedForRoute);
+            System.out.println("Kevin average speed for route: " + (summaryStatistics.getMean() * 3.6));
 
             return mapper.writeValueAsString(trafficPath);
 		});

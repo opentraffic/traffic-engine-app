@@ -23,6 +23,7 @@ public class TrafficPathEdge {
 
     private Color[] colors;
 
+    public Long segmentId;
     public String geometry;
     public String color;
     public double length;
@@ -41,6 +42,7 @@ public class TrafficPathEdge {
     }
 
     public TrafficPathEdge(StreetSegment streetSegment, SummaryStatistics summaryStatistics, Color comparisonColor) {
+        this.segmentId = streetSegment.id;
 
         EncodedPolylineBean encodedPolyline = PolylineEncoder.createEncodings(streetSegment.getGeometry());
         geometry = encodedPolyline.getPoints();
