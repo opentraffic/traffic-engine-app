@@ -939,7 +939,91 @@ public class TrafficEngineApp {
                 trafficPath.setWeeklyStats(summaryStatistics);
             }
 
-            trafficPath.averageSpeedForRouteInKph = Math.round((summaryStatistics.getMean() * 3.6) * 100.0) / 100.0;
+            double travelTimeInSeconds = 0;
+            double distanceInMeters = 0;
+            for(TrafficPathEdge segment : trafficPath.pathEdges){
+                if(utcCorrectedhours.size() > 0){
+                    for(Integer hour : utcCorrectedhours){
+                        if(segment.countMap.containsKey(hour)){
+                            double segmentSpeedInMetersPerSecond = segment.speedMap.get(hour);
+                            double segmentLengthInMeters = segment.countMap.get(hour);
+                            distanceInMeters += segmentLengthInMeters;
+                            double segmentTravelTimeInSeconds = segmentLengthInMeters/segmentSpeedInMetersPerSecond;
+                            travelTimeInSeconds += segmentTravelTimeInSeconds;
+                            int localHour = fixOutgoingHour(hour, utcAdjustment);
+                            System.out.println(segment.segmentId + "," + segmentLengthInMeters + "," + segmentSpeedInMetersPerSecond + "," + localHour);
+                        }
+                    }
+                }else{
+                    double segmentSpeedInMetersPerSecond = segment.speed;
+                    double segmentLengthInMeters = segment.length;
+                    distanceInMeters += segmentLengthInMeters;
+                    double segmentTravelTimeInSeconds = segmentLengthInMeters/segmentSpeedInMetersPerSecond;
+                    travelTimeInSeconds += segmentTravelTimeInSeconds;
+                    System.out.println(segment.segmentId + "," + segmentLengthInMeters + "," + segmentSpeedInMetersPerSecond + ", no filtering");
+                }
+            }
+
+            Double avgSpeedForRoute = (distanceInMeters / travelTimeInSeconds) * 3.6 ;
+
+            //put the speed data into hashmaps...
+            Map<Integer, Double> hourCountMap = new TreeMap<>();
+            Map<Integer, Double> hourSpeedMap = new TreeMap<>();
+            Iterator<IntCursor> hourIter = summaryStatistics.hourCount.keys().iterator();
+            while(hourIter.hasNext()){
+                IntCursor hourCursor = hourIter.next();
+                int hour = hourCursor.value;
+                double count = summaryStatistics.hourCount.get(hour);
+                if(!hourCountMap.keySet().contains(hour))
+                    hourCountMap.put(hour, 0d);
+                hourCountMap.put(hour, hourCountMap.get(hour) + count);
+            }
+
+            hourIter = summaryStatistics.hourSum.keys().iterator();
+            while(hourIter.hasNext()){
+                IntCursor hourCursor = hourIter.next();
+                int hour = hourCursor.value;
+                double speedSum = summaryStatistics.hourSum.get(hour);
+                if(!hourSpeedMap.keySet().contains(hour))
+                    hourSpeedMap.put(hour, 0d);
+                hourSpeedMap.put(hour, hourSpeedMap.get(hour) + speedSum);
+            }
+
+            Map<Integer, Double> utcHoursToAvgSpeedsMap = new TreeMap<>();
+            //divide speed sum by count, change from m/s to kph.
+            for(Integer hour : hourCountMap.keySet()){
+                utcHoursToAvgSpeedsMap.put(hour, (hourSpeedMap.get(hour) / hourCountMap.get(hour)) * 3.6);
+            }
+
+            Map<Integer, WeeklyStatsObject.HourStats> statsMap = new TreeMap<>();
+            for(int i = 0; i < trafficPath.weeklyStats.hours.length; i++){
+                WeeklyStatsObject.HourStats stats = trafficPath.weeklyStats.hours[i];
+                stats.avg = Math.round(stats.s / stats.c * 100.0) / 100.0;
+                statsMap.put(stats.h, stats);
+            }
+
+            for(Integer utcCorrectedHour: utcHoursToAvgSpeedsMap.keySet()){
+
+                int localizedHour = fixOutgoingHour(utcCorrectedHour, utcAdjustment);
+
+                Integer hourOfDay = localizedHour % 24;
+                if(hourOfDay == 0)
+                    hourOfDay = 24;
+                Integer dayOfWeek = Math.round(((localizedHour - hourOfDay) / 24));
+
+                if(statsMap.keySet().contains(utcCorrectedHour)){
+                    WeeklyStatsObject.HourStats stats = statsMap.get(utcCorrectedHour);
+                    stats.avg = Math.round(stats.s / stats.c * 100.0) / 100.0;
+                    stats.hourOfDay = hourOfDay;
+                    stats.dayOfWeek = dayOfWeek + 1;
+                    stats.h = localizedHour;
+                    stats.s = stats.s * 3.6;
+                }
+            }
+
+            trafficPath.averageSpeedForRouteInKph = Math.round(avgSpeedForRoute * 100.0) / 100.0;
+
+
             return mapper.writeValueAsString(trafficPath);
 		});
 
