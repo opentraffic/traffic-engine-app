@@ -1057,7 +1057,7 @@ public class TrafficEngineApp {
             for(int i = 1; i < 25; i++){
                 if(hourOfDaySpeedMap.keySet().contains(i)){
                     SpeedInfo info = hourOfDaySpeedMap.get(i);
-                    System.out.println(i + "," + info.speed / info.count + "," + info.count);
+                    System.out.println(i + "," + info.speed/info.count + "," + info.count);
                 }else{
                     System.out.println(i + ",no data");
                 }
@@ -1067,7 +1067,7 @@ public class TrafficEngineApp {
             for(int i = 0; i < 7; i++){
                 if(dayOfWeekSpeedMap.keySet().contains(i)){
                     SpeedInfo info = dayOfWeekSpeedMap.get(i);
-                    System.out.println((i + 1) + "," + info.speed / info.count + "," + info.count);
+                    System.out.println((i + 1) + "," + info.speed/info.count + "," + info.count);
                 }else{
                     System.out.println(i + ",no data");
                 }
@@ -1077,14 +1077,13 @@ public class TrafficEngineApp {
             for(int i = 1; i < 169; i++){
                 if(hourOfWeekSpeedMap.keySet().contains(i)){
                     SpeedInfo info = hourOfWeekSpeedMap.get(i);
-                    System.out.println((i + 1) + "," + info.speed / info.count + "," + info.count);
+                    System.out.println((i + 1) + "," + info.speed/info.count + "," + info.count);
                 }else{
                     System.out.println(i + ",no data");
                 }
             }
-
-            trafficPath.averageSpeedForRouteInKph = Math.round(avgSpeedForRoute * 100.0) / 100.0;
-            System.out.println("Kevin average speed for route: " + (summaryStatistics.getMean() * 3.6));
+            trafficPath.averageSpeedForRouteInKph = Math.round((summaryStatistics.getMean() * 3.6) * 100.0) / 100.0;
+            System.out.println("David average speed for route: " + Math.round(avgSpeedForRoute * 100.0) / 100.0);
 
             return mapper.writeValueAsString(trafficPath);
 		});
