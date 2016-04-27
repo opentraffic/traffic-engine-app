@@ -1002,6 +1002,7 @@ public class TrafficEngineApp {
 
             class SpeedInfo {
                 public int count = 0;
+                public int vehicleCount = 0;
                 public double speed = 0d;
             }
 
@@ -1036,11 +1037,14 @@ public class TrafficEngineApp {
                 SpeedInfo hourOfWeekInfo = hourOfWeekSpeedMap.get(localizedHour);
 
                 double speedSumForHour = utcHoursToAvgSpeedsMap.get(utcCorrectedHour);
-                hourOfDayInfo.count = hourOfDayInfo.count + utcHoursToCountsMap.get(utcCorrectedHour);
+                hourOfDayInfo.count = hourOfDayInfo.count + 1;
+                hourOfDayInfo.vehicleCount = hourOfDayInfo.vehicleCount + utcHoursToCountsMap.get(utcCorrectedHour);
                 hourOfDayInfo.speed = hourOfDayInfo.speed + speedSumForHour;
-                dayOfWeekInfo.count = dayOfWeekInfo.count + utcHoursToCountsMap.get(utcCorrectedHour);
+                dayOfWeekInfo.count = dayOfWeekInfo.count + 1;
+                dayOfWeekInfo.vehicleCount = dayOfWeekInfo.vehicleCount + utcHoursToCountsMap.get(utcCorrectedHour);
                 dayOfWeekInfo.speed = dayOfWeekInfo.speed + speedSumForHour;
-                hourOfWeekInfo.count = hourOfWeekInfo.count + utcHoursToCountsMap.get(utcCorrectedHour);
+                hourOfWeekInfo.count = hourOfWeekInfo.count + 1;
+                hourOfWeekInfo.vehicleCount = hourOfWeekInfo.vehicleCount + utcHoursToCountsMap.get(utcCorrectedHour);
                 hourOfWeekInfo.speed = hourOfWeekInfo.speed + speedSumForHour;
 
                 if(statsMap.keySet().contains(utcCorrectedHour)){
@@ -1057,7 +1061,7 @@ public class TrafficEngineApp {
             for(int i = 1; i < 25; i++){
                 if(hourOfDaySpeedMap.keySet().contains(i)){
                     SpeedInfo info = hourOfDaySpeedMap.get(i);
-                    System.out.println(i + "," + info.speed/info.count + "," + info.count);
+                    System.out.println(i + "," + info.speed/info.count + "," + info.vehicleCount);
                 }else{
                     System.out.println(i + ",no data");
                 }
@@ -1067,7 +1071,7 @@ public class TrafficEngineApp {
             for(int i = 0; i < 7; i++){
                 if(dayOfWeekSpeedMap.keySet().contains(i)){
                     SpeedInfo info = dayOfWeekSpeedMap.get(i);
-                    System.out.println((i + 1) + "," + info.speed/info.count + "," + info.count);
+                    System.out.println((i + 1) + "," + info.speed/info.count + "," + info.vehicleCount);
                 }else{
                     System.out.println(i + ",no data");
                 }
@@ -1077,7 +1081,7 @@ public class TrafficEngineApp {
             for(int i = 1; i < 169; i++){
                 if(hourOfWeekSpeedMap.keySet().contains(i)){
                     SpeedInfo info = hourOfWeekSpeedMap.get(i);
-                    System.out.println((i + 1) + "," + info.speed/info.count + "," + info.count);
+                    System.out.println((i + 1) + "," + info.speed/info.count + "," + info.vehicleCount);
                 }else{
                     System.out.println(i + ",no data");
                 }
