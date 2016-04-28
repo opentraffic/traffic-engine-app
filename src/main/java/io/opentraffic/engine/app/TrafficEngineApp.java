@@ -933,6 +933,13 @@ public class TrafficEngineApp {
             System.out.println("fetching Summary Statistics for chart");
             System.out.println("segment id, avg speed in kph");
             SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, null);
+            if(utcCorrectedhours.size() > 0){
+                System.out.println("now fetching filtered Summary Statistics for route avg speed");
+                System.out.println("segment id, avg speed in kph");
+                SummaryStatistics filteredSummaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, new HashSet(utcCorrectedhours));
+                trafficPath.averageSpeedForRouteInKph = Math.round((filteredSummaryStatistics.getMean() * 3.6) * 100.0) / 100.0;
+            }
+
             if (w2.size() > 0) {
                 SummaryStatistics summaryStats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds,normalizeByTime, w2, null);
                 SummaryStatisticsComparison summaryStatisticsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[Integer.parseInt(confidenceInterval)], summaryStatistics, summaryStats2);
@@ -1086,7 +1093,6 @@ public class TrafficEngineApp {
                     System.out.println(i + ",no data");
                 }
             }
-            trafficPath.averageSpeedForRouteInKph = Math.round((summaryStatistics.getMean() * 3.6) * 100.0) / 100.0;
             System.out.println("David average speed for route: " + Math.round(avgSpeedForRoute * 100.0) / 100.0);
 
             return mapper.writeValueAsString(trafficPath);
