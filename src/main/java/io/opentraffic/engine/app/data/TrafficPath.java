@@ -14,6 +14,8 @@ public class TrafficPath {
 
     public Double averageSpeedForRouteInKph;
 
+    public Double travelTimeInSeconds;
+
     public List<TrafficPathEdge> pathEdges = new ArrayList<>();
 
     public WeeklyStatsObject weeklyStats;

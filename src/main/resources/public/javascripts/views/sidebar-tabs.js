@@ -433,8 +433,9 @@ Traffic.views = Traffic.views || {};
                     speed = speedSum / distance;
 
                     $('.travel-time-span').show();
+                    var seconds = data.travelTimeInSeconds % 60;
+                    var minutes = data.travelTimeInSeconds / 60;
                     A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
-                    //A.app.sidebar.$("#avgSpeed").text((speed * 3.6).toPrecision(2) +  " KPH");
                     A.app.sidebar.$("#avgSpeed").text(data.averageSpeedForRouteInKph +  " KPH");
 
                     //sort by hour attr

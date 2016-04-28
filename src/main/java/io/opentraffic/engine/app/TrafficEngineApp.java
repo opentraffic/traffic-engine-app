@@ -949,33 +949,13 @@ public class TrafficEngineApp {
                 trafficPath.setWeeklyStats(summaryStatistics);
             }
 
-            double travelTimeInSeconds = 0;
             double distanceInMeters = 0;
             System.out.println("segmentId,length in meters,avg speed in kph,hour filter");
             for(TrafficPathEdge segment : trafficPath.pathEdges){
-                if(utcCorrectedhours.size() > 0){
-                    for(Integer hour : utcCorrectedhours){
-                        if(segment.countMap.containsKey(hour)){
-                            double segmentSpeedInMetersPerSecond = segment.speedMap.get(hour);
-                            double segmentLengthInMeters = segment.countMap.get(hour);
-                            distanceInMeters += segmentLengthInMeters;
-                            double segmentTravelTimeInSeconds = segmentLengthInMeters/segmentSpeedInMetersPerSecond;
-                            travelTimeInSeconds += segmentTravelTimeInSeconds;
-                            int localHour = fixOutgoingHour(hour, utcAdjustment);
-                            System.out.println(segment.segmentId + "," + segmentLengthInMeters + "," + segmentSpeedInMetersPerSecond + "," + localHour);
-                        }
-                    }
-                }else{
-                    double segmentSpeedInMetersPerSecond = segment.speed;
-                    double segmentLengthInMeters = segment.length;
-                    distanceInMeters += segmentLengthInMeters;
-                    double segmentTravelTimeInSeconds = segmentLengthInMeters/segmentSpeedInMetersPerSecond;
-                    travelTimeInSeconds += segmentTravelTimeInSeconds;
-                    System.out.println(segment.segmentId + "," + segmentLengthInMeters + "," + (segmentSpeedInMetersPerSecond * 3.6) + ", no filtering");
-                }
+                distanceInMeters += segment.length;
             }
 
-            Double avgSpeedForRoute = (distanceInMeters / travelTimeInSeconds) * 3.6 ;
+            trafficPath.travelTimeInSeconds = ((distanceInMeters / 1000) / trafficPath.averageSpeedForRouteInKph) * 60 * 60;
 
             //put the speed data into hashmaps...
             Map<Integer, Double> hourCountMap = new TreeMap<>();
@@ -1094,7 +1074,6 @@ public class TrafficEngineApp {
                     System.out.println(i + ",no data");
                 }
             }
-            System.out.println("David average speed for route: " + Math.round(avgSpeedForRoute * 100.0) / 100.0);
 
             return mapper.writeValueAsString(trafficPath);
 		});
