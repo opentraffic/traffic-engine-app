@@ -933,6 +933,7 @@ public class TrafficEngineApp {
             System.out.println("fetching Summary Statistics for chart");
             System.out.println("segment id, avg speed in kph");
             SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, null);
+            trafficPath.averageSpeedForRouteInKph = Math.round((summaryStatistics.getMean() * 3.6) * 100.0) / 100.0;
             if(utcCorrectedhours.size() > 0){
                 System.out.println("now fetching filtered Summary Statistics for route avg speed");
                 System.out.println("segment id, avg speed in kph");
