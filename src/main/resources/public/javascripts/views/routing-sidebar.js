@@ -123,9 +123,9 @@ Traffic.views = Traffic.views || {};
             this.dailyChart.brushOn(brushOn);
             this.hourlyChart.brushOn(brushOn);
             if(brushOn){
-                $(event.target).html(translator.translate("filter_on"))
+                $('#toggleFilters').html(translator.translate("filter_on"))
             }else{
-                $(event.target).html(translator.translate("filter_off"))
+                $('#toggleFilters').html(translator.translate("filter_off"))
                 A.app.sidebarTabs.getRoute();
             }
             dc.renderAll();
@@ -381,26 +381,6 @@ Traffic.views = Traffic.views || {};
             var compareCheckbox = this.$('#compare');
 
             var utcAdjustment = A.app.instance.utcTimezoneOffset || 0;
-
-           /* data.hours.forEach(function (d) {
-
-                d.hourOfDay = (d.h % 24) + 1;
-                d.dayOfWeek = Math.round(((d.h - d.hourOfDay) / 24) + 1 );
-
-                if (utcAdjustment) {
-
-                    var fixDay = false;
-                    if((d.hourOfDay + utcAdjustment) > 24)
-                        fixDay = true;
-                    d.hourOfDay = (d.hourOfDay + utcAdjustment) % 24;
-                    if(fixDay){
-                        d.dayOfWeek = d.dayOfWeek + 1;
-                        if(d.dayOfWeek > 7)
-                            d.dayOfWeek = d.dayOfWeek % 7;
-                    }
-                }
-                d.s = d.s * 3.6; // convert from m/s km/h
-            });*/
 
             if(!this.chartData) {
                 this.chartData = C(data.hours);
