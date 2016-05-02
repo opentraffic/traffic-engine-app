@@ -435,7 +435,7 @@ Traffic.views = Traffic.views || {};
                     $('.travel-time-span').show();
                     var seconds = data.travelTimeInSeconds % 60;
                     var minutes = data.travelTimeInSeconds / 60;
-                    if(isNaN(data.averageSpeedForRouteInKph)){
+                    if(isNaN(data.averageSpeedForRouteInKph) || isNaN(minutes) || isNaN(seconds)){
                         A.app.sidebar.$("#travelTime").text("No Data");
                         A.app.sidebar.$("#avgSpeed").text("No Data");
                     }else{
