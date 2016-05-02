@@ -435,8 +435,14 @@ Traffic.views = Traffic.views || {};
                     $('.travel-time-span').show();
                     var seconds = data.travelTimeInSeconds % 60;
                     var minutes = data.travelTimeInSeconds / 60;
-                    A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
-                    A.app.sidebar.$("#avgSpeed").text(data.averageSpeedForRouteInKph +  " KPH");
+                    if(isNaN(data.averageSpeedForRouteInKph)){
+                        A.app.sidebar.$("#travelTime").text("No Data");
+                        A.app.sidebar.$("#avgSpeed").text("No Data");
+                    }else{
+                        A.app.sidebar.$("#travelTime").text(Math.round(minutes) + "m " + Math.round(seconds) + "s");
+                        A.app.sidebar.$("#avgSpeed").text(data.averageSpeedForRouteInKph +  " KPH");
+                    }
+
 
                     //sort by hour attr
                     function compare(a,b) {
