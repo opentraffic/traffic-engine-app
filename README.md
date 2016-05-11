@@ -19,3 +19,7 @@ Requires Java 1.8+
 1. Git clone
 2. mvn package
 3. Built package in target/traffic-engine-app.jar 
+
+## NOTE
+
+The traffic-engine jar is unavailable in mvn nowaday, first build the traffic-engine via https://github.com/WorldBank-Transport/traffic-engine and do `mvn install`
