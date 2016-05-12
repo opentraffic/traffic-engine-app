@@ -6,7 +6,7 @@
     <session-factory>
         <property name="connection.driver_class">org.postgresql.Driver</property>
 
-        <property name="connection.url">jdbc:postgresql://ec2-54-165-240-44.compute-1.amazonaws.com /opentraffic</property>
+        <property name="connection.url">jdbc:postgresql://ec2-54-165-240-44.compute-1.amazonaws.com/opentraffic</property>
         <property name="connection.username">postgres</property>
         <property name="connection.password">password</property>
         <property name="connection.pool_size">1</property>
