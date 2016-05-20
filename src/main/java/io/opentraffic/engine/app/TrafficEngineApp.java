@@ -154,12 +154,18 @@ public class TrafficEngineApp {
 
             Map<String, Object> paramMap= mapper.readValue(request.body(), new TypeReference<Map<String, Object>>(){});
 
-            Set<Integer> hours = new HashSet<>();
+            List<Integer> hours = new ArrayList<>();
+
+            Integer utcAdjustment = (Integer)paramMap.get("utcAdjustment");
 
             if(paramMap.containsKey("h") && !((String)paramMap.get("h")).trim().isEmpty()) {
                 String valueStr[] = ((String)paramMap.get("h")).trim().split(",");
                 List<String> values = new ArrayList(Arrays.asList(valueStr));
-                values.forEach(v -> hours.add(Integer.parseInt(v.trim())));
+                for(String value : values){
+                    int uncorrectedHour = new Integer(value);
+                    int utcCorrectedHour = fixIncomingHour(uncorrectedHour, utcAdjustment);
+                    hours.add(utcCorrectedHour);
+                }
             }
 
             Set<Integer> w1 = new HashSet<>();
@@ -206,14 +212,14 @@ public class TrafficEngineApp {
 
                         if(compare) {
                             Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
-                            SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, hours);
-                            SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, hours);
+                            SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, new HashSet(hours));
+                            SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, new HashSet(hours));
                             SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[confidenceInterval], stats1, stats2);
                             statsVO.summaryStatisticsComparison = statsComparison;
                             statsVO.summaryStatisticsCompare1 = stats1;
                             statsVO.summaryStatisticsCompare2 = stats2;
                         }else{
-                            SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
+                            SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, new HashSet(hours));
                             statsVO.summaryStatistics = summaryStatistics;
                         }
                     }
@@ -280,14 +286,14 @@ public class TrafficEngineApp {
 
                                 if(compare) {
                                     Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
-                                    SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, hours);
-                                    SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, hours);
+                                    SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, new HashSet(hours));
+                                    SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, new HashSet(hours));
                                     SummaryStatisticsComparison statsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[confidenceInterval], stats1, stats2);
                                     statsVO.summaryStatisticsComparison = statsComparison;
                                     statsVO.summaryStatisticsCompare1 = stats1;
                                     statsVO.summaryStatisticsCompare2 = stats2;
                                 }else{
-                                    SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, hours);
+                                    SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, new HashSet(hours));
                                     statsVO.summaryStatistics = summaryStatistics;
                                 }
                             }
@@ -320,21 +326,6 @@ public class TrafficEngineApp {
                 maxHour = Collections.max(hours);
             }
 
-            String dayBooleanString = "1,1,1,1,1,1,1,";
-            if(hours != null && hours.size() > 0){
-                dayBooleanString = "";
-                Integer startDay = (minHour  -  1) / 24;
-                Integer endDay = ((maxHour - minHour) / 24) + startDay;
-                for(int i = 0; i < 7; i++){
-                    if(i >= startDay && i <= endDay){
-                        dayBooleanString += "1,";
-                    }else{
-                        dayBooleanString += "0,";
-                    }
-                }
-            }
-
-
             if(compare){
                 Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
                 if(isAdmin){
@@ -364,8 +355,19 @@ public class TrafficEngineApp {
                             builder.append(sdf.format(start) + ",");//Date Start (Comparison)
                             builder.append(sdf.format(cal.getTime()) + ",");//Date End (Comparison)
 
+                            int hourIndex = fixOutgoingHour(i, utcAdjustment);
+                            int dayIndex = 0;
+                            if(hourIndex > 24)
+                                dayIndex = (hourIndex - (hourIndex % 24)) / 24;
+                            String dayBooleanString = "";
+                            for(int j = 0; j < 7; j++){
+                                if(j == dayIndex){
+                                    dayBooleanString += "1,";
+                                }else{
+                                    dayBooleanString += "0,";
+                                }
+                            }
                             builder.append(dayBooleanString);//Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday
-                            int hourIndex = i;
                             if(i > 24)
                                 hourIndex = hourIndex % 24;
                             if(i < 10)
@@ -444,11 +446,23 @@ public class TrafficEngineApp {
                             cal.add(Calendar.DATE, 6); //bump end date to end of week
                             builder.append(sdf.format(start) + ",");
                             builder.append(sdf.format(cal.getTime()) + ",");
+                            int hourIndex = fixOutgoingHour(i, utcAdjustment);
+                            int dayIndex = 0;
+                            if(hourIndex > 24)
+                                dayIndex = (hourIndex - (hourIndex % 24)) / 24;
+                            String dayBooleanString = "";
+                            for(int j = 0; j < 7; j++){
+                                if(j == dayIndex){
+                                    dayBooleanString += "1,";
+                                }else{
+                                    dayBooleanString += "0,";
+                                }
+                            }
                             builder.append(dayBooleanString);
-                            int hourIndex = i;
-                            if(i > 24)
+
+                            if(hourIndex > 24)
                                 hourIndex = hourIndex % 24;
-                            if(i < 10)
+                            if(hourIndex < 10)
                                 builder.append("0");
                             builder.append(hourIndex + ":00,");
 
@@ -459,7 +473,11 @@ public class TrafficEngineApp {
                             Double sum = statsVO.summaryStatistics.hourSum.get(i);
                             Double mean = statsVO.summaryStatistics.getMean(i);
                             Double stdDev = statsVO.summaryStatistics.getStdDev(i);
-                            builder.append(mean + ",");
+                            if(!Double.isNaN(mean)){
+                                builder.append(mean * 3.6 + ",");
+                            }else{
+                                builder.append(mean + ",");
+                            }
                             if(isAdmin)
                                 builder.append(count + ",");
                             builder.append(stdDev + ",");
@@ -1254,12 +1272,14 @@ public class TrafficEngineApp {
 	}
 
     public static int fixIncomingHour(int uncorrectedHour, int utcAdjustment){
-        int hour = (uncorrectedHour - utcAdjustment - 1) % 168;
+        int hour = ((uncorrectedHour - utcAdjustment - 1) % 168) + 1;
+        if(hour < 1)
+            hour += 168;
         return hour;
     }
 
     public static int fixOutgoingHour(int uncorrectedHour, int utcAdjustment){
-        int hour = ((uncorrectedHour + utcAdjustment) % 168) + 1;
+        int hour = ((uncorrectedHour + utcAdjustment - 1) % 168) + 1;
         return hour;
     }
 
