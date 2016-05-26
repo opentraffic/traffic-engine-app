@@ -238,11 +238,16 @@ public class TrafficEngineApp {
                     RoutingRequest rr = new RoutingRequest();
                     rr.useTraffic = hourBin == null ? false : true;  //if no hour specified, use the overall edge weights
                     if(hourBin != null){
-                        DateTime time = new DateTime(DateTimeZone.UTC).dayOfMonth().withMinimumValue();
-                        time = time.withDayOfWeek(dayBin);
-                        time = time.withHourOfDay(hourBin);
+                        Calendar cal = Calendar.getInstance();
+                        cal.set(Calendar.MINUTE, 0);
+                        cal.set(Calendar.SECOND, 0);
+                        cal.set(Calendar.HOUR_OF_DAY, hourBin);
+                        System.out.println("querying for shortest route (local time): " + cal.getTime());
+                        cal.add(Calendar.HOUR_OF_DAY, -utcAdjustment);
+                        System.out.println("querying for shortest route (UTC time): " + cal.getTime());
+                        cal.set(Calendar.DAY_OF_WEEK, dayBin);
 
-                        rr.dateTime = time.getMillis() / 1000;
+                        rr.dateTime = cal.getTimeInMillis() / 1000;
                     }
                     rr.modes = new TraverseModeSet(TraverseMode.CAR);
 
@@ -805,11 +810,16 @@ public class TrafficEngineApp {
                 RoutingRequest rr = new RoutingRequest();
                 rr.useTraffic = hourBin == null ? false : true;  //if no hour specified, use the overall edge weights
                 if(hourBin != null){
-                    DateTime time = new DateTime(DateTimeZone.UTC).dayOfMonth().withMinimumValue();
-                    time = time.withDayOfWeek(dayBin);
-                    time = time.withHourOfDay(hourBin);
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.MINUTE, 0);
+                    cal.set(Calendar.SECOND, 0);
+                    cal.set(Calendar.DAY_OF_WEEK, dayBin);
+                    cal.set(Calendar.HOUR_OF_DAY, hourBin);
+                    System.out.println("querying for shortest route (local time): " + cal.getTime());
+                    cal.add(Calendar.HOUR_OF_DAY, -utcAdjustment);
+                    System.out.println("querying for shortest route (UTC time): " + cal.getTime());
 
-                    rr.dateTime = time.getMillis() / 1000;
+                    rr.dateTime = cal.getTimeInMillis() / 1000;
                 }
                 rr.modes = new TraverseModeSet(TraverseMode.CAR);
 
@@ -948,13 +958,9 @@ public class TrafficEngineApp {
 
 			}
 
-            System.out.println("fetching Summary Statistics for chart");
-            System.out.println("segment id, avg speed in kph");
             SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, null);
             trafficPath.averageSpeedForRouteInKph = Math.round((summaryStatistics.getMean() * 3.6) * 100.0) / 100.0;
             if(utcCorrectedhours.size() > 0){
-                System.out.println("now fetching filtered Summary Statistics for route avg speed");
-                System.out.println("segment id, avg speed in kph");
                 SummaryStatistics filteredSummaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, new HashSet(utcCorrectedhours));
                 trafficPath.averageSpeedForRouteInKph = Math.round((filteredSummaryStatistics.getMean() * 3.6) * 100.0) / 100.0;
             }
@@ -968,7 +974,6 @@ public class TrafficEngineApp {
             }
 
             double distanceInMeters = 0;
-            System.out.println("segmentId,length in meters,avg speed in kph,hour filter");
             for(TrafficPathEdge segment : trafficPath.pathEdges){
                 distanceInMeters += segment.length;
             }
@@ -1060,36 +1065,6 @@ public class TrafficEngineApp {
                     stats.dayOfWeek = dayOfWeek + 1;
                     stats.h = localizedHour;
                     stats.s = stats.s * 3.6;
-                }
-            }
-
-            System.out.println("hour of day,avg,count");
-            for(int i = 1; i < 25; i++){
-                if(hourOfDaySpeedMap.keySet().contains(i)){
-                    SpeedInfo info = hourOfDaySpeedMap.get(i);
-                    System.out.println(i + "," + info.speed/info.count + "," + info.vehicleCount);
-                }else{
-                    System.out.println(i + ",no data");
-                }
-            }
-
-            System.out.println("day of week,avg,count");
-            for(int i = 0; i < 7; i++){
-                if(dayOfWeekSpeedMap.keySet().contains(i)){
-                    SpeedInfo info = dayOfWeekSpeedMap.get(i);
-                    System.out.println((i + 1) + "," + info.speed/info.count + "," + info.vehicleCount);
-                }else{
-                    System.out.println((i  + 1) + ",no data");
-                }
-            }
-
-            System.out.println("hour of week,avg,count");
-            for(int i = 1; i < 169; i++){
-                if(hourOfWeekSpeedMap.keySet().contains(i)){
-                    SpeedInfo info = hourOfWeekSpeedMap.get(i);
-                    System.out.println(i + "," + info.speed/info.count + "," + info.vehicleCount);
-                }else{
-                    System.out.println(i + ",no data");
                 }
             }
 

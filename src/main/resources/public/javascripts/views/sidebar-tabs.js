@@ -291,24 +291,6 @@ Traffic.views = Traffic.views || {};
 
             var utcAdjustment = A.app.instance.utcTimezoneOffset || 0;
 
-            if(hour && day && utcAdjustment){
-
-                var numHour = parseInt(hour); //convert to number so can be used in following code
-                var numDay = parseInt(day);
-                var fixDay = false;
-                if((numHour + utcAdjustment) > 24)
-                    fixDay = true;
-                numHour = (numHour + utcAdjustment) % 24;
-                if(fixDay){
-                    numDay = numDay + 1;
-                    if(numDay > 7)
-                        numDay = 1;
-                }
-
-                hour = numHour.toString();
-                day = numDay.toString();
-            }
-
             var params = {};
             params.hour = hour;
             params.utcAdjustment = utcAdjustment;
