@@ -444,13 +444,14 @@ Traffic.views = Traffic.views || {};
                     if(hour){
 
                         var dayLabel = new Array();
-                        dayLabel[1] = translator.translate("mon");
-                        dayLabel[2] = translator.translate("tue");
-                        dayLabel[3] = translator.translate("wed");
-                        dayLabel[4] = translator.translate("thu");
-                        dayLabel[5] = translator.translate("fri");
-                        dayLabel[6] = translator.translate("sat");
-                        dayLabel[7] = translator.translate("sun");
+                        dayLabel[1] = translator.translate("sun");
+                        dayLabel[2] = translator.translate("mon");
+                        dayLabel[3] = translator.translate("tue");
+                        dayLabel[4] = translator.translate("wed");
+                        dayLabel[5] = translator.translate("thu");
+                        dayLabel[6] = translator.translate("fri");
+                        dayLabel[7] = translator.translate("sat");
+
 
                         $('#routeSelections').hide();
                         $('#byHourRouteButtons').show();
