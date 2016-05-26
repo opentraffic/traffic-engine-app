@@ -163,6 +163,7 @@ public class TrafficEngineApp {
                 List<String> values = new ArrayList(Arrays.asList(valueStr));
                 for(String value : values){
                     int uncorrectedHour = new Integer(value);
+                    uncorrectedHour--;
                     int utcCorrectedHour = fixIncomingHour(uncorrectedHour, utcAdjustment);
                     hours.add(utcCorrectedHour);
                 }
