@@ -335,9 +335,9 @@ public class TrafficEngineApp {
             if(compare){
                 Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
                 if(isAdmin){
-                    builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed (Baseline),Number of Observations (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed (Comparison),Number of Observations (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
+                    builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed KPH (Baseline),Number of Observations (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed (Comparison),Number of Observations (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
                 }else{
-                    builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
+                    builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed KPH (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed KMH (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
                 }
                 for(StatsVO statsVO : statsVOs){
                     if(statsVO.summaryStatisticsComparison != null){
@@ -433,9 +433,9 @@ public class TrafficEngineApp {
                 }
             }else{
                 if(isAdmin){
-                    builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed,Number of Observations,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
+                    builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed KPH,Number of Observations,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
                 }else{
-                    builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
+                    builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed KPH,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
                 }
                 for(StatsVO statsVO : statsVOs){
                     if(statsVO.summaryStatistics != null){
@@ -860,7 +860,7 @@ public class TrafficEngineApp {
 							edgeIds.add(streetSegment.id);
 							SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, new HashSet(utcCorrectedhours));
 							if(summaryStatistics != null){
-                                if(summaryStatistics.count == 0){
+                                /*if(summaryStatistics.count == 0){
 
                                     //no data for this segment, find nearby segments of the same road type and average those stats
 
@@ -917,7 +917,7 @@ public class TrafficEngineApp {
                                     summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(segmentIds, normalizeByTime, w1, new HashSet(utcCorrectedhours));
                                     summaryStatistics.inferred = true;
                                     trafficPath.inferred = true;
-                                }
+                                }*/
                                 if(compare){
                                     SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, new HashSet(utcCorrectedhours));
                                     SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, new HashSet(utcCorrectedhours));
@@ -947,19 +947,23 @@ public class TrafficEngineApp {
                                     trafficPath.addSegment(streetSegment, summaryStatistics, null);
                                 }
                             }
-						}
-						else {
+						} else {
 							lastUnmatchedEdgeId = edgeId;
 						}
 					}
-				}
-				else {
+				} else {
 					lastUnmatchedEdgeId = edgeId;
 				}
 
 			}
 
             SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, null);
+            for(long edgeId : edgeIds){
+                SummaryStatistics test = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeId, normalizeByTime, w1, new HashSet(new ArrayList<Integer>() {{ add(8);}}));
+                System.out.println(edgeId + " " + test.getMean());
+            }
+
+
             trafficPath.averageSpeedForRouteInKph = Math.round((summaryStatistics.getMean() * 3.6) * 100.0) / 100.0;
             if(utcCorrectedhours.size() > 0){
                 SummaryStatistics filteredSummaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, new HashSet(utcCorrectedhours));
