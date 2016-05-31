@@ -163,7 +163,6 @@ public class TrafficEngineApp {
                 List<String> values = new ArrayList(Arrays.asList(valueStr));
                 for(String value : values){
                     int uncorrectedHour = new Integer(value);
-                    uncorrectedHour--;
                     int utcCorrectedHour = fixIncomingHour(uncorrectedHour, utcAdjustment);
                     hours.add(utcCorrectedHour);
                 }
@@ -363,7 +362,7 @@ public class TrafficEngineApp {
 
                             int hourIndex = fixOutgoingHour(i, utcAdjustment);
                             int dayIndex = 0;
-                            if(hourIndex > 24)
+                            if(hourIndex > 23)
                                 dayIndex = (hourIndex - (hourIndex % 24)) / 24;
                             String dayBooleanString = "";
                             for(int j = 0; j < 7; j++){
@@ -466,7 +465,7 @@ public class TrafficEngineApp {
                             }
                             builder.append(dayBooleanString);
 
-                            if(hourIndex > 24)
+                            if(hourIndex > 23)
                                 hourIndex = hourIndex % 24;
                             if(hourIndex < 10)
                                 builder.append("0");
