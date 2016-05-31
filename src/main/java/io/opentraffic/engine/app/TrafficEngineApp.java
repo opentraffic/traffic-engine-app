@@ -860,7 +860,7 @@ public class TrafficEngineApp {
 							edgeIds.add(streetSegment.id);
 							SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, true, w1, new HashSet(utcCorrectedhours));
 							if(summaryStatistics != null){
-                                /*if(summaryStatistics.count == 0){
+                                if(summaryStatistics.count == 0){
 
                                     //no data for this segment, find nearby segments of the same road type and average those stats
 
@@ -917,7 +917,7 @@ public class TrafficEngineApp {
                                     summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(segmentIds, normalizeByTime, w1, new HashSet(utcCorrectedhours));
                                     summaryStatistics.inferred = true;
                                     trafficPath.inferred = true;
-                                }*/
+                                }
                                 if(compare){
                                     SummaryStatistics stats1 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w1, new HashSet(utcCorrectedhours));
                                     SummaryStatistics stats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(streetSegment.id, normalizeByTime, w2, new HashSet(utcCorrectedhours));
@@ -1252,8 +1252,8 @@ public class TrafficEngineApp {
 	}
 
     public static int fixIncomingHour(int uncorrectedHour, int utcAdjustment){
-        int hour = ((uncorrectedHour - utcAdjustment - 1) % 168) + 1;
-        if(hour < 1)
+        int hour = ((uncorrectedHour - utcAdjustment) % 168);
+        if(hour < 0)
             hour += 168;
         return hour;
     }
