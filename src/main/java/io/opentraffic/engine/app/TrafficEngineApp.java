@@ -377,11 +377,11 @@ public class TrafficEngineApp {
                                 hourIndex = hourIndex % 24;
                             if(i < 10)
                                 builder.append("0");
-                            builder.append(hourIndex + ":00,");
+                            builder.append(hourIndex - 1 + ":00,");
 
                             if(i < 10)
                                 builder.append("0");
-                            builder.append(hourIndex + ":59,");
+                            builder.append(hourIndex - 1 + ":59,");
                             builder.append(statsVO.summaryStatisticsComparison.differenceAsPercent(i) + ",");
                             builder.append(confidenceInterval + ",");
                             builder.append(1 - confidenceInterval + ",");
@@ -394,7 +394,11 @@ public class TrafficEngineApp {
                             double marginOfError = tCrit * (stdDev / Math.sqrt(combinedN));
                             builder.append(marginOfError + ","); // Margin of Error: tCrit * (std dev / √n)
                             builder.append(normalizeByTime + ","); //normalize by time
-                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + ","); //Average Speed (Baseline),
+                            if(!Double.isNaN(statsVO.summaryStatisticsCompare1.getMean(i))){
+                                builder.append(statsVO.summaryStatisticsCompare1.getMean(i) * 3.6 + ","); //Average Speed (Baseline),
+                            }else{
+                                builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + ","); //Average Speed (Baseline),
+                            }
                             if(isAdmin)
                                 builder.append(statsVO.summaryStatisticsCompare1.hourCount.get(i) + ",");// Number of Observations (Baseline)
                             builder.append(statsVO.summaryStatisticsCompare1.getStdDev(i) + ","); //,Standard Deviation (Baseline),
@@ -402,14 +406,14 @@ public class TrafficEngineApp {
                             double stdError = Math.sqrt(((stdDev * stdDev) / statsVO.summaryStatisticsCompare1.hourCount.get(i)) + ((stdDev * stdDev) / statsVO.summaryStatisticsCompare2.hourCount.get(i) ));
                             builder.append(stdError + ",");// Standard Error (Baseline),  square.root[(sd2/na) + (sd2/nb)]
 
-                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + (2.58 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 99% Upper Bound (Baseline)
-                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) - (2.58 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 99% Lower Bound (Baseline)
-                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + (2.17 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 97% Upper Bound (Baseline)
-                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) - (2.17 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 97% Lower Bound (Baseline)
-                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + (1.96 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 95% Upper Bound (Baseline)
-                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) - (1.96 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 95% Lower Bound (Baseline)
-                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + (1.64 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 90% Upper Bound (Baseline)
-                            builder.append(statsVO.summaryStatisticsCompare1.getMean(i) - (1.64 * statsVO.summaryStatisticsCompare1.getStdDev(i)) + ","); // 90% Lower Bound (Baseline)
+                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) + (2.58 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 99% Upper Bound (Baseline)
+                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) - (2.58 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 99% Lower Bound (Baseline)
+                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) + (2.17 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 97% Upper Bound (Baseline)
+                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) - (2.17 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 97% Lower Bound (Baseline)
+                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) + (1.96 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 95% Upper Bound (Baseline)
+                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) - (1.96 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 95% Lower Bound (Baseline)
+                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) + (1.64 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 90% Upper Bound (Baseline)
+                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) - (1.64 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 90% Lower Bound (Baseline)
 
                             if(isAdmin)
                                 builder.append(statsVO.summaryStatisticsCompare2.getStdDev(i) + ","); // Number of Observations (Comparison),
@@ -418,14 +422,14 @@ public class TrafficEngineApp {
                             stdError = Math.sqrt(((stdDev * stdDev) / statsVO.summaryStatisticsCompare2.hourCount.get(i)) + ((stdDev * stdDev) / statsVO.summaryStatisticsCompare1.hourCount.get(i) ));
                             builder.append(stdError + ",");// Standard Error (Comparison),
 
-                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) + (2.58 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 99% Upper Bound (Comparison)
-                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) - (2.58 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 99% Lower Bound (Comparison)
-                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) + (2.17 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 97% Upper Bound (Comparison)
-                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) - (2.17 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 97% Lower Bound (Comparison)
-                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) + (1.96 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 95% Upper Bound (Comparison)
-                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) - (1.96 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 95% Lower Bound (Comparison)
-                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) + (1.64 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 90% Upper Bound (Comparison)
-                            builder.append(statsVO.summaryStatisticsCompare2.getMean(i) - (1.64 * statsVO.summaryStatisticsCompare2.getStdDev(i)) + ","); // 90% Lower Bound (Comparison)
+                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) + (2.58 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 99% Upper Bound (Comparison)
+                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) - (2.58 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 99% Lower Bound (Comparison)
+                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) + (2.17 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 97% Upper Bound (Comparison)
+                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) - (2.17 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 97% Lower Bound (Comparison)
+                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) + (1.96 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 95% Upper Bound (Comparison)
+                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) - (1.96 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 95% Lower Bound (Comparison)
+                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) + (1.64 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 90% Upper Bound (Comparison)
+                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) - (1.64 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 90% Lower Bound (Comparison)
                             builder.append("\n");
                         }
                     }
@@ -469,20 +473,20 @@ public class TrafficEngineApp {
                                 hourIndex = hourIndex % 24;
                             if(hourIndex < 10)
                                 builder.append("0");
-                            builder.append(hourIndex + ":00,");
+                            builder.append(hourIndex - 1 + ":00,");
 
                             if(i < 10)
                                 builder.append("0");
-                            builder.append(hourIndex + ":59,");
+                            builder.append(hourIndex - 1 + ":59,");
 
                             Double sum = statsVO.summaryStatistics.hourSum.get(i);
                             Double mean = statsVO.summaryStatistics.getMean(i);
                             Double stdDev = statsVO.summaryStatistics.getStdDev(i);
                             if(!Double.isNaN(mean)){
-                                builder.append(mean * 3.6 + ",");
-                            }else{
-                                builder.append(mean + ",");
+                                mean = mean * 3.6;
+                                stdDev = stdDev * 3.6;
                             }
+                            builder.append(mean + ",");
                             if(isAdmin)
                                 builder.append(count + ",");
                             builder.append(stdDev + ",");
@@ -957,12 +961,6 @@ public class TrafficEngineApp {
 			}
 
             SummaryStatistics summaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, null);
-            for(long edgeId : edgeIds){
-                SummaryStatistics test = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeId, normalizeByTime, w1, new HashSet(new ArrayList<Integer>() {{ add(8);}}));
-                System.out.println(edgeId + " " + test.getMean());
-            }
-
-
             trafficPath.averageSpeedForRouteInKph = Math.round((summaryStatistics.getMean() * 3.6) * 100.0) / 100.0;
             if(utcCorrectedhours.size() > 0){
                 SummaryStatistics filteredSummaryStatistics = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds, normalizeByTime, w1, new HashSet(utcCorrectedhours));
@@ -973,6 +971,13 @@ public class TrafficEngineApp {
                 SummaryStatistics summaryStats2 = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(edgeIds,normalizeByTime, w2, null);
                 SummaryStatisticsComparison summaryStatisticsComparison = new SummaryStatisticsComparison(SummaryStatisticsComparison.PValue.values()[Integer.parseInt(confidenceInterval)], summaryStatistics, summaryStats2);
                 trafficPath.setWeeklyStats(new WeeklyStatsObject(summaryStatisticsComparison));
+                for(int hour = 0; hour < (WeeklyStatsObject.HOURS_IN_WEEK); hour++) {
+                    double mean1 = summaryStatistics.getMean(hour);
+                    double mean2 = summaryStats2.getMean(hour);
+                    double diff = summaryStatisticsComparison.difference(hour);
+                    double diffPct = summaryStatisticsComparison.differenceAsPercent(hour);
+                    System.out.println(hour+","+mean1+","+mean2+","+diff+","+diffPct);
+                }
             }else{
                 trafficPath.setWeeklyStats(summaryStatistics);
             }
@@ -1251,14 +1256,14 @@ public class TrafficEngineApp {
 	}
 
     public static int fixIncomingHour(int uncorrectedHour, int utcAdjustment){
-        int hour = ((uncorrectedHour - utcAdjustment) % 168);
-        if(hour < 0)
-            hour += 168;
+        int hour = Math.floorMod((uncorrectedHour - utcAdjustment - 1), 168);
         return hour;
     }
 
     public static int fixOutgoingHour(int uncorrectedHour, int utcAdjustment){
-        int hour = ((uncorrectedHour + utcAdjustment - 1) % 168) + 1;
+        int hour = Math.floorMod((uncorrectedHour + utcAdjustment + 1), 168);
+        if(hour == 0)
+            hour = 168;
         return hour;
     }
 
