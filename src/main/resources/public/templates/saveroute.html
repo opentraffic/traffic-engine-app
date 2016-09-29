@@ -1,0 +1,16 @@
+<form action="#" method="post" id="routeForm">
+
+  <div class="msg-success alert alert-success" style="display:none;">{{I18n "you_logged_in"}}</div>
+  <div class="error-bad-auth alert alert-danger" style="display:none;">{{I18n "username_or_password_incorrect"}}</div>
+
+  <div class="form-group col-sm-12">
+    <label class="col-sm-3 control-label">{{I18n "routename_label"}}</label>
+    <div class="col-sm-9">
+      <input name="name" type="text" class="form-control" value="{{name}}">
+    </div>
+  </div>
+  <div style="text-align: center;">
+    <input type="submit" class="btn btn-lg btn-primary" value='{{I18n "save_label"}}'>
+  </div>
+
+</form>

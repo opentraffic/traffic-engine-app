@@ -5,30 +5,15 @@
                     	<img src="/images/opentraffic_logo.png" class="logo"/>
                     </a>
                     <a class="navbar-brand" href="#">
-                        Traffic Engine
+                        {{I18n "site_title"}}
                     </a>
                 </div>
-
-
              
-               	<ul class="nav navbar-nav navbar-right">
-
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <span class="glyphicon glyphicon-globe"></span> Location
-                            <span class="caret"></span>
-                        </a>
-                        <ul id="locationList" class="dropdown-menu" style="height: auto; max-height: 400px; overflow-x: hidden;" role="menu">
-
-                        </ul>
-                    </li>
-
-                    <li class="divider"></li>
-
-			        <li id="data"><a href="#">Data</a></li>
-			        <li id="routing"><a href="#">Routing</a></li>
-			        <li id="analysis"><a href="#">Analysis</a></li>
-		      	</ul>
+               	<div class="nav navbar-nav navbar-right location-search">
+                    {{I18n "location"}}: <input type="text" class="form-control" placeholder='{{I18n "enter_city_name"}}' id="locationSearch">
+                    <div id="userMenuContainer">
+                    </div>
+		      	</div>
                 
             </div>
         </nav>

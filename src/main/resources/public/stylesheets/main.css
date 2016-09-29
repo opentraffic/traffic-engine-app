@@ -1,3 +1,71 @@
+.modal-backdrop {
+  opacity: 0.8 !important;
+}
+
+html, body, #map {
+  height : 100% ;
+  width : 100% ;
+}
+
+body, div {
+  padding: 0;
+  margin: 0;
+}
+
+.navbar {
+  margin-bottom: 0px;
+}
+
+#navbar {
+  top: 0;
+  left: 0;
+  right: 0;
+  position: absolute;
+  height: 50px;
+}
+#main {
+  top: 50px;
+  bottom: 0;
+  left: 0;
+  right: 480px; 
+  position: absolute;
+}
+
+#content {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: auto;
+  position: absolute;
+}
+
+#sidebar-tabs {
+	top: 50px;
+  bottom: 0;
+  right: 0;
+	position: absolute;
+	width: 480px;
+  overflow: auto;
+  margin: 0;
+}
+
+#side-panel {
+  width: 100%;
+  overflow: auto;
+  top: 40px;
+  position: absolute;
+  bottom: 40px;
+}
+
+#side-footer {
+  bottom: 0px;
+  position: absolute;
+  width: 100%;
+  text-align: right;
+  padding: 5px 0px;
+}
+
 .logo {
 	height: 30px;
 	width: 30px;
@@ -5,12 +73,77 @@
 	margin-right: -5px;
 }
 
-#side-panel {
-	z-index: 2000;
-	position: fixed;
-	bottom: 10px;
-	right: 10px;
-	width: 450px;
-     max-height: 600px;
-     overflow: scroll;
+.footer-logo {
+  max-height: 40px;
+  max-width: 150px;
+}
+
+.location-search {
+  margin-top: 5px;
+}
+
+#userMenuContainer {
+  display: inline-block;
+}
+
+#signIn {
+  margin-right: 5px;
+}
+
+#localeList {
+  min-width: 0px !important;
+}
+
+.user-actions {
+  float: right;
+}
+
+.delete-user {
+  margin-right: 5px;
+}
+
+.compare-notes {
+  background-color: #DCE6F5;
+  padding: 10px;
+  margin: 5px;
+}
+
+.inferred-data-warning {
+    width: 16px;
+}
+
+.remove-last-route-point {
+  background-image: url(/images/undo.png);
+  background-size: 20px 20px;
+}
+
+#saveRouteContainer {
+  padding: 0px 5px 0px 0px;
+}
+
+#bookmarkRouteContainer {
+  padding: 0px;
+}
+
+.backgrid tr:hover td {
+  background: lightgrey;
+  font-style: italic;
+}
+
+.routes-table .backgrid tr:hover td {
+  cursor: pointer;
+}
+
+.sidebar-pills > li > a,
+.sidebar-pills > li > a:hover,
+.sidebar-pills > li > a:focus {
+  color: #fff;
+  background-color: #337ab7;
+}
+
+.sidebar-pills > li.active > a,
+.sidebar-pills > li.active > a:hover,
+.sidebar-pills > li.active > a:focus {
+  color: #337ab7;
+  background-color: #fff;
 }

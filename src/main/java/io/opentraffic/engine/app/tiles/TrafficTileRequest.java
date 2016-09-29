@@ -1,5 +1,6 @@
 package io.opentraffic.engine.app.tiles;
 
+import io.opentraffic.engine.app.data.WeeklyStatsObject;
 import io.opentraffic.engine.data.stats.SummaryStatisticsComparison;
 import io.opentraffic.engine.data.stores.SpatialDataStore;
 import io.opentraffic.engine.geom.GPSPoint;
@@ -25,15 +26,19 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public abstract class TrafficTileRequest {
 
-	public static final double MS_TO_KMS = 3.6d;
+    private static final int numberOfBins = Integer.parseInt(TrafficEngineApp.appProps.getProperty("application.numberOfBins"));
+    private static final double maxSpeedInKph = Double.parseDouble(TrafficEngineApp.appProps.getProperty("application.maxSpeedInKph"));
+    private static final Logger log = Logger.getLogger( TrafficTileRequest.class.getName());
 
 	final public String type;
 	final public Integer x, y, z;
-	
-	public TrafficTileRequest(Integer x, Integer y, Integer z, String type) {
+
+
+    public TrafficTileRequest(Integer x, Integer y, Integer z, String type) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -88,6 +93,8 @@ public abstract class TrafficTileRequest {
 
 		public byte[] renderPercentChange() {
 
+            int analysisLineWeight = Integer.parseInt(TrafficEngineApp.appProps.getProperty("application.analysisLineWeight"));
+
 			Tile tile = new Tile(this);
 
     		List<Long> segmentIds = TrafficEngineApp.engine.getTrafficEngine().getStreetSegmentIds(tile.envelope);
@@ -138,16 +145,17 @@ public abstract class TrafficTileRequest {
 							colorNum = (int)Math.round(4 * speedPercentChange);
 						}
 
-						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 3);
+						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], analysisLineWeight);
 
 					}
 					//else
-					//	tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  Color.GREEN, 2);
+					//	tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  Color.GREEN, 4);
 
 				} catch (MismatchedDimensionException e) {
-					// TODO Auto-generated catch block
+                    log.warning(e.getMessage());
 					e.printStackTrace();
 				} catch (TransformException e) {
+                    log.warning(e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -155,7 +163,7 @@ public abstract class TrafficTileRequest {
     		try {
 				return tile.generateImage();
 			} catch (IOException | ImageWriteException e) {
-				// TODO Auto-generated catch block
+                log.warning(e.getMessage());
 				e.printStackTrace();
 				return null;
 			}
@@ -163,11 +171,13 @@ public abstract class TrafficTileRequest {
 
 		public byte[] renderSpeed(){
 
+            int analysisLineWeight = Integer.parseInt(TrafficEngineApp.appProps.getProperty("application.analysisLineWeight"));
+
 			Tile tile = new Tile(this);
 
 			List<Long> segmentIds = TrafficEngineApp.engine.getTrafficEngine().getStreetSegmentIds(tile.envelope);
 
-			Color[] colors = ColorBrewer.RdYlBu.getColorPalette(11);
+			Color[] colors = ColorBrewer.RdYlBu.getColorPalette(numberOfBins + 1);
 
 			for(Long id : segmentIds) {
 
@@ -193,16 +203,15 @@ public abstract class TrafficTileRequest {
 					SummaryStatistics baselineStats = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(id,normalizeByTime, w1, hours);
 
 					if(baselineStats.getMean() > 0) {
-						averageSpeed = baselineStats.getMean() * MS_TO_KMS;
-						colorNum = (int) (10 / (50.0 / averageSpeed));
-						if(colorNum > 10)
-							colorNum = 10;
-
-						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], 3);
+						averageSpeed = baselineStats.getMean() * WeeklyStatsObject.MS_TO_KMH;
+                        colorNum = (int) (numberOfBins / (maxSpeedInKph / averageSpeed));
+                        if(colorNum > numberOfBins)
+                            colorNum = numberOfBins;
+						tile.renderLineString(TrafficEngineApp.engine.getTrafficEngine().getGeometryById(id),  colors[colorNum], analysisLineWeight);
 					}
 
 				} catch (MismatchedDimensionException | TransformException e) {
-					// TODO Auto-generated catch block
+
 					e.printStackTrace();
 				}
 			}
@@ -210,7 +219,7 @@ public abstract class TrafficTileRequest {
 			try {
 				return tile.generateImage();
 			} catch (IOException | ImageWriteException e) {
-				// TODO Auto-generated catch block
+				log.warning(e.getMessage());
 				e.printStackTrace();
 				return null;
 			}
@@ -268,7 +277,7 @@ public abstract class TrafficTileRequest {
 
 					fillColor = new Color(0.25f, 0.25f, 0.25f, 0.2f);
 					try {
-						tile.renderPolygon((com.vividsolutions.jts.geom.Polygon) tileGeom, new Color(0.5f, 0.5f, 0.5f, 0.2f), fillColor);
+						tile.renderPolygon(tileGeom, new Color(0.5f, 0.5f, 0.5f, 0.2f), fillColor);
 					} catch(Exception e) {
 						e.printStackTrace();
 					}
@@ -294,7 +303,7 @@ public abstract class TrafficTileRequest {
 						fillColor = new Color(0.25f, 0.25f, 0.25f, 0.2f);
 
 					try {
-						tile.renderPolygon((com.vividsolutions.jts.geom.Polygon) tileGeom, new Color(0.5f, 0.5f, 0.5f, 0.2f), fillColor);
+						tile.renderPolygon(tileGeom, new Color(0.5f, 0.5f, 0.5f, 0.2f), fillColor);
 					} catch(Exception e) {
 						e.printStackTrace();
 					}
@@ -304,7 +313,7 @@ public abstract class TrafficTileRequest {
     		try {
 				return tile.generateImage();
 			} catch (IOException | ImageWriteException e ) {
-				// TODO Auto-generated catch block
+                log.warning(e.getMessage());
 				e.printStackTrace();
 				return null;
 			}

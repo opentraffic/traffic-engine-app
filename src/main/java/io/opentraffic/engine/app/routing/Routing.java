@@ -70,8 +70,8 @@ public class Routing {
         env.expandToInclude(request.to.lng, request.to.lat);
         env.expandToInclude(request.from.lng, request.from.lat);
 
-        //if(!updated)
-        //    update(env);
+        if(!updated)
+            update(env);
 
         List<GraphPath> paths = gpf.graphPathFinderEntryPoint(request);
 
@@ -102,7 +102,9 @@ public class Routing {
         // not using an updater here as that requires dumping/loading PBFs.
         for (SpatialDataItem sdi : TrafficEngineApp.engine.getTrafficEngine().getStreetSegments(env)) {
             StreetSegment ss = (StreetSegment) sdi;
-            SummaryStatistics stats = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(ss.id, null, null);
+
+            //todo: previously normalize flag was null, causing an NPE.  Defaulting to true, not sure whether that's actually correct (DB)
+            SummaryStatistics stats = TrafficEngineApp.engine.getTrafficEngine().osmData.statsDataStore.collectSummaryStatistics(ss.id, true, null);
 
             if (stats == null || Double.isNaN(stats.getMean()))
                 continue;
@@ -222,5 +224,9 @@ public class Routing {
 
             log.log(Level.INFO, "graph built");
         }
+    }
+
+    public boolean isReady(){
+        return graph != null;
     }
 }
