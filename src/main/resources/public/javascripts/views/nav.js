@@ -67,8 +67,8 @@ Traffic.views = Traffic.views || {};
           var href = window.location.href.toLowerCase();
           var start = window.location.href.indexOf('//');
           var end = window.location.href.indexOf('.');
-          var currentCountry = href.substring(start + 2, end);
-          href = href.replace(currentCountry, datum.country)
+          //var currentCountry = href.substring(start + 2, end);
+          //href = href.replace(currentCountry, datum.country)
           href = href.substr(0, href.lastIndexOf("/") + 1)
           href += "?city=" + datum.city;
           window.location.href = href;

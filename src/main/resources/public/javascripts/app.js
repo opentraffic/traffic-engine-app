@@ -107,7 +107,7 @@ $(document).ready(function() {
 	}
 	Traffic.app.instance.start();
 
-	Traffic.app.instance.vent.trigger('login:auto_auth');
+//	Traffic.app.instance.vent.trigger('login:auto_auth');
 
     if(window.location.href.indexOf('route=') > -1){
         var routeId = window.location.href.substr(window.location.href.indexOf('route=') + 6);

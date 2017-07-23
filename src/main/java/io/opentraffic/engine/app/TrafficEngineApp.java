@@ -1,11 +1,8 @@
 package io.opentraffic.engine.app;
 
-import com.carrotsearch.hppc.IntCollection;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import com.carrotsearch.hppc.cursors.ShortCursor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.std.IterableSerializer;
 import com.google.common.net.MediaType;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -13,8 +10,6 @@ import io.opentraffic.engine.app.data.*;
 import io.opentraffic.engine.app.engine.Engine;
 import io.opentraffic.engine.app.routing.Routing;
 import io.opentraffic.engine.app.tiles.TrafficTileRequest;
-import io.opentraffic.engine.app.util.HibernateUtil;
-import io.opentraffic.engine.app.util.PasswordUtil;
 import io.opentraffic.engine.app.util.ShapefileUtil;
 import io.opentraffic.engine.data.SpatialDataItem;
 import io.opentraffic.engine.data.pbf.ExchangeFormat;
@@ -30,8 +25,6 @@ import org.apache.commons.io.FileUtils;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.jcolorbrewer.ColorBrewer;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.mapdb.Fun;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opentripplanner.common.model.GenericLocation;
@@ -42,17 +35,22 @@ import org.zeroturnaround.zip.ZipUtil;
 import spark.Request;
 import spark.utils.StringUtils;
 
+
 import javax.measure.Measure;
 import javax.measure.unit.SI;
 import javax.servlet.ServletOutputStream;
 import java.awt.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -68,7 +66,7 @@ public class TrafficEngineApp {
 	
 	private static final ObjectMapper mapper = new ObjectMapper();
 	
-	private static Routing routing = new Routing(new Rectangle(-180, -90, 360, 180));
+	private static Routing routing = new Routing(new Rectangle(-180, -90, 360, 180));;
 
     private static List<Envelope> importBoundingBoxes = null;
 	
@@ -77,6 +75,46 @@ public class TrafficEngineApp {
     public static Engine engine;
 
 	public static HashMap<String,Long> vehicleIdMap = new HashMap<>();
+
+
+    public static String renderContent(String htmlFile) {
+        try {
+            // If you are using maven then your files
+            // will be in a folder called resources.
+            // getResource() gets that folder
+            // and any files you specify.
+            InputStream inputStream = TrafficEngineApp.class.getClassLoader().getResourceAsStream(htmlFile);
+
+            BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream));
+            return buffer.lines().collect(Collectors.joining("\n"));
+
+        } catch (Exception e) {
+            // Add your own exception handlers here.
+        }
+        return null;
+    }
+
+    public static void initRouting () {
+
+        // lazy loading OTP
+        synchronized (routing) {
+            if(routing == null)
+                routing = new Routing(new Rectangle(-180, -90, 360, 180));
+        }
+
+        // check if graph is ready
+        while(!routing.isReady()){
+            log.info("Graph not ready, waiting 1 second");
+
+            try {
+                Thread.sleep(1000);
+            }
+            catch (Exception e){
+                // noop
+            }
+        }
+
+    }
 
 	public static void main(String[] args) throws ParseException {
 
@@ -98,8 +136,6 @@ public class TrafficEngineApp {
 		// setup public folder
 		staticFileLocation("/public");
 
-        HibernateUtil.getSessionFactory();
-
 		engine = new Engine();
 
         String portString = appProps.getProperty("application.port");
@@ -107,9 +143,70 @@ public class TrafficEngineApp {
             port(Integer.parseInt(portString));
         }
 
+        before((request, response) -> {
+            String pathInfo = request.pathInfo();
+            log.info(pathInfo);
 
+            if(pathInfo.startsWith("/stylesheets/") || pathInfo.startsWith("/images/") || pathInfo.startsWith("/javascripts/") || pathInfo.startsWith("/locales/") || pathInfo.startsWith("/templates/"))
+                return;
+
+            boolean authenticated = false;
+
+            //  check if authenticated
+            if(request.session().attribute("user") != null)
+                authenticated = true;
+
+            if(!authenticated && !pathInfo.startsWith("/auth")) {
+                response.redirect("/auth");
+                halt();
+            }
+
+        });
+
+        get("/", (request, response) -> {
+            return renderContent("templates/index.html");
+        });
+
+        get("/auth", (request, response) -> {
+
+            return renderContent("templates/login.html");
+        });
+
+        post("/auth", (request, response) -> {
+
+            String action = request.queryParams("action");
+
+            if(action == null)
+                halt(401);
+            else if(action.equals("login")){
+
+                String username = request.queryParams("username");
+                String password = request.queryParams("password");
+
+                if(     (username.toLowerCase().trim().equals("demo") && password.toLowerCase().trim().equals("phdata")) ||
+                        (username.toLowerCase().trim().equals("admin") && password.toLowerCase().trim().equals("admin"))) {
+                    request.session(true);
+                    request.session().attribute("user", username);
+
+                    return response;
+                }
+                else
+                    halt(401);
+            }
+            else if(action.equals("logout")){
+                request.session().removeAttribute("user");
+                response.redirect("/auth");
+                return response;
+            }
+            else {
+                halt(401);
+            }
+
+            return response;
+        });
 
         get("/download", (request, response) -> {
+
             String filename = request.queryMap("filename").value();
             File file = new File(filename);
 
@@ -128,16 +225,6 @@ public class TrafficEngineApp {
         });
 
         post("/csv", (request, response) -> {
-
-            Map<String, String> cookies = request.cookies();
-            String username = cookies.get("login_username");
-            String cookie = cookies.get("login_token");
-            boolean isAdmin = false;
-            if(cookie != null){
-                User user = HibernateUtil.login(username, null, cookie);
-                if(user.getRole().equalsIgnoreCase("super admin") || user.getRole().equalsIgnoreCase("super admin"))
-                    isAdmin = true;
-            }
 
             class StatsVO {
                 public Long edgeId;
@@ -225,10 +312,9 @@ public class TrafficEngineApp {
                     }
                 }
             }else{
-                while(!routing.isReady()){
-                    log.info("Graph not ready, waiting 1 second");
-                    Thread.sleep(1000);
-                }
+
+                //initRouting();
+
                 //TODO: 'intermediate places' are in the api but the feature is broken: https://github.com/opentripplanner/OpenTripPlanner/issues/1784
                 List<Fun.Tuple3<Long, Long, Long>> edges = new ArrayList<>();
 
@@ -321,218 +407,92 @@ public class TrafficEngineApp {
             statsVOs.forEach(v -> segments.add(v.streetSegment));
             ShapefileUtil.create(segments, dir);
 
+            DecimalFormat decimalFormatter = new DecimalFormat("#.00");
+
             StringBuilder builder = new StringBuilder();
-            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-            Integer minHour = 0;
-            Integer maxHour = 23;
-            if(hours != null && hours.size() > 0){
-                minHour = Collections.min(hours);
-                maxHour = Collections.max(hours);
-            }
+            for(Integer week : w1) {
 
-            if(compare){
-                Integer confidenceInterval = Integer.parseInt((String)paramMap.get("confidenceInterval"));
-                if(isAdmin){
-                    builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed KPH (Baseline),Number of Observations (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed (Comparison),Number of Observations (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
-                }else{
-                    builder.append("Edge Id,Date Start (Baseline),Date End (Baseline),Date Start (Comparison),Date End (Comparison),Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Percent Change,Confidence Interval,Alpha,T-Score,Degrees of Freedom,Margin of Error,Normalized by Time,Average Speed KPH (Baseline),Standard Deviation (Baseline),Standard Error (Baseline),99% Upper Bound (Baseline),99% Lower Bound (Baseline),97% Upper Bound (Baseline),97% Lower Bound (Baseline),95% Upper Bound (Baseline),95% Lower Bound (Baseline),90% Upper Bound (Baseline),90% Lower Bound (Baseline),Average Speed KMH (Comparison),Standard Deviation (Comparison),Standard Error (Comparison),99% Upper Bound (Comparison),99% Lower Bound (Comparison),97% Upper Bound (Comparison),97% Lower Bound (Comparison),95% Upper Bound (Comparison),95% Lower Bound (Comparison),90% Upper Bound (Comparison),90% Lower Bound (Comparison)\n");
+
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(SegmentStatistics.getTimeForWeek(week));
+
+
+                ArrayList<String> dates = new ArrayList<String>();
+
+                for(int dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+
+                    String date = sdf.format(cal.getTime());
+                    dates.add(dayOfWeek, date);
+                    cal.add(Calendar.DATE, 1); //bump day
                 }
-                for(StatsVO statsVO : statsVOs){
-                    if(statsVO.summaryStatisticsComparison != null){
-                        for(int i = 0; i < SegmentStatistics.HOURS_IN_WEEK; i++){
-                            Double count = statsVO.summaryStatisticsCompare1.hourCount.get(i);
-                            if(count < 1)
+
+                PrintWriter pw = new PrintWriter(new File(dir + "/week_" + dates.get(0) + ".csv"));
+
+                //date string,edge_id int,day_of_week int,hour_of_day int,avg_speed double,std_dev double,std_error double
+                builder.append("date,edge_id,day_of_week,hour_of_day,avg_speed\n");
+
+                for (StatsVO statsVO : statsVOs) {
+                    if (statsVO.summaryStatistics != null) {
+                        for (int hour = 0; hour < SegmentStatistics.HOURS_IN_WEEK; hour++) {
+
+                            Double count = statsVO.summaryStatistics.hourCount.get(hour);
+                            if (count < 1)
                                 continue;
 
-                            builder.append(statsVO.edgeId + ",");
-                            Date start = new Date(SegmentStatistics.getTimeForWeek(Collections.min(w1)));
-                            Calendar cal = Calendar.getInstance();
-                            cal.setTimeInMillis(SegmentStatistics.getTimeForWeek(Collections.max(w1)));
-                            cal.add(Calendar.DATE, 6); //bump end date to end of week
-                            builder.append(sdf.format(start) + ",");//Date Start (Baseline)
-                            builder.append(sdf.format(cal.getTime()) + ",");//Date End (Baseline)
+                            int dayOfWeek = (int)Math.floor((hour) / 24);
 
-                            start = new Date(SegmentStatistics.getTimeForWeek(Collections.min(w2)));
-                            cal = Calendar.getInstance();
-                            cal.setTimeInMillis(SegmentStatistics.getTimeForWeek(Collections.max(w2)));
-                            cal.add(Calendar.DATE, 6); //bump end date to end of week
-                            builder.append(sdf.format(start) + ",");//Date Start (Comparison)
-                            builder.append(sdf.format(cal.getTime()) + ",");//Date End (Comparison)
-
-                            int hourIndex = fixOutgoingHour(i, utcAdjustment);
-                            int dayIndex = 0;
-                            if(hourIndex > 23)
-                                dayIndex = (hourIndex - (hourIndex % 24)) / 24;
-                            String dayBooleanString = "";
-                            for(int j = 0; j < 7; j++){
-                                if(j == dayIndex){
-                                    dayBooleanString += "1,";
-                                }else{
-                                    dayBooleanString += "0,";
-                                }
-                            }
-                            builder.append(dayBooleanString);//Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday
-                            if(i > 24)
-                                hourIndex = hourIndex % 24;
-                            if(i < 10)
-                                builder.append("0");
-                            builder.append(hourIndex - 1 + ":00,");
-
-                            if(i < 10)
-                                builder.append("0");
-                            builder.append(hourIndex - 1 + ":59,");
-                            builder.append(statsVO.summaryStatisticsComparison.differenceAsPercent(i) + ",");
-                            builder.append(confidenceInterval + ",");
-                            builder.append(1 - confidenceInterval + ",");
-                            builder.append(statsVO.summaryStatisticsComparison.tStat(i) + ",");
-                            builder.append((statsVO.summaryStatisticsCompare1.count + statsVO.summaryStatisticsCompare2.count - 2) + ",");//Degrees of Freedom, df=n1+n2−2
-
-                            double tCrit = statsVO.summaryStatisticsComparison.tCrit(i);
-                            double stdDev = statsVO.summaryStatisticsComparison.combinedStdDev(i);
-                            double combinedN = statsVO.summaryStatisticsComparison.getMeanSize(i);
-                            double marginOfError = tCrit * (stdDev / Math.sqrt(combinedN));
-                            builder.append(marginOfError + ","); // Margin of Error: tCrit * (std dev / √n)
-                            builder.append(normalizeByTime + ","); //normalize by time
-                            if(!Double.isNaN(statsVO.summaryStatisticsCompare1.getMean(i))){
-                                builder.append(statsVO.summaryStatisticsCompare1.getMean(i) * 3.6 + ","); //Average Speed (Baseline),
-                            }else{
-                                builder.append(statsVO.summaryStatisticsCompare1.getMean(i) + ","); //Average Speed (Baseline),
-                            }
-                            if(isAdmin)
-                                builder.append(statsVO.summaryStatisticsCompare1.hourCount.get(i) + ",");// Number of Observations (Baseline)
-                            builder.append(statsVO.summaryStatisticsCompare1.getStdDev(i) + ","); //,Standard Deviation (Baseline),
-                            stdDev = statsVO.summaryStatisticsCompare1.getStdDev(i);
-                            double stdError = Math.sqrt(((stdDev * stdDev) / statsVO.summaryStatisticsCompare1.hourCount.get(i)) + ((stdDev * stdDev) / statsVO.summaryStatisticsCompare2.hourCount.get(i) ));
-                            builder.append(stdError + ",");// Standard Error (Baseline),  square.root[(sd2/na) + (sd2/nb)]
-
-                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) + (2.58 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 99% Upper Bound (Baseline)
-                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) - (2.58 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 99% Lower Bound (Baseline)
-                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) + (2.17 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 97% Upper Bound (Baseline)
-                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) - (2.17 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 97% Lower Bound (Baseline)
-                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) + (1.96 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 95% Upper Bound (Baseline)
-                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) - (1.96 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 95% Lower Bound (Baseline)
-                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) + (1.64 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 90% Upper Bound (Baseline)
-                            builder.append((statsVO.summaryStatisticsCompare1.getMean(i)  * 3.6) - (1.64 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 90% Lower Bound (Baseline)
-
-                            if(isAdmin)
-                                builder.append(statsVO.summaryStatisticsCompare2.getStdDev(i) + ","); // Number of Observations (Comparison),
-                            builder.append(statsVO.summaryStatisticsCompare2.getStdDev(i) + ",");// Standard Deviation (Comparison),
-                            stdDev = statsVO.summaryStatisticsCompare2.getStdDev(i);
-                            stdError = Math.sqrt(((stdDev * stdDev) / statsVO.summaryStatisticsCompare2.hourCount.get(i)) + ((stdDev * stdDev) / statsVO.summaryStatisticsCompare1.hourCount.get(i) ));
-                            builder.append(stdError + ",");// Standard Error (Comparison),
-
-                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) + (2.58 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 99% Upper Bound (Comparison)
-                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) - (2.58 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 99% Lower Bound (Comparison)
-                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) + (2.17 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 97% Upper Bound (Comparison)
-                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) - (2.17 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 97% Lower Bound (Comparison)
-                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) + (1.96 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 95% Upper Bound (Comparison)
-                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) - (1.96 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 95% Lower Bound (Comparison)
-                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) + (1.64 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 90% Upper Bound (Comparison)
-                            builder.append((statsVO.summaryStatisticsCompare2.getMean(i) * 3.6) - (1.64 * (statsVO.summaryStatisticsCompare2.getStdDev(i) * 3.6)) + ","); // 90% Lower Bound (Comparison)
-                            builder.append("\n");
-                        }
-                    }
-                }
-            }else{
-                if(isAdmin){
-                    builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed KPH,Number of Observations,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
-                }else{
-                    builder.append("Edge Id,Date Start,Date End,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday,Time Start,Time End,Average Speed KPH,Standard Deviation,Standard Error,99% Upper Bound,99% Lower Bound,97% Upper Bound,97% Lower Bound,95% Upper Bound,95% Lower Bound,90% Upper Bound,90% Lower Bound\n");
-                }
-                for(StatsVO statsVO : statsVOs){
-                    if(statsVO.summaryStatistics != null){
-                        for(int i = 0; i < SegmentStatistics.HOURS_IN_WEEK; i++){
-
-                            Double count = statsVO.summaryStatistics.hourCount.get(i);
-                            if(count < 1)
-                                continue;
+                            builder.append(dates.get(dayOfWeek) + ",");d
 
                             builder.append(statsVO.edgeId + ",");
-                            Date start = new Date(SegmentStatistics.getTimeForWeek(Collections.min(w1)));
-                            Calendar cal = Calendar.getInstance();
-                            cal.setTimeInMillis(SegmentStatistics.getTimeForWeek(Collections.max(w1)));
-                            cal.add(Calendar.DATE, 6); //bump end date to end of week
-                            builder.append(sdf.format(start) + ",");
-                            builder.append(sdf.format(cal.getTime()) + ",");
-                            int hourIndex = fixOutgoingHour(i, utcAdjustment);
-                            int dayIndex = 0;
-                            if(hourIndex > 24)
-                                dayIndex = (hourIndex - (hourIndex % 24)) / 24;
-                            String dayBooleanString = "";
-                            for(int j = 0; j < 7; j++){
-                                if(j == dayIndex){
-                                    dayBooleanString += "1,";
-                                }else{
-                                    dayBooleanString += "0,";
-                                }
-                            }
-                            builder.append(dayBooleanString);
 
-                            if(hourIndex > 23)
-                                hourIndex = hourIndex % 24;
-                            if(hourIndex < 10)
-                                builder.append("0");
-                            builder.append(hourIndex - 1 + ":00,");
+                            builder.append(dayOfWeek + ",");
+                            builder.append((hour) % 24 + ",");
 
-                            if(i < 10)
-                                builder.append("0");
-                            builder.append(hourIndex - 1 + ":59,");
+                            //Double sum = statsVO.summaryStatistics.hourSum.get(hour);
+                            Double mean = statsVO.summaryStatistics.getMean(hour);
+                            //Double stdDev = statsVO.summaryStatistics.getStdDev(hour);
 
-                            Double sum = statsVO.summaryStatistics.hourSum.get(i);
-                            Double mean = statsVO.summaryStatistics.getMean(i);
-                            Double stdDev = statsVO.summaryStatistics.getStdDev(i);
-                            if(!Double.isNaN(mean)){
+                            if (!Double.isNaN(mean)) {
                                 mean = mean * 3.6;
-                                stdDev = stdDev * 3.6;
+//                                stdDev = stdDev * 3.6;
                             }
-                            builder.append(mean + ",");
-                            if(isAdmin)
-                                builder.append(count + ",");
-                            builder.append(stdDev + ",");
-                            builder.append(stdDev / Math.sqrt(count));
-                            builder.append(",");
-                            builder.append(mean + (2.58 * stdDev)); //99% Upper Bound
-                            builder.append(",");
-                            builder.append(mean - (2.58 * stdDev)); //99% Lower Bound
-                            builder.append(",");
-                            builder.append(mean + (2.17 * stdDev)); //97% Upper Bound
-                            builder.append(",");
-                            builder.append(mean - (2.17 * stdDev)); //97% Lower Bound
-                            builder.append(",");
-                            builder.append(mean + (1.96 * stdDev)); //95% Upper Bound
-                            builder.append(",");
-                            builder.append(mean - (1.96 * stdDev)); //95% Lower Bound
-                            builder.append(",");
-                            builder.append(mean + (1.64 * stdDev)); //90% Upper Bound
-                            builder.append(",");
-                            builder.append(mean - (1.64 * stdDev)); //90% Lower Bound
+                            builder.append(decimalFormatter.format(mean));
+//
+//                            builder.append(stdDev + ",");
+//                            builder.append(stdDev / Math.sqrt(count));
+
+
                             builder.append("\n");
+
                         }
+
+                        pw.write(builder.toString());
+                        builder = new StringBuilder();
                     }
                 }
+
+                pw.write(builder.toString());
+                pw.flush();
+                pw.close();
+
+
+                log.info("writing csv for week " + week);
             }
 
-            PrintWriter pw = new PrintWriter(new File( dir + "/" + dir + ".csv"));
-            pw.write(builder.toString());
-            pw.flush();
-            pw.close();
-            File directory = new File(dir);
-            ZipUtil.pack(directory, new File(dir + ".zip"));
-            FileUtils.cleanDirectory(directory);
-            new File(dir).delete();
+            log.info("done.");
+
+            //File directory = new File(dir);
+            //ZipUtil.pack(directory, new File(dir + ".zip"));
+            //FileUtils.cleanDirectory(directory);
+            //new File(dir).delete();
             return dir + ".zip";
         });
 
 
         post("/route/save", (request, response) -> {
-            Map<String, String> cookies = request.cookies();
-            String username = cookies.get("login_username");
-            String cookie = cookies.get("login_token");
-            User user = null;
-            if(cookie != null){
-                user = HibernateUtil.login(username, null, cookie);
-            }
 
             String routeJson = request.body();
             Map<String, Object> paramMap = mapper.readValue(routeJson, new TypeReference<Map<String, Object>>() {});
@@ -541,38 +501,39 @@ public class TrafficEngineApp {
             savedRoute.setCountry((String)paramMap.get("country"));
             savedRoute.setCreationDate(new Date());
             savedRoute.setJson(routeJson);
-            if(user != null)
-                savedRoute.setUser(user);
-
-            HibernateUtil.persistEntity(savedRoute);
+//            if(user != null)
+//                savedRoute.setUser(user);
+//
+//            AuthUtil.persistEntity(savedRoute);
 
             return savedRoute.getId();
         });
 
         get("/route/:id", (request, response) -> {
-            Integer id = new Integer(request.params(":id"));
-            SavedRoute savedRoute = HibernateUtil.getSavedRoute(id);
-            return savedRoute.getJson();
+//            Integer id = new Integer(request.params(":id"));
+//            SavedRoute savedRoute = AuthUtil.getSavedRoute(id);
+//            return savedRoute.getJson();
+            return response;
         });
 
         delete("/routelist/:id", (request, response) -> {
             Integer id = new Integer(request.params(":id"));
-            HibernateUtil.deleteSavedRoute(id);
-            response.status(200);
-            return response;
+//            AuthUtil.deleteSavedRoute(id);
+//            response.status(200);
+             return response;
         });
 
         get("/routesbycountry/:country", (request, response) -> {
-            String country = request.params(":country");
-            Map<String, String> cookies = request.cookies();
-            String username = cookies.get("login_username");
-            String cookie = cookies.get("login_token");
-            if (cookie != null) {
-                User user = HibernateUtil.login(username, null, cookie);
-                List<SavedRoute> routes = HibernateUtil.getRoutesForUser(user, country);
-                response.status(200);
-                return mapper.writeValueAsString(routes);
-            }
+//            String country = request.params(":country");
+//            Map<String, String> cookies = request.cookies();
+//            String username = cookies.get("login_username");
+//            String cookie = cookies.get("login_token");
+//            if (cookie != null) {
+//                User user = AuthUtil.login(username, null, cookie);
+//                List<SavedRoute> routes = AuthUtil.getRoutesForUser(user, country);
+//                response.status(200);
+//                return mapper.writeValueAsString(routes);
+//            }
             response.status(403);
             return response;
         });
@@ -750,10 +711,7 @@ public class TrafficEngineApp {
 		
 		post("/route", (request, response) -> {
 
-            while(!routing.isReady()){
-                log.info("Graph not ready, waiting 1 second");
-                Thread.sleep(1000);
-            }
+            //initRouting();
 
             Integer missingStatsSearchEnvelopeInMeters = Integer.parseInt(appProps.getProperty("application.missingStatsSearchEnvelopeInMeters"));
 
@@ -1145,66 +1103,66 @@ public class TrafficEngineApp {
             return response;
         });
 
-        post("/login", (request, response) -> {
-            Map<String, String> params = getPostParams(request);
-            String username = params.get("username");
-            String password = params.get("password");
-            String cookie = params.get("token");
-            if(password != null)
-                password = PasswordUtil.hash(password);
-
-            User user = HibernateUtil.login(username, password, cookie);
-
-            if(user != null){
-                return mapper.writeValueAsString(user);
-            }
-            response.status(403);
-            return "Authentication failed";
-        });
-
-        post("/users", (request, response) -> {
-            Map<String, String> params = getPostParams(request);
-            String username = java.net.URLDecoder.decode(params.get("username"), "UTF-8");
-            String password = params.get("password");
-            String role = java.net.URLDecoder.decode(params.get("role"), "UTF-8");
-            User u = new User();
-            u.setUsername(username);
-            u.setPasswordHash(PasswordUtil.hash(password));
-            u.setRole(role);
-            HibernateUtil.persistEntity(u);
-            response.status(200);
-            return response;
-        });
-
-        put("/users/:id", (request, response) -> {
-            Map<String, String> params = getPostParams(request);
-            String username = java.net.URLDecoder.decode(params.get("username"), "UTF-8");
-            String password = params.get("password");
-            String role = java.net.URLDecoder.decode(params.get("role"), "UTF-8");
-            Integer id = new Integer(request.params(":id"));
-
-            User u = HibernateUtil.getUser(id);
-            u.setUsername(username);
-            if(password != null && !password.isEmpty()) {
-              password = java.net.URLDecoder.decode(password, "UTF-8");
-              u.setPasswordHash(PasswordUtil.hash(password));
-            }
-            u.setRole(role);
-            HibernateUtil.updateUser(u);
-            response.status(200);
-            return mapper.writeValueAsString(u);
-        });
-
-        delete("/users/:id", (request, response) -> {
-            Integer id = new Integer(request.params(":id"));
-            HibernateUtil.deleteUser(id);
-            response.status(200);
-            return response;
-        });
-
-        get("/users", (request, response) -> {
-            return mapper.writeValueAsString(HibernateUtil.getUsers());
-        });
+//        post("/login", (request, response) -> {
+//            Map<String, String> params = getPostParams(request);
+//            String username = params.get("username");
+//            String password = params.get("password");
+//            String cookie = params.get("token");
+//            if(password != null)
+//                password = PasswordUtil.hash(password);
+//
+//            User user = AuthUtil.login(username, password, cookie);
+//
+//            if(user != null){
+//                return mapper.writeValueAsString(user);
+//            }
+//            response.status(403);
+//            return "Authentication failed";
+//        });
+//
+//        post("/users", (request, response) -> {
+//            Map<String, String> params = getPostParams(request);
+//            String username = java.net.URLDecoder.decode(params.get("username"), "UTF-8");
+//            String password = params.get("password");
+//            String role = java.net.URLDecoder.decode(params.get("role"), "UTF-8");
+//            User u = new User();
+//            u.setUsername(username);
+//            u.setPasswordHash(PasswordUtil.hash(password));
+//            u.setRole(role);
+//            AuthUtil.persistEntity(u);
+//            response.status(200);
+//            return response;
+//        });
+//
+//        put("/users/:id", (request, response) -> {
+//            Map<String, String> params = getPostParams(request);
+//            String username = java.net.URLDecoder.decode(params.get("username"), "UTF-8");
+//            String password = params.get("password");
+//            String role = java.net.URLDecoder.decode(params.get("role"), "UTF-8");
+//            Integer id = new Integer(request.params(":id"));
+//
+//            User u = AuthUtil.getUser(id);
+//            u.setUsername(username);
+//            if(password != null && !password.isEmpty()) {
+//              password = java.net.URLDecoder.decode(password, "UTF-8");
+//              u.setPasswordHash(PasswordUtil.hash(password));
+//            }
+//            u.setRole(role);
+//            AuthUtil.updateUser(u);
+//            response.status(200);
+//            return mapper.writeValueAsString(u);
+//        });
+//
+//        delete("/users/:id", (request, response) -> {
+//            Integer id = new Integer(request.params(":id"));
+//            AuthUtil.deleteUser(id);
+//            response.status(200);
+//            return response;
+//        });
+//
+//        get("/users", (request, response) -> {
+//            return mapper.writeValueAsString(AuthUtil.getUsers());
+//        });
 
         routing.buildIfUnbuilt();
 
@@ -1266,5 +1224,7 @@ public class TrafficEngineApp {
             hour = 168;
         return hour;
     }
+
+
 
 }

@@ -2,45 +2,19 @@ package io.opentraffic.engine.app.util;
 
 import io.opentraffic.engine.app.data.SavedRoute;
 import io.opentraffic.engine.app.data.User;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistry;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
+import spark.Request;
+import spark.Route;
+import spark.Response;
 
-public class HibernateUtil {
 
-    private static final Logger log = Logger.getLogger(HibernateUtil.class.getName());
-    private static SessionFactory sessionFactory = buildSessionFactory();
-    private static ServiceRegistry serviceRegistry;
+public class AuthUtil {
 
-    private static SessionFactory buildSessionFactory() {
-        Configuration configuration = new Configuration();
-        configuration.configure();
-        serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
-                configuration.getProperties()).build();
-        sessionFactory = configuration.buildSessionFactory(serviceRegistry);
-
-        Session session = sessionFactory.openSession();
-        Query q = session.createQuery("from User");
-        q.setMaxResults(1);
-        List<User> users = q.list();
-        if(users.size() < 1){
-            User u = new User();
-            u.setUsername("admin");
-            u.setPasswordHash(PasswordUtil.hash("admin"));
-            u.setRole("Super Admin");
-            persistEntity(u);
-        }
-        return sessionFactory;
-    }
-
+    private static final Logger log = Logger.getLogger(AuthUtil.class.getName());
+/*
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
     }
@@ -174,5 +148,5 @@ public class HibernateUtil {
         }
         return null;
     }
-
+*/
 }

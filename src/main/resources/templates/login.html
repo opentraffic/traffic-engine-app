@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Open Traffic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+
+  <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+
+  <script src="javascripts/lib/underscore.js"></script>
+  <script src="javascripts/lib/backbone.js"></script>
+  <script src="javascripts/lib/backbone.marionette.min.js"></script>
+
+  <script src="javascripts/lib/handlebars.js"></script>
+  <script src="javascripts/translations.js"></script>
+  <script src="javascripts/util.js"></script>
+
+
+
+  <link rel="stylesheet" type="text/css" href="stylesheets/main.css">
+  <link href='stylesheets/dc.css' rel='stylesheet' type='text/css'>
+
+</head>
+<body>
+
+<div id="form" style="width: 500px; float: none; margin: 0 auto;">
+
+</div>
+
+<script>
+
+  var Traffic = Traffic || {};
+
+  Traffic.config = {};
+  Traffic.config.templatePath = "templates";
+
+  $(document).ready(function() {
+
+    $("#failed_login").hide();
+
+    Traffic.translations.fetchData();
+
+    var template = Handlebars.getTemplate('app', 'login');
+    var html = template({});
+    $("#form").html(html);
+
+    $("#submit").on("click", function(event){
+      var username = $("#username").val();
+      var password = $("#password").val();
+
+      $.ajax({
+        url: "/auth",
+        type: "POST",
+        data: {action: "login", username : username, password: password},
+              success: function (response, status) {
+           // success code here
+        },
+        statusCode: {
+          401:function() {
+            $(".error-bad-auth").show();
+          }
+        },
+        success: function (xhr, status) {
+           $(".error-bad-auth").hide();
+           $(".msg-success").show();
+           window.location.replace("/?city=Cebu#");
+        }
+      });
+    });
+
+  });
+
+</script>
+
+
+</body>
+</html>
