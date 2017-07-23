@@ -444,7 +444,7 @@ public class TrafficEngineApp {
 
                             int dayOfWeek = (int)Math.floor((hour) / 24);
 
-                            builder.append(dates.get(dayOfWeek) + ",");d
+                            builder.append(dates.get(dayOfWeek) + ",");
 
                             builder.append(statsVO.edgeId + ",");
 
